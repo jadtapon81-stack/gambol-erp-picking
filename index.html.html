@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GAMBOL ERP PICKING</title>
+  <style>
+    :root{
+      --red:#d8241f;
+      --red2:#c91f1b;
+      --orange:#ff8a24;
+      --ink:#101827;
+      --muted:#6b7280;
+      --line:#ff4a43;
+      --page:#f3f4f6;
+      --card:#ffffff;
+      --soft:#fff8f7;
+      --shadow:0 18px 40px rgba(20,24,35,.10);
+    }
+
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;font-family:Tahoma,Arial,sans-serif;color:var(--ink)}
+    body{background:var(--page)}
+
+    .app{
+      width:min(1024px, calc(100% - 28px));
+      margin:22px auto 36px;
+    }
+
+    .topbar{
+      height:124px;
+      border-radius:22px;
+      background:linear-gradient(180deg,var(--red2),var(--red));
+      color:#fff;
+      display:grid;
+      grid-template-columns:90px 1fr 90px;
+      align-items:center;
+      box-shadow:var(--shadow);
+      padding:0 22px;
+    }
+
+    .icon-btn{
+      width:44px;height:44px;
+      border:0;border-radius:12px;
+      background:transparent;color:#fff;
+      font-size:25px;cursor:pointer;
+      display:grid;place-items:center;
+    }
+    .icon-btn:hover{background:rgba(255,255,255,.12)}
+
+    .brand{text-align:center;line-height:1}
+    .brand .main{
+      font-size:39px;
+      font-weight:900;
+      letter-spacing:1px;
+    }
+    .brand .sub{
+      margin-top:10px;
+      font-size:18px;
+      letter-spacing:7px;
+      font-weight:500;
+    }
+
+    .top-actions{
+      display:flex;justify-content:flex-end;gap:8px;
+    }
+    .top-actions .refresh{
+      background:#ff9a2f;
+      width:34px;height:34px;
+      border-radius:10px;
+      font-size:19px;
+    }
+
+    .shell{
+      width:94%;
+      margin:0 auto;
+      background:rgba(255,255,255,.70);
+      border-radius:0 0 22px 22px;
+      box-shadow:0 12px 30px rgba(20,24,35,.08);
+      padding:0 26px 28px;
+    }
+
+    .panel{
+      position:relative;
+      top:0;
+      background:rgba(255,255,255,.74);
+      border-radius:22px;
+      padding:22px 18px 30px;
+    }
+
+    .title-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:14px;
+    }
+
+    h1{
+      margin:0;
+      font-size:23px;
+      font-weight:900;
+    }
+
+    .badge{
+      padding:7px 13px;
+      border-radius:999px;
+      background:#fff2f1;
+      color:var(--red);
+      border:1px solid #ffd4d1;
+      font-size:12px;
+      font-weight:700;
+    }
+
+    .cards{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+    }
+
+    .card{
+      min-height:165px;
+      background:var(--soft);
+      border:1.5px solid var(--line);
+      border-radius:18px;
+      padding:22px 16px;
+      text-align:center;
+      cursor:pointer;
+      transition:.18s ease;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      text-decoration:none;
+      color:inherit;
+    }
+    .card:hover{
+      transform:translateY(-2px);
+      box-shadow:0 12px 24px rgba(216,36,31,.12);
+    }
+
+    .card h2{
+      margin:0 0 9px;
+      font-size:21px;
+      font-weight:900;
+      line-height:1.02;
+    }
+
+    .card .card-icon{
+      width:48px;height:48px;
+      border-radius:13px;
+      background:#fff0ee;
+      color:var(--red);
+      display:grid;place-items:center;
+      font-size:27px;
+      margin-bottom:10px;
+      font-weight:900;
+    }
+
+    .card p{
+      margin:0;
+      color:#5d6673;
+      font-size:13px;
+    }
+
+    .wide{
+      margin-top:12px;
+      background:#fff;
+      border:1px solid #e5e7eb;
+      border-radius:18px;
+      min-height:78px;
+      display:flex;
+      align-items:center;
+      gap:14px;
+      padding:13px 16px;
+      cursor:pointer;
+      box-shadow:0 4px 12px rgba(20,24,35,.05);
+    }
+    .wide:hover{border-color:#ffc5c1}
+
+    .wide-icon{
+      width:48px;height:48px;
+      border-radius:12px;
+      display:grid;place-items:center;
+      background:#ec2b26;
+      color:#fff;
+      font-size:22px;
+      flex:0 0 48px;
+    }
+    .wide h3{margin:0 0 4px;font-size:17px;font-weight:900}
+    .wide p{margin:0;color:var(--muted);font-size:12px}
+
+    .section-label{
+      margin:18px 0 10px;
+      font-weight:900;
+      font-size:15px;
+      color:#353b45;
+    }
+
+    .small-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    .small-card{
+      background:#fff;
+      border:1px solid #eadfdc;
+      min-height:92px;
+      border-radius:16px;
+      padding:14px 16px;
+      display:flex;
+      gap:12px;
+      align-items:center;
+      cursor:pointer;
+    }
+    .small-card:hover{border-color:#ff8a84}
+    .small-icon{
+      width:42px;height:42px;border-radius:11px;
+      display:grid;place-items:center;
+      background:#fff1ef;color:var(--red);
+      font-size:20px;font-weight:900;
+      flex:0 0 42px;
+    }
+    .small-card strong{display:block;font-size:15px}
+    .small-card span{display:block;margin-top:4px;font-size:12px;color:var(--muted)}
+
+    .footer{
+      text-align:center;
+      font-size:11px;
+      color:#9ca3af;
+      padding-top:18px;
+    }
+
+    @media (max-width:760px){
+      .app{width:100%;margin:0 auto}
+      .topbar{border-radius:0 0 20px 20px;height:102px;padding:0 10px;grid-template-columns:55px 1fr 70px}
+      .brand .main{font-size:28px}
+      .brand .sub{font-size:12px;letter-spacing:4px}
+      .shell{width:100%;padding:0 10px 18px;box-shadow:none}
+      .panel{padding:18px 8px 24px}
+      .cards{grid-template-columns:1fr}
+      .card{min-height:132px}
+      .small-grid{grid-template-columns:1fr}
+      h1{font-size:20px}
+    }
+
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:28px;
+      transform:translateX(-50%) translateY(20px);
+      opacity:0;
+      pointer-events:none;
+      background:#111827;color:#fff;
+      padding:11px 16px;
+      border-radius:10px;
+      font-size:13px;
+      transition:.2s;
+    }
+    .toast.show{
+      opacity:1;
+      transform:translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <header class="topbar">
+    <button class="icon-btn" id="menuBtn" aria-label="menu">☰</button>
+
+    <div class="brand">
+      <div class="main">GAMBOL</div>
+      <div class="sub">ERP PICKING</div>
+    </div>
+
+    <div class="top-actions">
+      <button class="icon-btn refresh" id="refreshBtn" aria-label="refresh">↻</button>
+      <button class="icon-btn" id="homeBtn" aria-label="home">⌂</button>
+    </div>
+  </header>
+
+  <div class="shell">
+    <main class="panel">
+      <div class="title-row">
+        <h1>HOME</h1>
+        <div class="badge">PTT ERP</div>
+      </div>
+
+      <section class="cards">
+        <a class="card" href="#" data-page="create">
+          <h2>CREATE<br>PICKING</h2>
+          <div class="card-icon">＋</div>
+          <p>สร้างใบจัดงานใหม่</p>
+        </a>
+
+        <a class="card" href="#" data-page="orders">
+          <h2>PICKING<br>ORDER</h2>
+          <div class="card-icon">▤</div>
+          <p>ดูรายการใบจัดงานทั้งหมด</p>
+        </a>
+
+        <a class="card" href="#" data-page="stock">
+          <h2>ERP<br>STOCK</h2>
+          <div class="card-icon">▣</div>
+          <p>ตรวจสอบสต๊อกจาก ERP</p>
+        </a>
+      </section>
+
+      <div class="wide" data-page="active">
+        <div class="wide-icon">⌁</div>
+        <div>
+          <h3>ACTIVE PICKING</h3>
+          <p>ใบจัดงานที่กำลังดำเนินการ</p>
+        </div>
+      </div>
+
+      <div class="section-label">MANAGEMENT</div>
+
+      <section class="small-grid">
+        <div class="small-card" data-page="upload">
+          <div class="small-icon">⇧</div>
+          <div>
+            <strong>UPLOAD ERP</strong>
+            <span>อัปเดตข้อมูล ERP เข้า Supabase</span>
+          </div>
+        </div>
+
+        <div class="small-card" data-page="complete">
+          <div class="small-icon">✓</div>
+          <div>
+            <strong>COMPLETED</strong>
+            <span>ประวัติใบจัดงานที่เสร็จแล้ว</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="footer">GAMBOL • ERP Picking System</div>
+    </main>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const toast = document.getElementById('toast');
+
+  function showToast(text){
+    toast.textContent = text;
+    toast.classList.add('show');
+    clearTimeout(window.toastTimer);
+    window.toastTimer = setTimeout(() => toast.classList.remove('show'), 1500);
+  }
+
+  document.querySelectorAll('[data-page]').forEach(el => {
+    el.addEventListener('click', e => {
+      e.preventDefault();
+      const page = el.dataset.page;
+      const names = {
+        create:'CREATE PICKING',
+        orders:'PICKING ORDER',
+        stock:'ERP STOCK',
+        active:'ACTIVE PICKING',
+        upload:'UPLOAD ERP',
+        complete:'COMPLETED'
+      };
+      showToast('กำลังเตรียมหน้า ' + names[page]);
+    });
+  });
+
+  document.getElementById('refreshBtn').addEventListener('click', () => location.reload());
+  document.getElementById('homeBtn').addEventListener('click', () => showToast('HOME'));
+  document.getElementById('menuBtn').addEventListener('click', () => showToast('เมนู'));
+</script>
+
+</body>
+</html>
