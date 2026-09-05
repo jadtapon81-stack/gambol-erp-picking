@@ -1781,6 +1781,210 @@ table.general th{background:#f9fafb;font-size:12px}
   .print-table th,.print-table td{border:1px solid #111;padding:5px;text-align:center;font-size:10px}
   .print-table th{background:#df382f;color:#fff}
 }
+
+
+/* =========================================================
+   MOBILE FIX - LOCATION QR MASTER
+   ========================================================= */
+@media(max-width:760px){
+  #page-locationqr .page-box{
+    padding:10px 8px 18px !important;
+    overflow:hidden;
+  }
+
+  #page-locationqr .page-head{
+    gap:8px;
+    align-items:center;
+    margin-bottom:10px;
+  }
+
+  #page-locationqr .page-title{
+    font-size:20px !important;
+    line-height:1.15;
+    word-break:normal;
+  }
+
+  #page-locationqr .badge{
+    font-size:9px;
+    padding:6px 8px;
+  }
+
+  #page-locationqr .location-qr-layout{
+    display:block !important;
+    width:100% !important;
+  }
+
+  #page-locationqr .location-qr-form,
+  #page-locationqr .location-qr-list-card{
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    box-sizing:border-box !important;
+    padding:12px !important;
+    margin:0 0 12px !important;
+    overflow:hidden;
+  }
+
+  #page-locationqr .location-qr-form h3,
+  #page-locationqr .location-qr-list-card h3{
+    font-size:18px !important;
+    margin-bottom:10px !important;
+  }
+
+  #page-locationqr .location-qr-fields{
+    display:block !important;
+  }
+
+  #page-locationqr .location-qr-field{
+    width:100% !important;
+    margin-bottom:12px !important;
+    min-width:0 !important;
+  }
+
+  #page-locationqr .location-qr-field label{
+    font-size:12px !important;
+    margin-bottom:5px !important;
+  }
+
+  #page-locationqr .location-qr-field input,
+  #page-locationqr .location-qr-field select{
+    display:block !important;
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    box-sizing:border-box !important;
+    min-height:46px !important;
+    padding:10px 11px !important;
+    font-size:16px !important;
+  }
+
+  /* file input บน iPhone */
+  #locationQrImageFile{
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    overflow:hidden !important;
+    padding:6px !important;
+    font-size:14px !important;
+  }
+
+  #locationQrImageFile::file-selector-button{
+    max-width:130px;
+    margin-right:8px;
+    padding:8px 10px;
+    border:0;
+    border-radius:8px;
+    background:#f3f4f6;
+    font-weight:800;
+  }
+
+  #page-locationqr .location-qr-preview{
+    width:100% !important;
+    max-width:100% !important;
+    min-height:150px !important;
+    max-height:240px !important;
+    box-sizing:border-box !important;
+    overflow:hidden !important;
+    padding:10px !important;
+  }
+
+  #page-locationqr .location-qr-preview > div{
+    width:100%;
+    max-width:100%;
+    overflow:hidden;
+  }
+
+  #page-locationqr .location-qr-preview img{
+    display:block;
+    width:auto !important;
+    max-width:180px !important;
+    max-height:180px !important;
+    margin:0 auto !important;
+    object-fit:contain !important;
+  }
+
+  #page-locationqr .qr-preview-name{
+    font-size:12px !important;
+    overflow-wrap:anywhere;
+  }
+
+  #page-locationqr .location-qr-form-actions{
+    display:grid !important;
+    grid-template-columns:1fr !important;
+    gap:8px !important;
+    width:100% !important;
+  }
+
+  #page-locationqr .location-qr-form-actions .btn{
+    width:100% !important;
+    min-height:46px !important;
+  }
+
+  #page-locationqr .location-qr-search{
+    display:grid !important;
+    grid-template-columns:1fr !important;
+    gap:8px !important;
+    width:100% !important;
+  }
+
+  #page-locationqr .location-qr-search input,
+  #page-locationqr .location-qr-search .btn{
+    width:100% !important;
+    max-width:100% !important;
+    box-sizing:border-box !important;
+  }
+
+  #page-locationqr .location-qr-table-wrap{
+    width:100% !important;
+    max-width:100% !important;
+    overflow-x:auto !important;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  #page-locationqr .location-qr-table{
+    min-width:620px !important;
+  }
+}
+
+@media(max-width:420px){
+  #page-locationqr .page-title{
+    font-size:18px !important;
+  }
+
+  #page-locationqr .location-qr-form,
+  #page-locationqr .location-qr-list-card{
+    padding:10px !important;
+    border-radius:12px !important;
+  }
+
+  #page-locationqr .location-qr-preview{
+    min-height:130px !important;
+    max-height:210px !important;
+  }
+
+  #page-locationqr .location-qr-preview img{
+    max-width:160px !important;
+    max-height:160px !important;
+  }
+}
+
+
+
+@media(max-width:760px){
+  #page-detail .detail-select-help{
+    display:none !important;
+  }
+
+  #page-detail .detail-message{
+    font-size:11px !important;
+    line-height:1.35 !important;
+  }
+
+  #page-detail .page-sub{
+    display:none !important;
+  }
+}
+
 </style>
 </head>
 
@@ -2071,7 +2275,7 @@ table.general th{background:#f9fafb;font-size:12px}
   <div class="page-head">
     <div class="head-left">
       <button class="back-btn" id="detailBackBtn">←</button>
-      <div><h2 class="page-title">PICKING DETAIL</h2><p class="page-sub">รายการ PO และ Location จาก ERP Stock</p></div>
+      <div><h2 class="page-title">PICKING DETAIL</h2></div>
     </div>
     <div class="badge" id="detailStatusBadge">-</div>
   </div>
@@ -2094,10 +2298,7 @@ table.general th{background:#f9fafb;font-size:12px}
 
   <div id="detailMessage" class="detail-message"></div>
 
-  <div class="detail-select-help">
-    ✓ ติ๊ก Location ที่ต้องการหยิบ ระบบจะคำนวณจำนวนหยิบให้อัตโนมัติ
-    และจะจำ Location ที่เลือกไว้ แม้ Refresh หน้าเว็บ หาก Location เดียวไม่พอสามารถเลือกหลาย Location ได้
-  </div>
+  
 
   <div id="pickingDetailList" class="pick-detail-list">
     <div class="empty"><div><strong>เลือก PO ก่อน</strong></div></div>
@@ -2260,7 +2461,7 @@ table.general th{background:#f9fafb;font-size:12px}
       <button class="back-btn" data-page="home">←</button>
       <div>
         <h2 class="page-title">LOCATION QR MASTER</h2>
-        <p class="page-sub">บันทึก Warehouse / Location และรูป QR Code ลง Supabase</p>
+        
       </div>
     </div>
     <div class="badge">QR MASTER</div>
@@ -2269,7 +2470,7 @@ table.general th{background:#f9fafb;font-size:12px}
   <div class="location-qr-layout">
 
     <div class="location-qr-form">
-      <h3>เพิ่ม / แก้ไข Location QR</h3>
+      <h3>LOCATION QR</h3>
 
       <input id="locationQrEditId" type="hidden">
 
@@ -2297,7 +2498,7 @@ table.general th{background:#f9fafb;font-size:12px}
 
       <div id="locationQrPreview" class="location-qr-preview">
         <div>
-          <div>ยังไม่ได้เลือกรูป QR</div>
+          <div>QR IMAGE</div>
           <div id="locationQrPreviewName" class="qr-preview-name"></div>
         </div>
       </div>
@@ -2314,7 +2515,7 @@ table.general th{background:#f9fafb;font-size:12px}
       <h3>รายการ Location QR</h3>
 
       <div class="location-qr-search">
-        <input id="locationQrSearchInput" placeholder="ค้นหา Warehouse / Location เช่น G-01-E-12">
+        <input id="locationQrSearchInput" placeholder="ค้นหา Location">
         <button class="btn btn-secondary" id="locationQrSearchBtn">ค้นหา</button>
       </div>
 
@@ -3892,7 +4093,7 @@ function resetLocationQrForm(){
 
   el('locationQrPreview').innerHTML=`
     <div>
-      <div>ยังไม่ได้เลือกรูป QR</div>
+      <div>QR IMAGE</div>
       <div id="locationQrPreviewName" class="qr-preview-name"></div>
     </div>
   `
@@ -3903,7 +4104,7 @@ function showLocationQrPreview(url,warehouse='',location=''){
   if(!url){
     preview.innerHTML=`
       <div>
-        <div>ยังไม่ได้เลือกรูป QR</div>
+        <div>QR IMAGE</div>
         <div class="qr-preview-name">${esc(location||'')}</div>
       </div>
     `
