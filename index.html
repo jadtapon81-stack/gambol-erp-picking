@@ -1,377 +1,6156 @@
 <!doctype html>
 <html lang="th">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>GAMBOL ERP PICKING</title>
-  <style>
-    :root{
-      --red:#d8241f;
-      --red2:#c91f1b;
-      --orange:#ff8a24;
-      --ink:#101827;
-      --muted:#6b7280;
-      --line:#ff4a43;
-      --page:#f3f4f6;
-      --card:#ffffff;
-      --soft:#fff8f7;
-      --shadow:0 18px 40px rgba(20,24,35,.10);
-    }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GAMBOL ERP PICKING</title>
 
-    *{box-sizing:border-box}
-    html,body{margin:0;min-height:100%;font-family:Tahoma,Arial,sans-serif;color:var(--ink)}
-    body{background:var(--page)}
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
-    .app{
-      width:min(1024px, calc(100% - 28px));
-      margin:22px auto 36px;
-    }
+<style>
+:root{
+  --red:#d92f27;--red-dark:#c8241e;--red-soft:#fff1ef;--orange:#f69a2c;
+  --ink:#101827;--muted:#6b7280;--line:#e5e7eb;--page:#f4f5f7;--white:#fff;
+  --green:#16803a;--yellow:#fff51e;--blue:#2563eb;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Tahoma,Arial,sans-serif;color:var(--ink)}
+body{background:var(--page)}
+button,input,select{font:inherit}
+button{touch-action:manipulation}
 
-    .topbar{
-      height:124px;
-      border-radius:22px;
-      background:linear-gradient(180deg,var(--red2),var(--red));
-      color:#fff;
-      display:grid;
-      grid-template-columns:90px 1fr 90px;
-      align-items:center;
-      box-shadow:var(--shadow);
-      padding:0 22px;
-    }
+.app{width:min(1100px,calc(100% - 28px));margin:22px auto 38px}
+.topbar{
+  height:124px;border-radius:22px;background:linear-gradient(180deg,var(--red-dark),var(--red));
+  color:#fff;display:grid;grid-template-columns:90px 1fr 90px;align-items:center;padding:0 22px;
+  box-shadow:0 18px 40px rgba(20,24,35,.10)
+}
+.brand{text-align:center;line-height:1}
+.brand-main{font-size:39px;font-weight:900;letter-spacing:1px}
+.brand-sub{margin-top:10px;font-size:18px;letter-spacing:7px}
+.icon-btn{
+  width:44px;height:44px;border:0;border-radius:12px;background:transparent;color:#fff;
+  font-size:25px;cursor:pointer;display:grid;place-items:center
+}
+.icon-btn:hover{background:rgba(255,255,255,.12)}
+.top-actions{display:flex;justify-content:flex-end;gap:8px}
+.refresh{background:var(--orange);width:34px;height:34px;border-radius:10px;font-size:19px}
 
-    .icon-btn{
-      width:44px;height:44px;
-      border:0;border-radius:12px;
-      background:transparent;color:#fff;
-      font-size:25px;cursor:pointer;
-      display:grid;place-items:center;
-    }
-    .icon-btn:hover{background:rgba(255,255,255,.12)}
+.shell{
+  width:95%;margin:0 auto;background:rgba(255,255,255,.74);border-radius:0 0 22px 22px;
+  box-shadow:0 12px 30px rgba(20,24,35,.08);padding:0 26px 28px
+}
+.panel{background:rgba(255,255,255,.78);border-radius:22px;padding:22px 18px 30px}
+.page{display:none}.page.active{display:block;animation:fade .16s ease}
+@keyframes fade{from{opacity:.35;transform:translateY(3px)}to{opacity:1;transform:none}}
 
-    .brand{text-align:center;line-height:1}
-    .brand .main{
-      font-size:39px;
-      font-weight:900;
-      letter-spacing:1px;
-    }
-    .brand .sub{
-      margin-top:10px;
-      font-size:18px;
-      letter-spacing:7px;
-      font-weight:500;
-    }
+.title-row,.page-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+h1{margin:0;font-size:23px;font-weight:900}
+.badge{
+  padding:7px 13px;border-radius:999px;background:#fff2f1;color:var(--red);
+  border:1px solid #ffd4d1;font-size:12px;font-weight:700
+}
 
-    .top-actions{
-      display:flex;justify-content:flex-end;gap:8px;
-    }
-    .top-actions .refresh{
-      background:#ff9a2f;
-      width:34px;height:34px;
-      border-radius:10px;
-      font-size:19px;
-    }
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.card{
+  min-height:165px;background:#fff8f7;border:1.5px solid #ff4a43;border-radius:18px;
+  padding:22px 16px;text-align:center;cursor:pointer;transition:.18s ease;
+  display:flex;flex-direction:column;justify-content:center;align-items:center
+}
+.card:hover{transform:translateY(-2px);box-shadow:0 12px 24px rgba(216,36,31,.12)}
+.card h2{margin:0 0 9px;font-size:21px;font-weight:900;line-height:1.02}
+.card-icon{
+  width:48px;height:48px;border-radius:13px;background:#fff0ee;color:var(--red);
+  display:grid;place-items:center;font-size:27px;margin-bottom:10px;font-weight:900
+}
+.card p{margin:0;color:#5d6673;font-size:13px}
+.wide{
+  margin-top:12px;background:#fff;border:1px solid var(--line);border-radius:18px;min-height:78px;
+  display:flex;align-items:center;gap:14px;padding:13px 16px;cursor:pointer;
+  box-shadow:0 4px 12px rgba(20,24,35,.05)
+}
+.wide:hover{border-color:#ffc5c1}
+.wide-icon{
+  width:48px;height:48px;border-radius:12px;display:grid;place-items:center;
+  background:#ec2b26;color:#fff;font-size:22px;flex:0 0 48px
+}
+.wide h3{margin:0 0 4px;font-size:17px;font-weight:900}.wide p{margin:0;color:var(--muted);font-size:12px}
+.section-label{margin:18px 0 10px;font-weight:900;font-size:15px}
+.small-grid{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:stretch}
+.small-card{
+  background:#fff;border:1px solid #eadfdc;min-height:92px;border-radius:16px;padding:14px 16px;
+  display:flex;gap:12px;align-items:center;cursor:pointer
+}
+.small-card:hover{border-color:#ff8a84}
+.small-card.danger{
+  min-height:58px;
+  width:190px;
+  align-self:center;
+  background:#dc2626;
+  border-color:#b91c1c;
+  color:#fff;
+  padding:9px 12px;
+  box-shadow:0 6px 16px rgba(185,28,28,.18);
+}
+.small-card.danger:hover{
+  background:#b91c1c;
+  border-color:#991b1b;
+  box-shadow:0 9px 20px rgba(153,27,27,.25);
+  transform:translateY(-1px);
+}
+.small-card.danger .small-icon{
+  width:34px;
+  height:34px;
+  flex:0 0 34px;
+  background:rgba(255,255,255,.16);
+  color:#fff;
+  border-radius:9px;
+  font-size:17px;
+}
+.small-card.danger strong{
+  color:#fff;
+  font-size:13px;
+}
+.small-card.danger.hidden{
+  display:none !important;
+}
+.small-card.danger span{
+  color:#fee2e2;
+  font-size:10px;
+  margin-top:2px;
+}
+.small-icon{
+  width:42px;height:42px;border-radius:11px;display:grid;place-items:center;background:#fff1ef;color:var(--red);
+  font-size:20px;font-weight:900;flex:0 0 42px
+}
+.small-card strong{display:block;font-size:15px}.small-card span{display:block;margin-top:4px;font-size:12px;color:var(--muted)}
 
-    .shell{
-      width:94%;
-      margin:0 auto;
-      background:rgba(255,255,255,.70);
-      border-radius:0 0 22px 22px;
-      box-shadow:0 12px 30px rgba(20,24,35,.08);
-      padding:0 26px 28px;
-    }
+.page-box{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px;min-height:420px}
+.back-btn{
+  border:0;background:#fff0ee;color:var(--red);width:38px;height:38px;border-radius:10px;
+  font-size:22px;font-weight:900;cursor:pointer
+}
+.head-left{display:flex;align-items:center;gap:10px}
+.page-title{margin:0;font-size:21px;font-weight:900}
+.page-sub{margin:4px 0 0;color:var(--muted);font-size:12px}
 
-    .panel{
-      position:relative;
-      top:0;
-      background:rgba(255,255,255,.74);
-      border-radius:22px;
-      padding:22px 18px 30px;
-    }
+/* IMPORT */
+.import-card{
+  border:1px solid #dbe3ef;border-radius:16px;padding:16px;background:#fbfdff;margin-bottom:18px
+}
+.import-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.import-title h3{margin:0;font-size:17px}
+.import-title span{font-size:11px;color:#7c3aed;background:#f3e8ff;padding:6px 9px;border-radius:999px;font-weight:800}
+.import-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field.full{grid-column:1/-1}
+.field label{font-size:11px;font-weight:800;color:#4b5563}
+.field input,.field select{
+  width:100%;padding:11px;border:1px solid #d1d5db;border-radius:9px;background:#fff
+}
+.import-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:12px}
+.btn{border:0;border-radius:10px;padding:11px 15px;font-weight:900;cursor:pointer}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-primary{background:var(--red);color:#fff}
+.btn-secondary{background:#eef0f3;color:#111827}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-green{background:var(--green);color:#fff}
+.btn-yellow{background:var(--yellow);color:#111;border:1px solid #d8ce00}
+.import-status{
+  display:none;margin-top:12px;padding:12px 13px;border-radius:10px;white-space:pre-line;
+  font-size:12px;line-height:1.55
+}
+.import-status.show{display:block}
+.import-status.info{background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe}
+.import-status.ok{background:#ecfdf5;color:#166534;border:1px solid #86efac}
+.import-status.warn{background:#fff7ed;color:#9a3412;border:1px solid #fdba74}
+.import-status.error{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
+.import-stats{display:none;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px}
+.import-stats.show{display:grid}
+.stat{border:1px solid #e5e7eb;background:#fff;border-radius:10px;padding:9px 10px}
+.stat small{display:block;color:#6b7280;font-size:10px;margin-bottom:3px}
+.stat b{font-size:14px}
+.preview-wrap{display:none;margin-top:12px;overflow:auto;border:1px solid #e5e7eb;border-radius:10px;max-height:360px}
+.preview-wrap.show{display:block}
+.preview-table{width:100%;border-collapse:collapse;min-width:980px}
+.preview-table th,.preview-table td{padding:8px 9px;border-bottom:1px solid #e5e7eb;font-size:11px;text-align:center}
+.preview-table th{position:sticky;top:0;background:#f8fafc;z-index:1}
+.preview-table td.left{text-align:left}
+.pill{display:inline-block;padding:4px 7px;border-radius:999px;font-size:10px;font-weight:900}
+.pill.ready{background:#ecfdf5;color:#15803d}
+.pill.warning{background:#fff7ed;color:#c2410c}
+.pill.error{background:#fef2f2;color:#b91c1c}
 
-    .title-row{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom:14px;
-    }
 
-    h1{
-      margin:0;
-      font-size:23px;
-      font-weight:900;
-    }
+/* ERP STOCK UPLOAD */
+.erp-upload-card{
+  border:1px solid #dbe3ef;
+  border-radius:16px;
+  padding:18px;
+  background:#fbfdff;
+}
+.erp-upload-drop{
+  border:2px dashed #cbd5e1;
+  border-radius:14px;
+  padding:18px;
+  background:#fff;
+}
+.erp-upload-drop input[type=file]{
+  width:100%;
+  padding:12px;
+  border:1px solid #d1d5db;
+  border-radius:10px;
+  background:#fff;
+}
+.erp-upload-note{
+  margin-top:10px;
+  padding:10px 12px;
+  border-radius:10px;
+  background:#fff7ed;
+  border:1px solid #fed7aa;
+  color:#9a3412;
+  font-size:11px;
+  line-height:1.55;
+}
+.erp-upload-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:9px;
+  margin-top:12px;
+}
+.erp-upload-progress{
+  display:none;
+  margin-top:12px;
+  background:#eef2f7;
+  border-radius:999px;
+  overflow:hidden;
+  height:12px;
+}
+.erp-upload-progress.show{display:block}
+.erp-upload-progress > div{
+  width:0%;
+  height:100%;
+  background:#16a34a;
+  transition:width .2s ease;
+}
+.erp-stock-stats{
+  display:none;
+  grid-template-columns:repeat(5,1fr);
+  gap:8px;
+  margin-top:12px;
+}
+.erp-stock-stats.show{display:grid}
 
-    .badge{
-      padding:7px 13px;
-      border-radius:999px;
-      background:#fff2f1;
-      color:var(--red);
-      border:1px solid #ffd4d1;
-      font-size:12px;
-      font-weight:700;
-    }
+.erp-search-box{
+  margin-top:16px;
+  padding:14px;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+  background:#fff;
+}
+.erp-search-title{
+  font-size:13px;
+  font-weight:900;
+  margin-bottom:8px;
+}
+.erp-search-row{
+  display:flex;
+  gap:8px;
+}
+.erp-search-row input{
+  flex:1;
+  min-width:0;
+  padding:10px 11px;
+  border:1px solid #d1d5db;
+  border-radius:9px;
+}
+.erp-search-result{
+  display:none;
+  margin-top:10px;
+  overflow:auto;
+  border:1px solid #e5e7eb;
+  border-radius:10px;
+  max-height:320px;
+}
+.erp-search-result.show{display:block}
+.erp-search-result table{
+  width:100%;
+  min-width:820px;
+  border-collapse:collapse;
+}
+.erp-search-result th,.erp-search-result td{
+  padding:8px 9px;
+  border-bottom:1px solid #e5e7eb;
+  font-size:11px;
+  text-align:left;
+  white-space:nowrap;
+}
+.erp-search-result th{
+  position:sticky;
+  top:0;
+  background:#f8fafc;
+  z-index:1;
+}
+.erp-search-summary{
+  display:none;
+  margin-top:10px;
+  padding:10px 12px;
+  border-radius:10px;
+  background:#f8fafc;
+  border:1px solid #e5e7eb;
+  font-size:12px;
+}
+.erp-search-summary.show{display:block}
 
-    .cards{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:12px;
-    }
+.erp-preview{
+  display:none;
+  margin-top:12px;
+  border:1px solid #e5e7eb;
+  border-radius:10px;
+  overflow:auto;
+  max-height:360px;
+}
+.erp-preview.show{display:block}
+.erp-preview table{
+  width:100%;
+  min-width:900px;
+  border-collapse:collapse;
+}
+.erp-preview th,.erp-preview td{
+  padding:8px 9px;
+  border-bottom:1px solid #e5e7eb;
+  font-size:11px;
+  text-align:left;
+  white-space:nowrap;
+}
+.erp-preview th{
+  position:sticky;
+  top:0;
+  background:#f8fafc;
+  z-index:1;
+}
+.erp-db-empty{
+  color:#15803d;
+}
+.erp-db-not-empty{
+  color:#b91c1c;
+}
 
-    .card{
-      min-height:165px;
-      background:var(--soft);
-      border:1.5px solid var(--line);
-      border-radius:18px;
-      padding:22px 16px;
-      text-align:center;
-      cursor:pointer;
-      transition:.18s ease;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      align-items:center;
-      text-decoration:none;
-      color:inherit;
-    }
-    .card:hover{
-      transform:translateY(-2px);
-      box-shadow:0 12px 24px rgba(216,36,31,.12);
-    }
+/* JOB FORM */
+.job-form{border:2px solid #1f2937;border-radius:4px;overflow:hidden;background:white}
+.job-title{background:#df382f;color:#fff;text-align:center;font-size:22px;font-weight:900;padding:8px 10px}
+.job-subtitle{background:#ffe3e1;color:#d82f27;text-align:center;font-size:13px;font-weight:800;padding:5px 10px}
+.meta-grid{display:grid;grid-template-columns:1fr 1.1fr 1fr 1.3fr;border-top:1px solid #333}
+.meta-label,.meta-value{
+  min-height:42px;display:flex;align-items:center;justify-content:center;padding:8px;
+  border-right:1px solid #333;border-bottom:1px solid #333
+}
+.meta-label{background:#fbe3e1;font-weight:900;text-align:center}
+.meta-value{font-weight:800;background:#fff}
+.meta-grid>*:nth-child(4n){border-right:0}
+.meta-value input,.meta-value select{
+  width:100%;border:0;outline:none;text-align:center;font-weight:800;background:transparent
+}
+.break-title{padding:7px 10px;color:#df382f;font-size:14px;font-weight:900;border-bottom:1px solid #333}
+.job-table-wrap{overflow:auto}
+.job-table{width:100%;border-collapse:collapse;min-width:900px}
+.job-table th{background:#df382f;color:#fff;padding:8px 7px;border:1px solid #333;font-size:13px}
+.job-table td{padding:5px;border:1px solid #333;text-align:center;font-size:12px}
+.job-table input{width:100%;border:0;outline:none;text-align:center;background:transparent;padding:4px}
+.job-table td:nth-child(2) input,.job-table td:nth-child(3) input,.job-table td:nth-child(9) input{text-align:left}
+.row-action{border:0;background:#fee2e2;color:#b91c1c;border-radius:7px;padding:6px 9px;cursor:pointer;font-weight:800}
+.action-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.summary-strip{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px}
+.sum-card{background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;min-width:140px}
+.sum-card small{display:block;color:#6b7280;margin-bottom:4px}.sum-card strong{font-size:18px}
 
-    .card h2{
-      margin:0 0 9px;
-      font-size:21px;
-      font-weight:900;
-      line-height:1.02;
-    }
+/* GENERAL */
+.table-wrap{overflow:auto;border:1px solid #e5e7eb;border-radius:12px;margin-top:14px}
+table.general{width:100%;border-collapse:collapse;min-width:720px}
+table.general th,table.general td{padding:11px 12px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:13px}
+table.general th{background:#f9fafb;font-size:12px}
+.status{display:inline-block;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:800}
+.status.draft{background:#fff7ed;color:#c2410c}.status.pick{background:#eff6ff;color:#1d4ed8}.status.done{background:#ecfdf5;color:#15803d}
 
-    .card .card-icon{
-      width:48px;height:48px;
-      border-radius:13px;
-      background:#fff0ee;
-      color:var(--red);
-      display:grid;place-items:center;
-      font-size:27px;
-      margin-bottom:10px;
-      font-weight:900;
-    }
+.active-summary{font-size:11px;color:#6b7280;margin-bottom:10px}
+.active-list{display:grid;gap:10px}
 
-    .card p{
-      margin:0;
-      color:#5d6673;
-      font-size:13px;
-    }
+.active-job-header{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:9px;
+  padding:12px;
+  margin-bottom:12px;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+  background:#fff;
+}
+.active-job-header small{
+  display:block;
+  margin-bottom:4px;
+  color:#6b7280;
+  font-size:9px;
+  font-weight:900;
+}
+.active-job-header b{
+  display:block;
+  font-size:13px;
+}
+.active-scan-progress{
+  margin-bottom:12px;
+  padding:10px 12px;
+  border-radius:10px;
+  border:1px solid #bfdbfe;
+  background:#eff6ff;
+  color:#1e40af;
+  font-size:11px;
+  font-weight:800;
+}
+.active-scan-progress.done{
+  border-color:#86efac;
+  background:#ecfdf5;
+  color:#166534;
+}
+.active-scan-table-wrap{
+  overflow:auto;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+}
+.active-scan-table{
+  width:100%;
+  min-width:680px;
+  border-collapse:collapse;
+}
+.active-scan-table th,
+.active-scan-table td{
+  padding:10px 11px;
+  border-bottom:1px solid #e5e7eb;
+  text-align:left;
+  font-size:11px;
+  vertical-align:middle;
+}
+.active-scan-table th{
+  background:#f8fafc;
+  color:#4b5563;
+  font-size:9px;
+  font-weight:900;
+}
+.active-scan-table tr.scanned-row td{
+  background:#ecfdf5;
+}
+.active-scan-table tr.scanned-row .active-item-code,
+.active-scan-table tr.scanned-row .active-location{
+  color:#166534;
+}
+.active-scan-check{
+  width:22px;
+  height:22px;
+  accent-color:#16a34a;
+  cursor:pointer;
+  vertical-align:middle;
+}
+.active-item-code,
+.active-location{
+  font-weight:900;
+}
+.active-scanned-label{
+  display:inline-block;
+  min-width:78px;
+  padding:5px 8px;
+  border-radius:999px;
+  text-align:center;
+  font-size:9px;
+  font-weight:900;
+  background:#f3f4f6;
+  color:#6b7280;
+}
+.active-scanned-label.done{
+  background:#dcfce7;
+  color:#15803d;
+}
 
-    .wide{
-      margin-top:12px;
-      background:#fff;
-      border:1px solid #e5e7eb;
-      border-radius:18px;
-      min-height:78px;
-      display:flex;
-      align-items:center;
-      gap:14px;
-      padding:13px 16px;
-      cursor:pointer;
-      box-shadow:0 4px 12px rgba(20,24,35,.05);
-    }
-    .wide:hover{border-color:#ffc5c1}
+.po-card{
+  display:grid;
+  grid-template-columns:minmax(0,1.5fr) repeat(3,minmax(80px,.55fr)) auto;
+  gap:10px;align-items:center;padding:13px;border:1px solid #e5e7eb;
+  border-radius:13px;background:#fff
+}
+.po-main strong{display:block;font-size:16px;margin-bottom:4px}
+.po-main span,.po-metric small{display:block;font-size:10px;color:#6b7280}
+.po-metric b{display:block;font-size:13px;margin-top:3px}
+.po-action{
+  border:0;background:#dc2626;color:#fff;padding:9px 12px;min-height:40px;
+  border-radius:9px;font-weight:900;cursor:pointer;white-space:nowrap
+}
+.po-action:hover{background:#b91c1c}
+.detail-head-card{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:8px;
+  margin-bottom:12px;padding:12px;border:1px solid #e5e7eb;border-radius:12px;background:#fff
+}
+.detail-head-card small{display:block;font-size:9px;color:#6b7280;margin-bottom:4px}
+.detail-head-card b{font-size:12px}
+.detail-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.detail-message{display:none;margin-bottom:12px;padding:10px 12px;border-radius:10px;font-size:11px}
+.detail-message.show{display:block}
+.detail-message.ok{background:#ecfdf5;border:1px solid #86efac;color:#166534}
+.detail-message.warn{background:#fff7ed;border:1px solid #fdba74;color:#9a3412}
+.detail-message.info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af}
+.pick-detail-list{display:grid;gap:10px}
+.pick-line{border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;background:#fff}
+.pick-line-head{
+  display:grid;grid-template-columns:42px minmax(130px,1.2fr) repeat(4,minmax(70px,.55fr));
+  background:#f8fafc;border-bottom:1px solid #e5e7eb
+}
+.pick-line-head>div{padding:8px 9px;border-right:1px solid #e5e7eb;font-size:10px}
+.pick-line-head>div:last-child{border-right:0}
+.pick-line-head small{display:block;color:#6b7280;font-size:8px;margin-bottom:2px}
+.loc-table-wrap{overflow:auto}
+.loc-table{width:100%;min-width:620px;border-collapse:collapse}
+.loc-table th,.loc-table td{padding:8px 9px;border-bottom:1px solid #eef2f7;font-size:10px;text-align:left}
+.loc-table th{font-size:9px;color:#6b7280}
+.loc-ok{color:#15803d;font-weight:900}.loc-short{color:#b91c1c;font-weight:900}
 
-    .wide-icon{
-      width:48px;height:48px;
-      border-radius:12px;
-      display:grid;place-items:center;
-      background:#ec2b26;
-      color:#fff;
-      font-size:22px;
-      flex:0 0 48px;
-    }
-    .wide h3{margin:0 0 4px;font-size:17px;font-weight:900}
-    .wide p{margin:0;color:var(--muted);font-size:12px}
+.loc-select-cell{
+  width:58px;
+  text-align:center !important;
+}
+.loc-check{
+  width:20px;
+  height:20px;
+  accent-color:#16a34a;
+  cursor:pointer;
+  vertical-align:middle;
+}
+.loc-check:disabled{
+  cursor:not-allowed;
+  opacity:.35;
+}
+.loc-row-selected{
+  background:#f0fdf4;
+}
+.loc-pick-qty{
+  font-weight:900;
+  color:#15803d;
+}
 
-    .section-label{
-      margin:18px 0 10px;
-      font-weight:900;
-      font-size:15px;
-      color:#353b45;
-    }
+.loc-qr-btn{
+  border:1px solid #cbd5e1;
+  background:#fff;
+  color:#111827;
+  min-width:42px;
+  min-height:31px;
+  padding:5px 8px;
+  border-radius:8px;
+  font-size:10px;
+  font-weight:900;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.loc-qr-btn:hover{
+  border-color:#2563eb;
+  background:#eff6ff;
+  color:#1d4ed8;
+}
+.loc-qr-btn:disabled{
+  opacity:.35;
+  cursor:not-allowed;
+}
+.loc-qr-btn.has-qr{
+  border-color:#86efac;
+  background:#ecfdf5;
+  color:#166534;
+}
 
-    .small-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-    }
+.location-qr-view-modal{
+  position:fixed;
+  inset:0;
+  z-index:10050;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(15,23,42,.72);
+  backdrop-filter:blur(5px);
+}
+.location-qr-view-modal.show{
+  display:flex;
+}
+.location-qr-view-dialog{
+  width:min(470px,100%);
+  max-height:calc(100vh - 32px);
+  overflow:auto;
+  border-radius:22px;
+  background:#fff;
+  box-shadow:0 28px 80px rgba(0,0,0,.38);
+  animation:qrViewIn .17s ease;
+}
+@keyframes qrViewIn{
+  from{opacity:0;transform:scale(.96) translateY(8px)}
+  to{opacity:1;transform:none}
+}
+.location-qr-view-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  padding:17px 18px 8px;
+}
+.location-qr-view-head h2{
+  margin:0;
+  font-size:18px;
+  font-weight:900;
+}
+.location-qr-view-head p{
+  margin:4px 0 0;
+  color:#6b7280;
+  font-size:10px;
+}
+.location-qr-view-close{
+  width:38px;
+  height:38px;
+  flex:0 0 38px;
+  border:0;
+  border-radius:10px;
+  background:#f3f4f6;
+  color:#111827;
+  font-size:20px;
+  cursor:pointer;
+}
+.location-qr-view-body{
+  padding:8px 18px 20px;
+  text-align:center;
+}
+.location-qr-view-image-box{
+  width:100%;
+  min-height:330px;
+  display:grid;
+  place-items:center;
+  padding:16px;
+  border:1px solid #e5e7eb;
+  border-radius:16px;
+  background:#fff;
+}
+.location-qr-view-image{
+  display:block;
+  width:min(330px,90%);
+  height:auto;
+  max-height:330px;
+  object-fit:contain;
+  image-rendering:auto;
+}
+.location-qr-view-location{
+  margin-top:14px;
+  font-size:27px;
+  line-height:1.15;
+  font-weight:900;
+  letter-spacing:.4px;
+  color:#111827;
+  overflow-wrap:anywhere;
+}
+.location-qr-view-warehouse{
+  margin-top:5px;
+  color:#6b7280;
+  font-size:13px;
+  font-weight:800;
+}
+.location-qr-view-value{
+  margin-top:10px;
+  padding:8px 10px;
+  border-radius:9px;
+  background:#f8fafc;
+  color:#475569;
+  font-size:10px;
+}
+.location-qr-view-error{
+  padding:30px 14px;
+  color:#b91c1c;
+  font-size:13px;
+  font-weight:900;
+  line-height:1.5;
+}
 
-    .small-card{
-      background:#fff;
-      border:1px solid #eadfdc;
-      min-height:92px;
-      border-radius:16px;
-      padding:14px 16px;
-      display:flex;
-      gap:12px;
-      align-items:center;
-      cursor:pointer;
-    }
-    .small-card:hover{border-color:#ff8a84}
-    .small-icon{
-      width:42px;height:42px;border-radius:11px;
-      display:grid;place-items:center;
-      background:#fff1ef;color:var(--red);
-      font-size:20px;font-weight:900;
-      flex:0 0 42px;
-    }
-    .small-card strong{display:block;font-size:15px}
-    .small-card span{display:block;margin-top:4px;font-size:12px;color:var(--muted)}
+.line-pick-status{
+  padding:7px 10px;
+  border-top:1px solid #eef2f7;
+  background:#fafafa;
+  font-size:10px;
+  font-weight:800;
+}
+.line-pick-status.ready{
+  background:#ecfdf5;
+  color:#166534;
+}
+.line-pick-status.pending{
+  background:#fff7ed;
+  color:#9a3412;
+}
+.detail-select-help{
+  margin-bottom:12px;
+  padding:10px 12px;
+  border-radius:10px;
+  background:#eff6ff;
+  border:1px solid #bfdbfe;
+  color:#1e40af;
+  font-size:11px;
+  line-height:1.5;
+}
 
-    .footer{
-      text-align:center;
-      font-size:11px;
-      color:#9ca3af;
-      padding-top:18px;
-    }
+.no-location{padding:11px;background:#fff7f7;color:#b91c1c;font-size:10px;font-weight:800}
 
-    @media (max-width:760px){
-      .app{width:100%;margin:0 auto}
-      .topbar{border-radius:0 0 20px 20px;height:102px;padding:0 10px;grid-template-columns:55px 1fr 70px}
-      .brand .main{font-size:28px}
-      .brand .sub{font-size:12px;letter-spacing:4px}
-      .shell{width:100%;padding:0 10px 18px;box-shadow:none}
-      .panel{padding:18px 8px 24px}
-      .cards{grid-template-columns:1fr}
-      .card{min-height:132px}
-      .small-grid{grid-template-columns:1fr}
-      h1{font-size:20px}
-    }
+.empty{min-height:250px;display:grid;place-items:center;text-align:center;color:var(--muted)}
+.empty strong{display:block;color:var(--ink);font-size:17px;margin-bottom:7px}
+.stock-search{display:flex;gap:9px;margin-bottom:12px}
+.stock-summary{
+  display:none;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  margin:0 0 14px;
+}
+.stock-summary.show{display:grid}
+.stock-summary-card{
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+  padding:12px 14px;
+}
+.stock-summary-card small{
+  display:block;
+  color:#6b7280;
+  font-size:10px;
+  font-weight:800;
+  margin-bottom:5px;
+}
+.stock-summary-card strong{
+  display:block;
+  font-size:19px;
+  line-height:1.15;
+}
+.stock-summary-card.primary{
+  border-color:#fecaca;
+  background:#fff7f7;
+}
+.stock-summary-card.primary strong{color:#b91c1c}
+.stock-db-note{
+  display:none;
+  margin:0 0 12px;
+  padding:10px 12px;
+  border-radius:10px;
+  font-size:11px;
+  line-height:1.5;
+}
+.stock-db-note.show{display:block}
+.stock-db-note.ok{background:#ecfdf5;border:1px solid #86efac;color:#166534}
+.stock-db-note.warn{background:#fff7ed;border:1px solid #fdba74;color:#9a3412}
+.stock-search input{flex:1;padding:11px;border:1px solid #d1d5db;border-radius:9px}
 
-    .toast{
-      position:fixed;
-      left:50%;
-      bottom:28px;
-      transform:translateX(-50%) translateY(20px);
-      opacity:0;
-      pointer-events:none;
-      background:#111827;color:#fff;
-      padding:11px 16px;
-      border-radius:10px;
-      font-size:13px;
-      transition:.2s;
-    }
-    .toast.show{
-      opacity:1;
-      transform:translateX(-50%) translateY(0);
-    }
-  </style>
+.location-qr-layout{
+  display:grid;
+  grid-template-columns:minmax(320px,.8fr) minmax(0,1.4fr);
+  gap:14px;
+}
+.location-qr-form,
+.location-qr-list-card{
+  border:1px solid #e5e7eb;
+  border-radius:15px;
+  background:#fff;
+  padding:15px;
+}
+.location-qr-form h3,
+.location-qr-list-card h3{
+  margin:0 0 12px;
+  font-size:16px;
+}
+.location-qr-fields{
+  display:grid;
+  gap:10px;
+}
+.location-qr-field label{
+  display:block;
+  margin-bottom:5px;
+  color:#4b5563;
+  font-size:10px;
+  font-weight:900;
+}
+.location-qr-field input,
+.location-qr-field select{
+  width:100%;
+  min-height:43px;
+  padding:10px 11px;
+  border:1px solid #d1d5db;
+  border-radius:9px;
+  background:#fff;
+  font-size:14px;
+}
+.location-qr-preview{
+  margin-top:10px;
+  min-height:180px;
+  border:1px dashed #cbd5e1;
+  border-radius:12px;
+  background:#f8fafc;
+  display:grid;
+  place-items:center;
+  padding:12px;
+  text-align:center;
+  color:#6b7280;
+}
+.location-qr-preview img{
+  max-width:190px;
+  max-height:190px;
+  object-fit:contain;
+  background:#fff;
+  border:1px solid #e5e7eb;
+  padding:6px;
+}
+.location-qr-preview .qr-preview-name{
+  margin-top:8px;
+  color:#111827;
+  font-weight:900;
+  font-size:14px;
+}
+.location-qr-form-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:12px;
+}
+.location-qr-form-actions .btn{
+  width:100%;
+}
+.location-qr-search{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:8px;
+  margin-bottom:10px;
+}
+.location-qr-search input{
+  min-height:42px;
+  padding:9px 11px;
+  border:1px solid #d1d5db;
+  border-radius:9px;
+  font-size:14px;
+}
+.location-qr-table-wrap{
+  overflow:auto;
+  border:1px solid #e5e7eb;
+  border-radius:10px;
+  max-height:530px;
+}
+.location-qr-table{
+  width:100%;
+  min-width:720px;
+  border-collapse:collapse;
+}
+.location-qr-table th,
+.location-qr-table td{
+  padding:9px 10px;
+  border-bottom:1px solid #e5e7eb;
+  text-align:left;
+  font-size:10px;
+  vertical-align:middle;
+}
+.location-qr-table th{
+  position:sticky;
+  top:0;
+  background:#f8fafc;
+  color:#4b5563;
+  z-index:1;
+}
+.location-qr-thumb{
+  width:54px;
+  height:54px;
+  object-fit:contain;
+  border:1px solid #e5e7eb;
+  border-radius:7px;
+  background:#fff;
+}
+.location-qr-actions{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+}
+.location-qr-actions button{
+  border:0;
+  border-radius:8px;
+  padding:6px 9px;
+  font-weight:900;
+  cursor:pointer;
+  font-size:10px;
+}
+.qr-edit-btn{background:#eff6ff;color:#1d4ed8}
+.qr-delete-btn{background:#fef2f2;color:#b91c1c}
+.location-qr-status{
+  margin-top:10px;
+  display:none;
+  padding:10px 11px;
+  border-radius:9px;
+  font-size:11px;
+  line-height:1.5;
+}
+.location-qr-status.show{display:block}
+.location-qr-status.info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af}
+.location-qr-status.ok{background:#ecfdf5;border:1px solid #86efac;color:#166534}
+.location-qr-status.warn{background:#fff7ed;border:1px solid #fdba74;color:#9a3412}
+.location-qr-status.error{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
+.location-qr-empty{
+  padding:26px 14px;
+  text-align:center;
+  color:#6b7280;
+}
+
+.footer{text-align:center;font-size:11px;color:#9ca3af;padding-top:18px}
+.toast{
+  position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;
+  background:#111827;color:#fff;padding:11px 16px;border-radius:10px;font-size:13px;transition:.2s;z-index:100
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* CLEAR ERP STOCK CONFIRM MODAL */
+.erp-clear-modal{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(15,23,42,.62);
+  backdrop-filter:blur(4px);
+}
+.erp-clear-modal.show{display:flex}
+.erp-clear-dialog{
+  width:min(430px,100%);
+  background:#fff;
+  border-radius:20px;
+  box-shadow:0 24px 70px rgba(0,0,0,.28);
+  overflow:hidden;
+  animation:erpModalIn .18s ease;
+}
+@keyframes erpModalIn{
+  from{opacity:0;transform:translateY(10px) scale(.98)}
+  to{opacity:1;transform:none}
+}
+.erp-clear-top{
+  padding:22px 22px 16px;
+  text-align:center;
+}
+.erp-clear-icon{
+  width:56px;
+  height:56px;
+  margin:0 auto 12px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:#fee2e2;
+  color:#dc2626;
+  font-size:28px;
+  font-weight:900;
+}
+.erp-clear-title{
+  margin:0;
+  font-size:21px;
+  font-weight:900;
+  color:#991b1b;
+}
+.erp-clear-message{
+  margin:8px 0 0;
+  color:#4b5563;
+  font-size:13px;
+  line-height:1.55;
+}
+.erp-clear-count{
+  margin-top:14px;
+  padding:10px 12px;
+  background:#fff7f7;
+  border:1px solid #fecaca;
+  border-radius:10px;
+  color:#b91c1c;
+  font-size:13px;
+  font-weight:800;
+}
+.erp-clear-code-wrap{
+  padding:0 22px 18px;
+}
+.erp-clear-code-label{
+  text-align:center;
+  color:#6b7280;
+  font-size:11px;
+  font-weight:800;
+  margin-bottom:7px;
+}
+.erp-clear-code{
+  width:max-content;
+  min-width:132px;
+  margin:0 auto 12px;
+  padding:10px 18px;
+  border-radius:12px;
+  background:#111827;
+  color:#fff;
+  font-size:27px;
+  font-weight:900;
+  letter-spacing:8px;
+  text-align:center;
+}
+.erp-clear-input{
+  width:100%;
+  padding:12px 14px;
+  border:1.5px solid #d1d5db;
+  border-radius:11px;
+  text-align:center;
+  font-size:20px;
+  font-weight:900;
+  letter-spacing:5px;
+  outline:none;
+}
+.erp-clear-input:focus{
+  border-color:#dc2626;
+  box-shadow:0 0 0 3px rgba(220,38,38,.10);
+}
+.erp-clear-error{
+  min-height:18px;
+  margin-top:7px;
+  text-align:center;
+  color:#dc2626;
+  font-size:11px;
+  font-weight:800;
+}
+.erp-clear-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  padding:14px 22px 22px;
+  border-top:1px solid #f1f5f9;
+}
+.erp-clear-actions button{
+  min-height:44px;
+  border:0;
+  border-radius:11px;
+  font-weight:900;
+  cursor:pointer;
+}
+.erp-clear-cancel{
+  background:#f3f4f6;
+  color:#374151;
+}
+.erp-clear-confirm{
+  background:#dc2626;
+  color:#fff;
+}
+.erp-clear-confirm:hover{background:#b91c1c}
+.erp-clear-confirm:disabled{opacity:.45;cursor:not-allowed}
+
+
+/* =========================================================
+   JOB ORDER PDF / PRINT LAYOUT
+   A4 width at 96 DPI ~= 794px
+   ========================================================= */
+.pdf-capture-stage{
+  position:fixed;
+  left:-12000px;
+  top:0;
+  width:794px;
+  background:#fff;
+  z-index:-9999;
+  pointer-events:none;
+}
+
+.pdf-job-sheet{
+  width:794px;
+  min-height:1123px;
+  box-sizing:border-box;
+  padding:24px 26px;
+  background:#fff;
+  color:#111;
+  font-family:Tahoma,Arial,sans-serif;
+}
+
+.pdf-job-title{
+  width:100%;
+  box-sizing:border-box;
+  background:#df382f;
+  color:#fff;
+  border:2px solid #111;
+  text-align:center;
+  font-size:22px;
+  line-height:1.25;
+  font-weight:900;
+  padding:9px 10px;
+}
+
+.pdf-job-sub{
+  width:100%;
+  box-sizing:border-box;
+  background:#ffe3e1;
+  color:#cf2f28;
+  border-left:2px solid #111;
+  border-right:2px solid #111;
+  border-bottom:1px solid #111;
+  text-align:center;
+  font-size:12px;
+  line-height:1.4;
+  font-weight:800;
+  padding:6px 8px;
+}
+
+.pdf-meta{
+  width:100%;
+  border-collapse:collapse;
+  table-layout:fixed;
+}
+
+.pdf-meta td{
+  border:1px solid #111;
+  padding:8px 7px;
+  font-size:12px;
+  line-height:1.25;
+  vertical-align:middle;
+  overflow-wrap:anywhere;
+}
+
+.pdf-meta .label{
+  width:18%;
+  background:#fbe3e1;
+  font-weight:900;
+  text-align:center;
+}
+
+.pdf-meta .value{
+  width:32%;
+  font-weight:800;
+  text-align:center;
+}
+
+.pdf-section{
+  width:100%;
+  box-sizing:border-box;
+  border-left:2px solid #111;
+  border-right:2px solid #111;
+  border-bottom:1px solid #111;
+  padding:7px 8px;
+  color:#df382f;
+  font-size:12px;
+  font-weight:900;
+}
+
+.pdf-detail-table{
+  width:100%;
+  border-collapse:collapse;
+  table-layout:fixed;
+}
+
+.pdf-detail-table th,
+.pdf-detail-table td{
+  border:1px solid #111;
+  padding:6px 4px;
+  text-align:center;
+  vertical-align:middle;
+  font-size:10.5px;
+  line-height:1.25;
+  overflow-wrap:anywhere;
+}
+
+.pdf-detail-table th{
+  background:#df382f;
+  color:#fff;
+  font-size:10.5px;
+  font-weight:900;
+}
+
+.pdf-detail-table th:nth-child(1){width:5%}
+.pdf-detail-table th:nth-child(2){width:17%}
+.pdf-detail-table th:nth-child(3){width:13%}
+.pdf-detail-table th:nth-child(4){width:8%}
+.pdf-detail-table th:nth-child(5){width:7%}
+.pdf-detail-table th:nth-child(6){width:7%}
+.pdf-detail-table th:nth-child(7){width:7%}
+.pdf-detail-table th:nth-child(8){width:8%}
+.pdf-detail-table th:nth-child(9){width:13%}
+.pdf-detail-table th:nth-child(10){width:15%}
+
+.pdf-detail-table td.item,
+.pdf-detail-table td.loc{
+  text-align:left;
+}
+
+.pdf-detail-table .job-shortage td,
+.pdf-detail-table tr.job-shortage td{
+  background:#fff1f2;
+  color:#b91c1c;
+  font-weight:900;
+}
+
+.pdf-footer-note{
+  margin-top:10px;
+  font-size:10px;
+  color:#6b7280;
+  text-align:right;
+}
+
+/* LOCATION QR SHEET - หน้าแยกต่อจากใบจัดงาน */
+.pdf-qr-sheet{
+  width:794px;
+  min-height:1123px;
+  box-sizing:border-box;
+  padding:28px 30px;
+  background:#fff;
+  color:#111827;
+  font-family:Tahoma,Arial,sans-serif;
+}
+.pdf-qr-title{
+  border:2px solid #111;
+  background:#df382f;
+  color:#fff;
+  text-align:center;
+  font-size:23px;
+  font-weight:900;
+  padding:10px 12px;
+}
+.pdf-qr-subtitle{
+  border:2px solid #111;
+  border-top:0;
+  background:#fff5f4;
+  text-align:center;
+  padding:8px 10px;
+  font-size:12px;
+  font-weight:800;
+}
+.pdf-qr-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+  margin-top:22px;
+}
+.pdf-qr-card{
+  min-height:410px;
+  border:1.5px solid #bfc5cc;
+  border-radius:4px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:18px 14px;
+  box-sizing:border-box;
+  page-break-inside:avoid;
+}
+.pdf-qr-card img{
+  width:250px;
+  height:250px;
+  object-fit:contain;
+  display:block;
+  background:#fff;
+}
+.pdf-qr-location{
+  margin-top:18px;
+  font-size:29px;
+  line-height:1.1;
+  font-weight:900;
+  text-align:center;
+  word-break:break-word;
+}
+.pdf-qr-warehouse{
+  margin-top:7px;
+  font-size:18px;
+  font-weight:800;
+  color:#374151;
+  text-align:center;
+}
+.pdf-qr-value{
+  margin-top:8px;
+  font-size:11px;
+  color:#6b7280;
+  text-align:center;
+}
+.pdf-qr-missing{
+  width:250px;
+  height:250px;
+  display:grid;
+  place-items:center;
+  border:2px dashed #fca5a5;
+  background:#fff7f7;
+  color:#b91c1c;
+  font-size:14px;
+  font-weight:900;
+  text-align:center;
+  padding:14px;
+  box-sizing:border-box;
+}
+.print-page-break{
+  break-before:page;
+  page-break-before:always;
+}
+
+#printArea{
+  display:none;
+}
+
+/* Browser Print ใช้ layout เดียวกับ PDF */
+@media print{
+  body{
+    background:#fff !important;
+  }
+
+  .app,
+  .toast,
+  .erp-clear-modal,
+  .pdf-capture-stage{
+    display:none !important;
+  }
+
+  #printArea{
+    display:block !important;
+    width:100% !important;
+  }
+
+  #printArea .pdf-job-sheet,
+  #printArea .pdf-qr-sheet{
+    width:100% !important;
+    min-height:0 !important;
+    padding:0 !important;
+  }
+
+  #printArea .pdf-qr-sheet{
+    break-before:page !important;
+    page-break-before:always !important;
+  }
+
+  @page{
+    size:A4 portrait;
+    margin:10mm;
+  }
+}
+
+
+@media(max-width:760px){
+  html,body{overflow-x:hidden}
+  body{background:#fff}
+
+  .app{
+    width:100%;
+    margin:0;
+  }
+
+  .topbar{
+    height:88px;
+    border-radius:0 0 18px 18px;
+    padding:0 10px;
+    grid-template-columns:48px 1fr 72px;
+    position:sticky;
+    top:0;
+    z-index:50;
+  }
+
+  .brand-main{
+    font-size:25px;
+    line-height:1;
+  }
+
+  .brand-sub{
+    margin-top:7px;
+    font-size:10px;
+    letter-spacing:3px;
+  }
+
+  .icon-btn{
+    width:42px;
+    height:42px;
+    font-size:22px;
+  }
+
+  .top-actions{gap:4px}
+  .refresh{width:34px;height:34px}
+
+  .shell{
+    width:100%;
+    padding:0 8px 16px;
+    box-shadow:none;
+    background:#fff;
+  }
+
+  .panel{
+    padding:15px 4px 22px;
+    border-radius:0;
+  }
+
+  .title-row,.page-head{
+    align-items:flex-start;
+    margin-bottom:12px;
+  }
+
+  h1{font-size:20px}
+  .page-title{font-size:19px}
+  .page-sub{
+    font-size:11px;
+    line-height:1.45;
+  }
+
+  .badge{
+    padding:6px 9px;
+    font-size:10px;
+    white-space:nowrap;
+  }
+
+  .cards{
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+
+  .card{
+    min-height:112px;
+    padding:14px;
+    border-radius:15px;
+  }
+
+  .card h2{
+    font-size:18px;
+    margin-bottom:7px;
+  }
+
+  .card-icon{
+    width:42px;
+    height:42px;
+    font-size:23px;
+    margin-bottom:7px;
+  }
+
+  .card p{font-size:11px}
+
+  .wide{
+    min-height:68px;
+    padding:10px 12px;
+    border-radius:14px;
+  }
+
+  .wide-icon{
+    width:42px;
+    height:42px;
+    flex:0 0 42px;
+  }
+
+  .wide h3{font-size:15px}
+  .wide p{font-size:11px}
+
+  .section-label{
+    margin:16px 0 8px;
+    font-size:13px;
+  }
+
+  .small-grid{
+    grid-template-columns:1fr;
+    gap:9px;
+  }
+
+  .small-card{
+    width:100%;
+    min-height:70px;
+    padding:10px 12px;
+    border-radius:14px;
+  }
+
+  .small-card.danger{
+    width:100%;
+    min-height:58px;
+  }
+
+  .small-card strong{font-size:14px}
+  .small-card span{font-size:10px}
+
+  .page-box{
+    padding:12px;
+    border-radius:14px;
+    min-height:0;
+  }
+
+  .back-btn{
+    width:38px;
+    height:38px;
+    flex:0 0 38px;
+  }
+
+  .head-left{
+    min-width:0;
+    align-items:flex-start;
+  }
+
+  .import-card,
+  .erp-upload-card{
+    padding:12px;
+    border-radius:13px;
+  }
+
+  .import-title{
+    align-items:flex-start;
+    flex-wrap:wrap;
+  }
+
+  .import-title h3{font-size:15px}
+
+  .import-grid{
+    grid-template-columns:1fr;
+    gap:9px;
+  }
+
+  .field.full{grid-column:auto}
+
+  .field input,
+  .field select,
+  .erp-upload-drop input[type=file],
+  .stock-search input,
+  .erp-search-row input{
+    font-size:16px; /* ป้องกัน iPhone zoom ตอนแตะ input */
+    min-height:44px;
+  }
+
+  .import-actions,
+  .erp-upload-actions,
+  .action-row{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:8px;
+  }
+
+  .btn{
+    width:100%;
+    min-height:44px;
+    padding:11px 12px;
+  }
+
+  .import-stats.show,
+  .erp-stock-stats.show,
+  .stock-summary.show{
+    grid-template-columns:1fr 1fr;
+    gap:7px;
+  }
+
+  .stat,
+  .stock-summary-card{
+    padding:9px 10px;
+    min-width:0;
+  }
+
+  .stat b,
+  .stock-summary-card strong{
+    font-size:15px;
+    overflow-wrap:anywhere;
+  }
+
+  .preview-wrap,
+  .erp-preview,
+  .erp-search-result,
+  .table-wrap,
+  .job-table-wrap{
+    width:100%;
+    max-width:100%;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .preview-table,
+  .erp-preview table,
+  .erp-search-result table,
+  table.general,
+  .job-table{
+    min-width:760px;
+  }
+
+  .erp-search-row,
+  .stock-search{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+
+  .erp-search-row input,
+  .stock-search input{
+    grid-column:1/-1;
+  }
+
+  .erp-search-row .btn,
+  .stock-search .btn{
+    width:100%;
+  }
+
+  .erp-search-summary{
+    font-size:11px;
+    line-height:1.55;
+  }
+
+  .meta-grid{
+    grid-template-columns:120px minmax(0,1fr);
+  }
+
+  .meta-grid>*{
+    border-right:1px solid #333 !important;
+  }
+
+  .meta-grid>*:nth-child(2n){
+    border-right:0 !important;
+  }
+
+  .meta-label,.meta-value{
+    min-height:44px;
+    padding:7px;
+    font-size:11px;
+  }
+
+  .meta-value input,
+  .meta-value select{
+    font-size:16px;
+  }
+
+  .job-title{
+    font-size:16px;
+    padding:8px 6px;
+  }
+
+  .job-subtitle{
+    font-size:10px;
+    line-height:1.4;
+  }
+
+  .break-title{font-size:11px}
+
+  .summary-strip{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:7px;
+  }
+
+  .sum-card{
+    min-width:0;
+    padding:9px;
+  }
+
+  .sum-card strong{font-size:15px}
+  .sum-card small{font-size:9px}
+
+  .erp-clear-modal{
+    padding:14px;
+    align-items:center;
+  }
+
+  .erp-clear-dialog{
+    width:100%;
+    max-width:390px;
+    border-radius:18px;
+  }
+
+  .erp-clear-top{
+    padding:18px 16px 12px;
+  }
+
+  .erp-clear-icon{
+    width:50px;
+    height:50px;
+    font-size:24px;
+  }
+
+  .erp-clear-title{font-size:19px}
+  .erp-clear-message{font-size:12px}
+
+  .erp-clear-code-wrap{
+    padding:0 16px 14px;
+  }
+
+  .erp-clear-code{
+    font-size:24px;
+    letter-spacing:7px;
+  }
+
+  .erp-clear-input{
+    min-height:48px;
+    font-size:20px;
+  }
+
+  .erp-clear-actions{
+    padding:12px 16px 16px;
+    gap:8px;
+  }
+
+  .erp-clear-actions button{
+    min-height:46px;
+  }
+
+  .footer{padding-top:14px}
+}
+
+
+  .po-card{grid-template-columns:1fr 1fr;padding:11px}
+  .po-main{grid-column:1/-1}
+  .po-action{grid-column:1/-1;width:100%}
+  .detail-head-card{grid-template-columns:1fr 1fr}
+  .detail-actions{display:grid;grid-template-columns:1fr}
+  .detail-actions .btn{width:100%}
+  .pick-line-head{grid-template-columns:36px minmax(120px,1fr) 65px 65px}
+  .pick-line-head>div:nth-child(5),.pick-line-head>div:nth-child(6){display:none}
+
+  .loc-check{width:24px;height:24px}
+
+  .location-qr-layout{grid-template-columns:1fr}
+  .location-qr-form,.location-qr-list-card{padding:12px}
+  .location-qr-field input,.location-qr-field select,.location-qr-search input{font-size:16px}
+  .location-qr-search{grid-template-columns:1fr}
+  .location-qr-search .btn{width:100%}
+  .location-qr-form-actions{grid-template-columns:1fr}
+
+
+  .loc-qr-btn{
+    min-width:46px;
+    min-height:36px;
+    font-size:11px;
+  }
+
+  .location-qr-view-modal{
+    padding:10px;
+  }
+
+  .location-qr-view-dialog{
+    border-radius:18px;
+  }
+
+  .location-qr-view-image-box{
+    min-height:290px;
+    padding:10px;
+  }
+
+  .location-qr-view-image{
+    width:min(300px,94%);
+    max-height:300px;
+  }
+
+  .location-qr-view-location{
+    font-size:24px;
+  }
+
+
+  .active-job-header{
+    grid-template-columns:1fr 1fr;
+  }
+  .active-scan-check{
+    width:26px;
+    height:26px;
+  }
+
+@media(max-width:420px){
+  .brand-main{font-size:22px}
+  .brand-sub{font-size:9px;letter-spacing:2.4px}
+
+  .topbar{
+    grid-template-columns:44px 1fr 68px;
+    padding:0 7px;
+  }
+
+  .import-stats.show,
+  .erp-stock-stats.show,
+  .stock-summary.show{
+    grid-template-columns:1fr;
+  }
+
+  .summary-strip{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .sum-card:first-child{
+    grid-column:1/-1;
+  }
+
+  .meta-grid{
+    grid-template-columns:105px minmax(0,1fr);
+  }
+
+  .erp-clear-actions{
+    grid-template-columns:1fr;
+  }
+
+  .erp-clear-cancel{order:2}
+  .erp-clear-confirm{order:1}
+}
+
+@media print{
+  body{background:#fff}.app,.toast{display:none!important}#printArea{display:block!important}
+  @page{size:A4 portrait;margin:10mm}
+  .print-sheet{font-family:Tahoma,Arial,sans-serif;color:#111}
+  .print-title{background:#df382f;color:#fff;border:2px solid #111;text-align:center;font-size:20px;font-weight:900;padding:7px}
+  .print-sub{background:#ffe3e1;color:#d82f27;border-left:2px solid #111;border-right:2px solid #111;border-bottom:1px solid #111;text-align:center;font-size:12px;font-weight:800;padding:5px}
+  .print-meta{width:100%;border-collapse:collapse}
+  .print-meta td{border:1px solid #111;padding:7px;font-size:12px}
+  .print-meta .l{background:#fbe3e1;font-weight:900;text-align:center;width:22%}.print-meta .v{font-weight:800;text-align:center}
+  .print-break{border:2px solid #111;border-top:0;padding:6px;color:#df382f;font-weight:900;font-size:12px}
+  .print-table{width:100%;border-collapse:collapse}
+  .print-table th,.print-table td{border:1px solid #111;padding:5px;text-align:center;font-size:10px}
+  .print-table th{background:#df382f;color:#fff}
+}
+</style>
 </head>
+
 <body>
-
 <div class="app">
-  <header class="topbar">
-    <button class="icon-btn" id="menuBtn" aria-label="menu">☰</button>
+<header class="topbar">
+  <button class="icon-btn" id="menuBtn">☰</button>
+  <div class="brand"><div class="brand-main">GAMBOL</div><div class="brand-sub">ERP PICKING</div></div>
+  <div class="top-actions">
+    <button class="icon-btn refresh" id="refreshBtn">↻</button>
+    <button class="icon-btn" id="homeBtn">⌂</button>
+  </div>
+</header>
 
-    <div class="brand">
-      <div class="main">GAMBOL</div>
-      <div class="sub">ERP PICKING</div>
+<div class="shell"><main class="panel">
+
+<section class="page active" id="page-home">
+  <div class="title-row"><h1>HOME</h1><div class="badge">ERP PICKING</div></div>
+  <section class="cards">
+    <div class="card" data-page="create"><h2>CREATE<br>PICKING</h2><div class="card-icon">＋</div><p>อัปโหลด PO เข้าระบบ</p></div>
+    <div class="card" data-page="orders"><h2>PICKING<br>ORDER</h2><div class="card-icon">▤</div><p>ดูรายการ PO จาก Supabase</p></div>
+    <div class="card" data-page="stock"><h2>ERP<br>STOCK</h2><div class="card-icon">▣</div><p>ตรวจสอบ erp_stock_ptt</p></div>
+  </section>
+  <div class="wide" data-page="active"><div class="wide-icon">⌁</div><div><h3>ACTIVE PICKING</h3><p>เฉพาะ PO ที่สร้างใบจัดงานแล้ว / เช็กว่าสแกนรายการไหนแล้ว</p></div></div>
+  <div class="section-label">MANAGEMENT</div>
+  <section class="small-grid">
+    <div class="small-card" data-page="upload">
+      <div class="small-icon">⇧</div>
+      <div><strong>UPLOAD ERP STOCK</strong><span>อัปเดตฐาน ERP Stock</span></div>
     </div>
 
-    <div class="top-actions">
-      <button class="icon-btn refresh" id="refreshBtn" aria-label="refresh">↻</button>
-      <button class="icon-btn" id="homeBtn" aria-label="home">⌂</button>
+    <div class="small-card danger" id="clearErpStockCard" title="ล้างข้อมูล ERP Stock ทั้งหมด">
+      <div class="small-icon">⚠</div>
+      <div><strong>CLEAR ERP STOCK</strong><span>DANGER • ล้างข้อมูลทั้งหมด</span></div>
     </div>
-  </header>
+  </section>
 
-  <div class="shell">
-    <main class="panel">
-      <div class="title-row">
-        <h1>HOME</h1>
-        <div class="badge">PTT ERP</div>
+
+  <div class="section-label">LOCATION MASTER</div>
+  <section class="small-grid" style="grid-template-columns:1fr;">
+    <div class="small-card" data-page="locationqr">
+      <div class="small-icon">▦</div>
+      <div>
+        <strong>LOCATION QR MASTER</strong>
+        <span>เพิ่ม / แก้ไข QR Code ประจำ Location</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-label">JOB HISTORY</div>
+  <section class="small-grid" style="grid-template-columns:1fr;">
+    <div class="small-card" data-page="completed">
+      <div class="small-icon">✓</div>
+      <div><strong>COMPLETED JOBS</strong><span>ประวัติใบจัดงานที่เสร็จสมบูรณ์แล้ว</span></div>
+    </div>
+  </section>
+</section>
+
+<section class="page" id="page-create">
+<div class="page-box">
+  <div class="page-head">
+    <div class="head-left">
+      <button class="back-btn" data-page="home">←</button>
+      <div><h2 class="page-title">CREATE PICKING</h2><p class="page-sub">นำเข้าไฟล์ PO → ตรวจสอบ → บันทึก Supabase</p></div>
+    </div>
+    <div class="badge">JOB ORDER FLOW</div>
+  </div>
+
+  <section class="import-card">
+    <div class="import-title">
+      <h3>IMPORT PO EXCEL</h3>
+      <span>AUTO → CSV → SUPABASE</span>
+    </div>
+
+    <div class="import-grid">
+      <div class="field">
+        <label>CUSTOMER</label>
+        <select id="importCustomer">
+          <option value="LOTUS">LOTUS</option>
+          <option value="BIG C">BIG C</option>
+          <option value="PTT">PTT</option>
+          <option value="VILLA MARKET">VILLA MARKET</option>
+          <option value="MAXMART">MAXMART</option>
+          <option value="7-11">7-11</option>
+          <option value="CJ">CJ</option>
+        </select>
       </div>
 
-      <section class="cards">
-        <a class="card" href="#" data-page="create">
-          <h2>CREATE<br>PICKING</h2>
-          <div class="card-icon">＋</div>
-          <p>สร้างใบจัดงานใหม่</p>
-        </a>
+      <div class="field">
+        <label>JOB TYPE</label>
+        <select id="importType">
+          <option value="ASN">ASN — CARTON & LOOSE</option>
+          <option value="PBL">PBL — FULL CARTON</option>
+        </select>
+      </div>
 
-        <a class="card" href="#" data-page="orders">
-          <h2>PICKING<br>ORDER</h2>
-          <div class="card-icon">▤</div>
-          <p>ดูรายการใบจัดงานทั้งหมด</p>
-        </a>
+      <div class="field">
+        <label>CREATED BY</label>
+        <input id="importCreatedBy" value="ADMIN" placeholder="ชื่อผู้สร้าง">
+      </div>
 
-        <a class="card" href="#" data-page="stock">
-          <h2>ERP<br>STOCK</h2>
-          <div class="card-icon">▣</div>
-          <p>ตรวจสอบสต๊อกจาก ERP</p>
-        </a>
-      </section>
+      <div class="field full">
+        <label>ไฟล์ PO จากลูกค้า (.xls / .xlsx / .xlsm)</label>
+        <input id="poExcelFile" type="file" accept=".xls,.xlsx,.xlsm">
+      </div>
+    </div>
 
-      <div class="wide" data-page="active">
-        <div class="wide-icon">⌁</div>
+    <div class="import-actions">
+      <button class="btn btn-primary" id="importPoBtn">ตรวจสอบ → แปลง CSV → บันทึก Supabase</button>
+      <button class="btn btn-secondary" id="resetImportBtn">ล้างข้อมูล</button>
+      <button class="btn btn-blue" id="downloadCsvBtn" disabled>ดาวน์โหลด CSV ตรวจสอบ</button>
+    </div>
+
+    <div id="importStatus" class="import-status"></div>
+
+    <div id="importStats" class="import-stats">
+      <div class="stat"><small>PO NUMBER</small><b id="statPo">-</b></div>
+      <div class="stat"><small>DELIVERY DATE</small><b id="statDelivery">-</b></div>
+      <div class="stat"><small>ITEM LINES</small><b id="statLines">0</b></div>
+      <div class="stat"><small>TOTAL PAIRS</small><b id="statPairs">0</b></div>
+      <div class="stat"><small>SUPABASE</small><b id="statDb">WAIT</b></div>
+    </div>
+
+    <div id="importPreviewWrap" class="preview-wrap">
+      <table class="preview-table">
+        <thead>
+          <tr>
+            <th>No.</th><th>UPC</th><th>Item</th><th>CODE</th><th>Size</th>
+            <th>คู่ PO</th><th>Box</th><th>เศษก่อน</th><th>ใช้เศษ</th><th>ดึงเศษ</th>
+            <th>เศษหลัง</th><th>Remark</th><th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="importPreviewBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+</section>
+
+<section class="page" id="page-orders">
+<div class="page-box">
+  <div class="page-head">
+    <div class="head-left"><button class="back-btn" data-page="home">←</button><div><h2 class="page-title">PICKING ORDER</h2><p class="page-sub">ข้อมูลจาก po_headers</p></div></div>
+    <button class="btn btn-secondary" id="reloadOrdersBtn">รีเฟรช</button>
+  </div>
+  <div class="table-wrap">
+    <table class="general">
+      <thead><tr><th>ID</th><th>PO</th><th>Customer</th><th>Type</th><th>Pairs</th><th>Cartons</th><th>Status</th><th>Action</th></tr></thead>
+      <tbody id="ordersBody"><tr><td colspan="8">กำลังโหลด...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+</section>
+
+<section class="page" id="page-stock">
+<div class="page-box">
+  <div class="page-head">
+    <div class="head-left">
+      <button class="back-btn" data-page="home">←</button>
+      <div>
+        <h2 class="page-title">ERP STOCK</h2>
+        <p class="page-sub">ค้นหา Item และดูยอด Available physical รวมทุก Size / Color / Location</p>
+      </div>
+    </div>
+    <div class="badge" id="erpDbCountBadge">DB: ...</div>
+  </div>
+
+  <div id="stockDbNote" class="stock-db-note"></div>
+
+  <div class="stock-search">
+    <input id="stockSearchInput" placeholder="ค้นหา Item เช่น DK42005">
+    <button class="btn btn-primary" id="stockSearchBtn">ค้นหา</button>
+    <button class="btn btn-secondary" id="stockClearSearchBtn">ล้าง</button>
+  </div>
+
+  <div id="stockSummary" class="stock-summary">
+    <div class="stock-summary-card primary">
+      <small>ITEM</small>
+      <strong id="stockSumItem">-</strong>
+    </div>
+    <div class="stock-summary-card">
+      <small>TOTAL AVAILABLE</small>
+      <strong id="stockSumAvailable">0</strong>
+    </div>
+    <div class="stock-summary-card">
+      <small>LOCATION</small>
+      <strong id="stockSumLocations">0</strong>
+    </div>
+    <div class="stock-summary-card">
+      <small>ROWS / VARIANTS</small>
+      <strong id="stockSumRows">0</strong>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="general">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Color Name</th>
+          <th>Size</th>
+          <th>Color</th>
+          <th>Warehouse</th>
+          <th>Location</th>
+          <th>Available</th>
+        </tr>
+      </thead>
+      <tbody id="stockBody">
+        <tr><td colspan="7">พิมพ์ Item แล้วกดค้นหา</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</section>
+
+<section class="page" id="page-active">
+<div class="page-box">
+  <div class="page-head">
+    <div class="head-left">
+      <button class="back-btn" data-page="home">←</button>
+      <div><h2 class="page-title">ACTIVE PICKING</h2><p class="page-sub">แสดงเฉพาะ PO ที่กดสร้างใบจัดงานแล้ว</p></div>
+    </div>
+    <button class="btn btn-secondary" id="reloadActiveBtn">รีเฟรช</button>
+  </div>
+  <div id="activeSummary" class="active-summary">กำลังโหลด...</div>
+  <div id="activePickingList" class="active-list">
+    <div class="empty"><div><strong>กำลังโหลด PO</strong></div></div>
+  </div>
+</div>
+</section>
+
+
+<section class="page" id="page-activejob">
+<div class="page-box">
+  <div class="page-head">
+    <div class="head-left">
+      <button class="back-btn" id="activeJobBackBtn">←</button>
+      <div>
+        <h2 class="page-title">ACTIVE SHEET</h2>
+        <p class="page-sub">ดู Item → Location และติ๊กเมื่อสแกนรายการแล้ว</p>
+      </div>
+    </div>
+    <div class="badge">ทำใบจัดแล้ว</div>
+  </div>
+
+  <div class="active-job-header">
+    <div><small>PO</small><b id="activeJobPo">-</b></div>
+    <div><small>CUSTOMER</small><b id="activeJobCustomer">-</b></div>
+    <div><small>รายการที่ต้องสแกน</small><b id="activeJobTotalLines">0</b></div>
+    <div><small>สแกนแล้ว</small><b id="activeJobScannedLines">0</b></div>
+  </div>
+
+  <div id="activeJobNotice" class="detail-message"></div>
+
+  <div id="activeScanProgress" class="active-scan-progress">
+    กำลังโหลด...
+  </div>
+
+  <div class="detail-actions">
+    <button class="btn btn-pdf-print" id="activeJobPrintBtn">🖨 พิมพ์ใบจัดงาน</button>
+    <button class="btn btn-pdf-save" id="activeJobPdfBtn">PDF บันทึกไฟล์</button>
+  </div>
+
+  <div class="active-scan-table-wrap">
+    <table class="active-scan-table">
+      <thead>
+        <tr>
+          <th style="width:70px">สแกนแล้ว</th>
+          <th>Item Code</th>
+          <th>Size</th>
+          <th>จำนวน</th>
+          <th>Location</th>
+          <th style="width:70px">QR</th>
+          <th>สถานะ</th>
+        </tr>
+      </thead>
+      <tbody id="activeJobRows">
+        <tr><td colspan="7">กำลังโหลด...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</section>
+
+<section class="page" id="page-detail">
+<div class="page-box">
+  <div class="page-head">
+    <div class="head-left">
+      <button class="back-btn" id="detailBackBtn">←</button>
+      <div><h2 class="page-title">PICKING DETAIL</h2><p class="page-sub">รายการ PO และ Location จาก ERP Stock</p></div>
+    </div>
+    <div class="badge" id="detailStatusBadge">-</div>
+  </div>
+
+  <div class="detail-head-card">
+    <div><small>PO</small><b id="detailPo">-</b></div>
+    <div><small>CUSTOMER</small><b id="detailCustomer">-</b></div>
+    <div><small>TYPE</small><b id="detailType">-</b></div>
+    <div><small>TOTAL PAIRS</small><b id="detailPairs">0</b></div>
+    <div><small>TOTAL CARTONS</small><b id="detailCartons">0</b></div>
+  </div>
+
+  <div class="detail-actions">
+    <button class="btn btn-primary" id="startPickingBtn">START PICKING</button>
+    <button class="btn btn-secondary" id="reloadDetailBtn">รีเฟรช Location</button>
+    <button class="btn pdf-action btn-pdf-save" id="openJobOrderBtn">
+      สร้างใบจัดงาน
+    </button>
+  </div>
+
+  <div id="detailMessage" class="detail-message"></div>
+
+  <div class="detail-select-help">
+    ✓ ติ๊ก Location ที่ต้องการหยิบ ระบบจะคำนวณจำนวนหยิบให้อัตโนมัติ
+    และจะจำ Location ที่เลือกไว้ แม้ Refresh หน้าเว็บ หาก Location เดียวไม่พอสามารถเลือกหลาย Location ได้
+  </div>
+
+  <div id="pickingDetailList" class="pick-detail-list">
+    <div class="empty"><div><strong>เลือก PO ก่อน</strong></div></div>
+  </div>
+</div>
+</section>
+
+
+<section class="page" id="page-joborder">
+<div class="page-box">
+  <div class="page-head">
+    <div class="head-left">
+      <button class="back-btn" id="jobOrderBackBtn">←</button>
+      <div>
+        <h2 class="page-title">JOB ORDER</h2>
+        <p class="page-sub">ตรวจใบจัดงานก่อนพิมพ์ / Export PDF</p>
+      </div>
+    </div>
+    <div class="badge">READY TO EXPORT</div>
+  </div>
+
+  <div id="jobOrderNotice" class="detail-message"></div>
+
+  <div class="job-form" id="jobEditor">
+    <div class="job-title">ใบจัดงาน - CARTON & LOOSE</div>
+    <div class="job-subtitle">ข้อมูลถูกสร้างจากไฟล์ PO ที่ Import และบันทึกลง Supabase</div>
+
+    <div class="meta-grid">
+      <div class="meta-label">CUSTOMER</div>
+      <div class="meta-value"><input id="customer" value="LOTUS"></div>
+      <div class="meta-label">PO NUMBER</div>
+      <div class="meta-value"><input id="poNumber" placeholder="เลข PO"></div>
+
+      <div class="meta-label">JOB TYPE</div>
+      <div class="meta-value"><select id="jobType"><option>ASN</option><option>PBL</option></select></div>
+      <div class="meta-label">DELIVERY DATE</div>
+      <div class="meta-value"><input id="deliveryDate" type="date"></div>
+
+      <div class="meta-label">CREATED BY</div>
+      <div class="meta-value"><input id="createdBy" placeholder="ชื่อผู้สร้าง"></div>
+      <div class="meta-label">CREATED AT</div>
+      <div class="meta-value"><span id="createdAt"></span></div>
+    </div>
+
+    <div class="break-title">ITEM / SIZE BREAKDOWN (รายการสินค้าและจำนวน)</div>
+
+    <div class="job-table-wrap">
+      <table class="job-table">
+        <thead>
+          <tr>
+            <th style="width:44px">No.</th><th>Item Code</th><th>Model</th><th>Color</th>
+            <th>Size</th><th>Box</th><th>Pairs</th><th>เศษ</th><th>Location</th>
+          </tr>
+        </thead>
+        <tbody id="jobBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+
+
+  <div class="action-row">
+    <button class="btn btn-pdf-print" id="printSelectedJobBtn">🖨 พิมพ์ใบจัดงาน</button>
+    <button class="btn btn-pdf-save" id="saveSelectedPdfBtn">PDF บันทึกไฟล์</button>
+  </div>
+
+  <div class="summary-strip">
+    <div class="sum-card"><small>จำนวนรายการ</small><strong id="sumLines">0</strong></div>
+    <div class="sum-card"><small>รวม Box</small><strong id="sumBox">0</strong></div>
+    <div class="sum-card"><small>รวม Pairs</small><strong id="sumPairs">0</strong></div>
+  </div>
+</div>
+</section>
+
+<section class="page" id="page-upload">
+<div class="page-box">
+  <div class="page-head">
+    <div class="head-left">
+      <button class="back-btn" data-page="home">←</button>
+      <div>
+        <h2 class="page-title">UPLOAD ERP STOCK</h2>
+        <p class="page-sub">อัปโหลด CSV Export จาก D365 เข้า erp_stock_ptt โดยตรง</p>
+      </div>
+    </div>
+    <div class="badge">CSV → SUPABASE</div>
+  </div>
+
+  <div class="erp-upload-card">
+    <div class="import-title">
+      <h3>D365 ERP STOCK CSV</h3>
+      <span>DIRECT UPLOAD</span>
+    </div>
+
+    <div class="erp-upload-drop">
+      <div class="field">
+        <label>เลือกไฟล์ CSV Export จาก D365 / ERP</label>
+        <input id="erpCsvFile" type="file" accept=".csv,text/csv">
+      </div>
+
+      <div class="erp-upload-note">
+        เพื่อป้องกันข้อมูลซ้ำ ระบบจะตรวจจำนวนแถวใน <b>erp_stock_ptt</b> ก่อนอัปโหลด
+        หากยังมีข้อมูลเดิม ระบบจะไม่เขียนทับ กรุณาใช้ปุ่ม <b>CLEAR ERP STOCK</b> ในหน้า HOME ก่อน
+      </div>
+
+      <div class="erp-upload-actions">
+        <button class="btn btn-primary" id="erpCheckCsvBtn">ตรวจสอบไฟล์</button>
+        <button class="btn btn-green" id="erpUploadCsvBtn" disabled>UPLOAD TO SUPABASE</button>
+        <button class="btn btn-secondary" id="erpResetCsvBtn">ล้างไฟล์</button>
+      </div>
+    </div>
+
+    <div id="erpUploadStatus" class="import-status"></div>
+
+    <div id="erpStockStats" class="erp-stock-stats">
+      <div class="stat"><small>ROWS IN FILE</small><b id="erpStatRows">0</b></div>
+      <div class="stat"><small>UNIQUE ITEM</small><b id="erpStatItems">0</b></div>
+      <div class="stat"><small>WAREHOUSE</small><b id="erpStatWh">0</b></div>
+      <div class="stat"><small>TOTAL AVAILABLE</small><b id="erpStatAvail">0</b></div>
+      <div class="stat"><small>DB CURRENT ROWS</small><b id="erpStatDb">0</b></div>
+    </div>
+
+    <div id="erpUploadProgress" class="erp-upload-progress"><div id="erpUploadProgressBar"></div></div>
+
+    <div class="erp-search-box">
+      <div class="erp-search-title">ค้นหา ITEM ใน ERP STOCK</div>
+      <div class="erp-search-row">
+        <input id="erpUploadSearchInput" placeholder="เช่น DK42005">
+        <button class="btn btn-primary" id="erpUploadSearchBtn">ค้นหา</button>
+        <button class="btn btn-secondary" id="erpUploadSearchClearBtn">ล้าง</button>
+      </div>
+
+      <div id="erpUploadSearchSummary" class="erp-search-summary"></div>
+
+      <div id="erpUploadSearchResult" class="erp-search-result">
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Color Name</th>
+              <th>Size</th>
+              <th>Color</th>
+              <th>Warehouse</th>
+              <th>Location</th>
+              <th>Available</th>
+            </tr>
+          </thead>
+          <tbody id="erpUploadSearchBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+
+<section class="page" id="page-locationqr">
+<div class="page-box">
+  <div class="page-head">
+    <div class="head-left">
+      <button class="back-btn" data-page="home">←</button>
+      <div>
+        <h2 class="page-title">LOCATION QR MASTER</h2>
+        <p class="page-sub">บันทึก Warehouse / Location และรูป QR Code ลง Supabase</p>
+      </div>
+    </div>
+    <div class="badge">QR MASTER</div>
+  </div>
+
+  <div class="location-qr-layout">
+
+    <div class="location-qr-form">
+      <h3>เพิ่ม / แก้ไข Location QR</h3>
+
+      <input id="locationQrEditId" type="hidden">
+
+      <div class="location-qr-fields">
+        <div class="location-qr-field">
+          <label>WAREHOUSE</label>
+          <input id="locationQrWarehouse" placeholder="เช่น WMT-LT-CTY">
+        </div>
+
+        <div class="location-qr-field">
+          <label>LOCATION</label>
+          <input id="locationQrLocation" placeholder="เช่น G-01-E-12">
+        </div>
+
+        <div class="location-qr-field">
+          <label>QR VALUE</label>
+          <input id="locationQrValue" placeholder="เช่น G-01-E-12">
+        </div>
+
+        <div class="location-qr-field">
+          <label>QR IMAGE</label>
+          <input id="locationQrImageFile" type="file" accept="image/png,image/jpeg,image/webp">
+        </div>
+      </div>
+
+      <div id="locationQrPreview" class="location-qr-preview">
         <div>
-          <h3>ACTIVE PICKING</h3>
-          <p>ใบจัดงานที่กำลังดำเนินการ</p>
+          <div>ยังไม่ได้เลือกรูป QR</div>
+          <div id="locationQrPreviewName" class="qr-preview-name"></div>
         </div>
       </div>
 
-      <div class="section-label">MANAGEMENT</div>
+      <div class="location-qr-form-actions">
+        <button class="btn btn-primary" id="saveLocationQrBtn">บันทึก Location QR</button>
+        <button class="btn btn-secondary" id="resetLocationQrBtn">ล้างฟอร์ม</button>
+      </div>
 
-      <section class="small-grid">
-        <div class="small-card" data-page="upload">
-          <div class="small-icon">⇧</div>
-          <div>
-            <strong>UPLOAD ERP</strong>
-            <span>อัปเดตข้อมูล ERP เข้า Supabase</span>
-          </div>
-        </div>
+      <div id="locationQrStatus" class="location-qr-status"></div>
+    </div>
 
-        <div class="small-card" data-page="complete">
-          <div class="small-icon">✓</div>
-          <div>
-            <strong>COMPLETED</strong>
-            <span>ประวัติใบจัดงานที่เสร็จแล้ว</span>
-          </div>
-        </div>
-      </section>
+    <div class="location-qr-list-card">
+      <h3>รายการ Location QR</h3>
 
-      <div class="footer">GAMBOL • ERP Picking System</div>
-    </main>
+      <div class="location-qr-search">
+        <input id="locationQrSearchInput" placeholder="ค้นหา Warehouse / Location เช่น G-01-E-12">
+        <button class="btn btn-secondary" id="locationQrSearchBtn">ค้นหา</button>
+      </div>
+
+      <div class="location-qr-table-wrap">
+        <table class="location-qr-table">
+          <thead>
+            <tr>
+              <th>QR</th>
+              <th>Warehouse</th>
+              <th>Location</th>
+              <th>QR Value</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="locationQrListBody">
+            <tr><td colspan="6"><div class="location-qr-empty">กำลังโหลด...</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+</section>
+
+<section class="page" id="page-completed">
+<div class="page-box">
+  <div class="page-head"><div class="head-left"><button class="back-btn" data-page="home">←</button><div><h2 class="page-title">COMPLETED</h2><p class="page-sub">งานที่ปิดแล้ว</p></div></div></div>
+  <div class="empty"><div><strong>COMPLETED PICKING</strong>ขั้นถัดไปจะเชื่อมสถานะ OUT_COMPLETED / COMPLETED</div></div>
+</div>
+</section>
+
+<div class="footer">GAMBOL • ERP Picking System</div>
+</main></div>
+</div>
+
+
+<div id="locationQrViewModal" class="location-qr-view-modal" aria-hidden="true">
+  <div class="location-qr-view-dialog" role="dialog" aria-modal="true" aria-labelledby="locationQrViewTitle">
+    <div class="location-qr-view-head">
+      <div>
+        <h2 id="locationQrViewTitle">LOCATION QR</h2>
+        <p>สำหรับแสดง QR ให้ Handheld สแกน</p>
+      </div>
+      <button id="locationQrViewCloseBtn" class="location-qr-view-close" type="button" aria-label="ปิด">×</button>
+    </div>
+
+    <div id="locationQrViewBody" class="location-qr-view-body">
+      <div class="location-qr-view-error">กำลังโหลด QR...</div>
+    </div>
   </div>
 </div>
 
+<div id="erpClearModal" class="erp-clear-modal" aria-hidden="true">
+  <div class="erp-clear-dialog" role="dialog" aria-modal="true" aria-labelledby="erpClearTitle">
+    <div class="erp-clear-top">
+      <div class="erp-clear-icon">⚠</div>
+      <h2 id="erpClearTitle" class="erp-clear-title">ล้าง ERP STOCK?</h2>
+      <p class="erp-clear-message">ข้อมูล ERP Stock จะถูกลบถาวร</p>
+      <div id="erpClearCount" class="erp-clear-count">0 แถว</div>
+    </div>
+
+    <div class="erp-clear-code-wrap">
+      <div class="erp-clear-code-label">กรอกเลข 4 หลักด้านล่างเพื่อยืนยัน</div>
+      <div id="erpClearCode" class="erp-clear-code">0000</div>
+      <input
+        id="erpClearCodeInput"
+        class="erp-clear-input"
+        type="text"
+        inputmode="numeric"
+        maxlength="4"
+        autocomplete="off"
+        placeholder="••••"
+        aria-label="กรอกรหัสยืนยัน 4 หลัก"
+      >
+      <div id="erpClearError" class="erp-clear-error"></div>
+    </div>
+
+    <div class="erp-clear-actions">
+      <button id="erpClearCancelBtn" class="erp-clear-cancel" type="button">ยกเลิก</button>
+      <button id="erpClearConfirmBtn" class="erp-clear-confirm" type="button">ยืนยันลบ</button>
+    </div>
+  </div>
+</div>
+
+<div id="pdfCaptureStage" class="pdf-capture-stage">
+  <div id="selectedJobPdfSheet" class="pdf-job-sheet"></div>
+</div>
+
+<div id="printArea"></div>
 <div class="toast" id="toast"></div>
 
-<script>
-  const toast = document.getElementById('toast');
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-  function showToast(text){
-    toast.textContent = text;
-    toast.classList.add('show');
-    clearTimeout(window.toastTimer);
-    window.toastTimer = setTimeout(() => toast.classList.remove('show'), 1500);
+/* =========================
+   SUPABASE
+   ใช้ Project เดียวกับ Stock App เดิม
+   ========================= */
+const SUPABASE_URL = 'https://asslmgjcicpgrxwqaenx.supabase.co'
+const SUPABASE_KEY = 'sb_publishable_PLOIg4kX4r8PN9LXvXZVIQ_OiF-yj-K'
+const db = createClient(SUPABASE_URL, SUPABASE_KEY)
+
+const HEADER_TABLE = 'po_headers'
+const ITEM_TABLE = 'po_items'
+const LOOSE_TABLE = 'loose_master_data'
+const LOOSE_FALLBACK = 'loose_balance'
+const MASTER_TABLE = 'master_data'
+const ERP_TABLE = 'erp_stock_ptt'
+const LOCATION_QR_TABLE = 'location_qr_master'
+const LOCATION_QR_BUCKET = 'location-qr'
+const PICKING_JOB_TABLE = 'picking_job_locations'
+const PACK_SIZE = 6
+
+const pages = ['home','create','orders','stock','active','activejob','detail','joborder','upload','locationqr','completed']
+const jobRows = []
+let importState = {
+  file:null,
+  parsed:null,
+  preview:[],
+  csvText:'',
+  savedHeader:null
+}
+
+const el = id => document.getElementById(id)
+const txt = value => String(value ?? '').trim()
+const num = value => {
+  const n = Number(String(value ?? '').replace(/,/g,'').trim())
+  return Number.isFinite(n) ? n : 0
+}
+const norm = value => txt(value).toUpperCase().replace(/[\s\-_'".\/():%]+/g,'').replace(/[’`]/g,'')
+const esc = value => String(value ?? '').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))
+const fmt = value => num(value).toLocaleString('th-TH',{maximumFractionDigits:2})
+
+function showPage(name, updateHash=true){
+  if(!pages.includes(name)) name='home'
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'))
+  el('page-'+name).classList.add('active')
+  if(updateHash) history.replaceState(null,'',name==='home'?location.pathname:'#'+name)
+  if(name==='orders') loadOrders()
+  if(name==='active') loadActivePicking()
+  if(name==='stock') refreshErpDbStatus()
+  if(name==='locationqr') loadLocationQrMaster()
+  window.scrollTo({top:0,behavior:'smooth'})
+}
+document.querySelectorAll('[data-page]').forEach(node=>node.addEventListener('click',()=>showPage(node.dataset.page)))
+el('homeBtn').onclick=()=>showPage('home')
+el('refreshBtn').onclick=()=>location.reload()
+
+const toast=el('toast')
+function showToast(message){
+  toast.textContent=message
+  toast.classList.add('show')
+  clearTimeout(window.__toast)
+  window.__toast=setTimeout(()=>toast.classList.remove('show'),1700)
+}
+el('menuBtn').onclick=()=>showToast('เมนูด้านข้างจะทำในขั้นต่อไป')
+
+/* =========================
+   CLEAR ERP STOCK
+   ล้างเฉพาะตาราง erp_stock_ptt
+   ไม่แตะ po_headers / po_items / Stock App ตารางอื่น
+   ========================= */
+async function refreshClearErpButtonVisibility(){
+  const card=el('clearErpStockCard')
+  if(!card) return
+
+  try{
+    const {count,error}=await db
+      .from(ERP_TABLE)
+      .select('id',{count:'exact',head:true})
+
+    if(error) throw error
+
+    const total=Number(count||0)
+
+    if(total<=0){
+      card.classList.add('hidden')
+      return
+    }
+
+    card.classList.remove('hidden')
+    const label=card.querySelector('span')
+    if(label){
+      label.textContent='DANGER • '+total.toLocaleString('th-TH')+' แถว'
+    }
+  }catch(error){
+    console.warn('ตรวจจำนวน ERP STOCK ไม่สำเร็จ',error)
+    card.classList.remove('hidden')
+  }
+}
+
+
+function requestErpClearConfirmation(total){
+  return new Promise(resolve=>{
+    const modal=el('erpClearModal')
+    const codeEl=el('erpClearCode')
+    const countEl=el('erpClearCount')
+    const input=el('erpClearCodeInput')
+    const errorEl=el('erpClearError')
+    const cancelBtn=el('erpClearCancelBtn')
+    const confirmBtn=el('erpClearConfirmBtn')
+
+    const code=String(Math.floor(1000+Math.random()*9000))
+
+    codeEl.textContent=code
+    countEl.textContent=total.toLocaleString('th-TH')+' แถวจะถูกลบ'
+    input.value=''
+    errorEl.textContent=''
+    confirmBtn.disabled=false
+
+    modal.classList.add('show')
+    modal.setAttribute('aria-hidden','false')
+
+    setTimeout(()=>input.focus(),50)
+
+    const close=result=>{
+      modal.classList.remove('show')
+      modal.setAttribute('aria-hidden','true')
+      input.value=''
+      cancelBtn.removeEventListener('click',onCancel)
+      confirmBtn.removeEventListener('click',onConfirm)
+      input.removeEventListener('keydown',onKeydown)
+      modal.removeEventListener('click',onBackdrop)
+      resolve(result)
+    }
+
+    const onCancel=()=>close(false)
+
+    const onConfirm=()=>{
+      const entered=String(input.value||'').replace(/\D/g,'')
+      if(entered!==code){
+        errorEl.textContent='เลขยืนยันไม่ถูกต้อง'
+        input.value=''
+        input.focus()
+        return
+      }
+      confirmBtn.disabled=true
+      close(true)
+    }
+
+    const onKeydown=e=>{
+      if(e.key==='Enter'){
+        e.preventDefault()
+        onConfirm()
+      }else if(e.key==='Escape'){
+        e.preventDefault()
+        onCancel()
+      }
+    }
+
+    const onBackdrop=e=>{
+      if(e.target===modal) onCancel()
+    }
+
+    input.addEventListener('input',()=>{
+      input.value=input.value.replace(/\D/g,'').slice(0,4)
+      errorEl.textContent=''
+    })
+
+    cancelBtn.addEventListener('click',onCancel)
+    confirmBtn.addEventListener('click',onConfirm)
+    input.addEventListener('keydown',onKeydown)
+    modal.addEventListener('click',onBackdrop)
+  })
+}
+
+async function clearErpStock(){
+  try{
+    const {count,error:countError}=await db
+      .from(ERP_TABLE)
+      .select('id',{count:'exact',head:true})
+
+    if(countError) throw countError
+
+    const total=Number(count||0)
+
+    if(total===0){
+      await refreshClearErpButtonVisibility()
+      showToast('ERP STOCK ไม่มีข้อมูล')
+      return
+    }
+
+    const confirmed=await requestErpClearConfirmation(total)
+
+    if(!confirmed){
+      showToast('ยกเลิกการล้าง ERP STOCK')
+      return
+    }
+
+    const card=el('clearErpStockCard')
+    if(card){
+      card.style.pointerEvents='none'
+      card.style.opacity='.55'
+    }
+
+    showToast('กำลังล้าง ERP STOCK...')
+
+    // id ของ erp_stock_ptt เป็น Identity เริ่มจาก 1
+    // Supabase delete ต้องมี filter จึงใช้ id >= 1 เพื่อหมายถึงทุกแถว
+    const {error:deleteError}=await db
+      .from(ERP_TABLE)
+      .delete()
+      .gte('id',1)
+
+    if(deleteError) throw deleteError
+
+    const {count:afterCount,error:afterError}=await db
+      .from(ERP_TABLE)
+      .select('id',{count:'exact',head:true})
+
+    if(afterError) throw afterError
+
+    if(Number(afterCount||0)!==0){
+      throw new Error(
+        'สั่งลบแล้วแต่ยังเหลือข้อมูล ' +
+        Number(afterCount||0).toLocaleString('th-TH') +
+        ' แถว กรุณาตรวจสอบ RLS Policy'
+      )
+    }
+
+    if(el('stockBody')){
+      el('stockBody').innerHTML='<tr><td colspan="7">ERP STOCK ถูกล้างแล้ว กรุณา Upload ERP Stock รอบใหม่</td></tr>'
+    }
+
+    const clearCard=el('clearErpStockCard')
+    if(clearCard) clearCard.classList.add('hidden')
+    await refreshClearErpButtonVisibility()
+
+    showToast('ล้าง ERP STOCK สำเร็จ')
+  }catch(error){
+    console.error(error)
+    alert(
+      'ล้าง ERP STOCK ไม่สำเร็จ\n\n' +
+      (error?.message||error) +
+      '\n\nหากขึ้นเรื่อง permission / RLS ต้องเปิด DELETE policy ให้ erp_stock_ptt ใน Supabase'
+    )
+  }finally{
+    const card=el('clearErpStockCard')
+    if(card){
+      card.style.pointerEvents=''
+      card.style.opacity=''
+    }
+  }
+}
+
+el('clearErpStockCard').onclick=clearErpStock
+
+function setImportStatus(message,type='info'){
+  const box=el('importStatus')
+  box.className='import-status show '+type
+  box.textContent=message
+}
+function clearImportStatus(){
+  el('importStatus').className='import-status'
+  el('importStatus').textContent=''
+}
+
+function nowThai(){
+  return new Date().toLocaleString('th-TH',{
+    year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'
+  })
+}
+el('createdAt').textContent=nowThai()
+el('importCreatedBy').value=localStorage.getItem('erp_picking_user') || 'ADMIN'
+el('createdBy').value=el('importCreatedBy').value
+
+/* =========================
+   FILE PARSER
+   รองรับ .xls ที่จริงเป็น HTML Table
+   และ Excel ปกติด้วย SheetJS
+   ========================= */
+function cleanBarcode(value){
+  if(value===null || value===undefined || value==='') return ''
+  if(typeof value==='number' && Number.isFinite(value)) return String(Math.trunc(value))
+  let s=txt(value).replace(/\.0+$/,'').replace(/\s+/g,'')
+  if(/^[0-9.]+E\+?[0-9]+$/i.test(s)){
+    const n=Number(s)
+    if(Number.isFinite(n)) s=String(Math.trunc(n))
+  }
+  const digits=s.replace(/\D/g,'')
+  return digits.length>=8 ? digits : s.toUpperCase()
+}
+
+function rowsFromHtml(htmlText){
+  const doc=new DOMParser().parseFromString(htmlText,'text/html')
+  const table=doc.querySelector('table')
+  if(!table) return []
+  return [...table.rows].map(tr=>[...tr.cells].map(td=>txt(td.textContent).replace(/\u00a0/g,'')))
+}
+
+function rowsFromWorksheet(ws){
+  if(!ws || !ws['!ref']) return []
+  const range=XLSX.utils.decode_range(ws['!ref'])
+  const rows=[]
+  for(let r=range.s.r;r<=range.e.r;r++){
+    const row=[]
+    for(let c=range.s.c;c<=range.e.c;c++){
+      const cell=ws[XLSX.utils.encode_cell({r,c})]
+      row.push(cell && cell.v!==undefined && cell.v!==null ? cell.v : '')
+    }
+    rows.push(row)
+  }
+  return rows
+}
+
+async function readFileRows(file){
+  const buffer=await file.arrayBuffer()
+  const bytes=new Uint8Array(buffer)
+  const head=new TextDecoder('utf-8').decode(bytes.slice(0,4096))
+  if(/<\s*table[\s>]/i.test(head)){
+    const text=new TextDecoder('utf-8').decode(bytes)
+    return {sheetName:'HTML',rows:rowsFromHtml(text)}
   }
 
-  document.querySelectorAll('[data-page]').forEach(el => {
-    el.addEventListener('click', e => {
-      e.preventDefault();
-      const page = el.dataset.page;
-      const names = {
-        create:'CREATE PICKING',
-        orders:'PICKING ORDER',
-        stock:'ERP STOCK',
-        active:'ACTIVE PICKING',
-        upload:'UPLOAD ERP',
-        complete:'COMPLETED'
-      };
-      showToast('กำลังเตรียมหน้า ' + names[page]);
-    });
-  });
+  if(!window.XLSX) throw new Error('ไม่พบไลบรารี XLSX')
+  const wb=XLSX.read(bytes,{type:'array',cellDates:true,raw:true})
+  if(!wb.SheetNames.length) throw new Error('ไม่พบ Sheet ในไฟล์')
+  let best=null
+  wb.SheetNames.forEach(name=>{
+    const rows=rowsFromWorksheet(wb.Sheets[name])
+    const header=detectLotusHeader(rows)
+    const score=header ? header.score + rows.length/1000 : 0
+    if(!best || score>best.score) best={sheetName:name,rows,score}
+  })
+  return best || {sheetName:wb.SheetNames[0],rows:rowsFromWorksheet(wb.Sheets[wb.SheetNames[0]])}
+}
 
-  document.getElementById('refreshBtn').addEventListener('click', () => location.reload());
-  document.getElementById('homeBtn').addEventListener('click', () => showToast('HOME'));
-  document.getElementById('menuBtn').addEventListener('click', () => showToast('เมนู'));
+function aliasIndex(headers,aliases){
+  const targets=aliases.map(norm)
+  for(let i=0;i<headers.length;i++){
+    const h=norm(headers[i])
+    if(!h) continue
+    if(targets.some(t=>h===t || h.includes(t) || t.includes(h))) return i
+  }
+  return -1
+}
+
+function detectLotusHeader(rows){
+  let best=null
+  for(let r=0;r<Math.min(rows.length,70);r++){
+    const h=rows[r]||[]
+    const columns={
+      barcode:aliasIndex(h,['UPC','BARCODE','EAN']),
+      item:aliasIndex(h,['SPN','ITEM','MODEL']),
+      pack:aliasIndex(h,['จำนวนชิ้นต่อลัง','จำนวนชิ้นต่อลังสินค้า','PACK']),
+      pair:aliasIndex(h,['จำนวนที่สั่งซื้อ (หน่วย)','จำนวนที่สั่งซื้อ','ORDERQTY','QTY']),
+      box:aliasIndex(h,['จำนวนลังสินค้าที่สั่งซื้อ','จำนวนลัง','BOX']),
+      color:aliasIndex(h,['รหัสสี/สี','COLOR']),
+      size:aliasIndex(h,['ขนาด/รายละเอียด','SIZE'])
+    }
+    if(columns.barcode<0 || columns.pair<0) continue
+    let score=0
+    Object.values(columns).forEach(v=>{if(v>=0)score++})
+    if(!best || score>best.score) best={row:r,columns,score}
+  }
+  return best
+}
+
+function valueNextToLabel(rows,labels){
+  const targets=labels.map(norm)
+  for(let r=0;r<Math.min(rows.length,60);r++){
+    const row=rows[r]||[]
+    for(let c=0;c<row.length;c++){
+      const n=norm(row[c])
+      if(targets.some(t=>n===t || n.includes(t))){
+        for(let x=c+1;x<Math.min(row.length,c+5);x++){
+          if(txt(row[x])) return txt(row[x])
+        }
+      }
+    }
+  }
+  return ''
+}
+
+function normalizePo(value){
+  return txt(value).replace(/\.0+$/,'').replace(/\s+/g,'')
+}
+
+function toIsoDate(value){
+  if(!value) return ''
+  if(value instanceof Date && !isNaN(value)) return value.toISOString().slice(0,10)
+
+  if(typeof value==='number' && window.XLSX?.SSF?.parse_date_code){
+    const d=XLSX.SSF.parse_date_code(value)
+    if(d) return `${String(d.y).padStart(4,'0')}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`
+  }
+
+  const s=txt(value)
+  let m=s.match(/^(\d{1,2})[-\/]([A-Za-z]{3})[-\/](\d{4})$/)
+  if(m){
+    const months={JAN:1,FEB:2,MAR:3,APR:4,MAY:5,JUN:6,JUL:7,AUG:8,SEP:9,OCT:10,NOV:11,DEC:12}
+    const mon=months[m[2].toUpperCase()]
+    if(mon) return `${m[3]}-${String(mon).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}`
+  }
+  m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/)
+  if(m) return `${m[3]}-${String(m[2]).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}`
+
+  const d=new Date(s)
+  if(!isNaN(d)) return d.toISOString().slice(0,10)
+  return ''
+}
+
+function parseOrderRows(rows,customer,selectedType){
+  const header=detectLotusHeader(rows)
+  if(!header) throw new Error('ไม่พบหัวตาราง UPC / จำนวนที่สั่งซื้อ ในไฟล์')
+
+  const po=normalizePo(valueNextToLabel(rows,['เลขที่ใบสั่งซื้อ','เลขที่ PO','PO NUMBER','PO']))
+  const deliveryRaw=valueNextToLabel(rows,['วันที่ส่งสินค้า','กำหนดส่ง','DELIVERY DATE','DUE DATE'])
+  const deliveryDate=toIsoDate(deliveryRaw)
+
+  const typeLabel=valueNextToLabel(rows,['ประเภทใบสั่งซื้อ','ประเภทงาน','JOB TYPE'])
+  const fileType=norm(typeLabel).includes('PBL') ? 'PBL' : norm(typeLabel).includes('ASN') ? 'ASN' : selectedType
+  const type=selectedType || fileType || 'ASN'
+
+  const c=header.columns
+  const out=[]
+  let blanks=0
+
+  for(let r=header.row+1;r<rows.length;r++){
+    const row=rows[r]||[]
+    const hasValue=row.some(v=>txt(v)!=='')
+    if(!hasValue){blanks++;if(blanks>=10)break;continue}
+    blanks=0
+
+    const barcode=c.barcode>=0 ? cleanBarcode(row[c.barcode]) : ''
+    const item=c.item>=0 ? txt(row[c.item]).toUpperCase() : ''
+    const pairQty=c.pair>=0 ? num(row[c.pair]) : 0
+    const packSize=c.pack>=0 ? num(row[c.pack]) : 0
+    let sourceBox=c.box>=0 ? num(row[c.box]) : 0
+    const sourceColor=c.color>=0 ? txt(row[c.color]) : ''
+    const sourceSize=c.size>=0 ? txt(row[c.size]) : ''
+
+    if(!barcode || pairQty<=0) continue
+    if(!sourceBox && packSize>0) sourceBox=pairQty/packSize
+
+    out.push({
+      sourceRow:r+1,barcode,sourceItem:item,sourceColor,sourceSize,
+      packSize,pairQty,sourceBox
+    })
+  }
+
+  const agg=new Map()
+  out.forEach(row=>{
+    const key=row.barcode
+    if(!agg.has(key)) agg.set(key,{...row})
+    else{
+      const a=agg.get(key)
+      a.pairQty+=row.pairQty
+      a.sourceBox+=row.sourceBox
+    }
+  })
+
+  const items=[...agg.values()]
+  if(!items.length) throw new Error('ไม่พบรายการสินค้าในไฟล์')
+
+  return {customer,type,po,deliveryDate,deliveryRaw,items}
+}
+
+/* =========================
+   SUPABASE LOOKUP
+   เหมือน Job Order เดิม:
+   Barcode Master + Loose Balance
+   ========================= */
+async function fetchAllRows(table){
+  let all=[],from=0
+  const size=1000
+  while(true){
+    const {data,error}=await db.from(table).select('*').range(from,from+size-1)
+    if(error) throw error
+    if(!data || !data.length) break
+    all=all.concat(data)
+    if(data.length<size) break
+    from+=size
+  }
+  return all
+}
+
+function rowBarcode(row){return cleanBarcode(row?.barcode ?? row?.Barcode ?? row?.BARCODE ?? row?.upc ?? row?.UPC ?? row?.ean ?? row?.EAN ?? '')}
+function rowItem(row){return txt(row?.Item ?? row?.item ?? row?.MODEL ?? row?.Model ?? row?.model ?? row?.product_id ?? row?.sku ?? '').toUpperCase()}
+function rowCode(row){return txt(row?.CODE ?? row?.code ?? row?.COLOR ?? row?.Color ?? row?.color ?? '').toUpperCase()}
+function rowAssort(row){return txt(row?.Assort ?? row?.assort ?? row?.SIZE ?? row?.Size ?? row?.size ?? '').replace(/\.0+$/,'').toUpperCase()}
+function rowCustomer(row){
+  const raw=txt(row?.customer ?? row?.Customer ?? '')
+  if(raw) return raw.toUpperCase()
+  return ''
+}
+function rowLooseQty(row){return num(row?.balance_pairs ?? row?.balance ?? row?.available_qty ?? row?.Quantity ?? row?.quantity ?? 0)}
+function productKey(customer,item,code,assort){return [norm(customer),norm(item),norm(code),norm(assort)].join('|')}
+
+function candidateBarcodeTables(customer){
+  const c=txt(customer).toUpperCase()
+  const common=['barcode_master','product_barcode','barcodes']
+  if(c==='LOTUS') return ['barcode_lotus','barcodes_lotus','lotus_barcode',...common]
+  if(c==='BIG C') return ['barcode_big_c','barcode_bigc','barcodes_big_c','bigc_barcode',...common]
+  return common
+}
+
+async function buildProductLookup(customer){
+  const map=new Map()
+
+  try{
+    const rows=await fetchAllRows(MASTER_TABLE)
+    rows.forEach(row=>{
+      const b=rowBarcode(row)
+      if(b && !map.has(b)) map.set(b,{item:rowItem(row),code:rowCode(row),assort:rowAssort(row),source:MASTER_TABLE})
+    })
+  }catch(e){console.warn('master_data lookup skipped',e?.message||e)}
+
+  for(const table of candidateBarcodeTables(customer)){
+    try{
+      const rows=await fetchAllRows(table)
+      rows.forEach(row=>{
+        const b=rowBarcode(row)
+        if(!b) return
+        const value={item:rowItem(row),code:rowCode(row),assort:rowAssort(row),source:table}
+        if(value.item || value.code || value.assort) map.set(b,value)
+      })
+    }catch(e){console.warn('barcode table skipped',table,e?.message||e)}
+  }
+  return map
+}
+
+async function buildLooseMap(customer){
+  let rows=[]
+  try{rows=await fetchAllRows(LOOSE_TABLE)}
+  catch(e){
+    try{rows=await fetchAllRows(LOOSE_FALLBACK)}
+    catch(x){rows=[]}
+  }
+  const map=new Map()
+  rows.forEach(row=>{
+    const c=rowCustomer(row) || customer
+    if(norm(c)!==norm(customer)) return
+    const key=productKey(customer,rowItem(row),rowCode(row),rowAssort(row))
+    map.set(key,(map.get(key)||0)+rowLooseQty(row))
+  })
+  return map
+}
+
+function calculateAsn(orderQty,looseBefore){
+  const q=num(orderQty),h=num(looseBefore),r=q%PACK_SIZE
+  if(q<=0) return {boxQty:0,looseUsed:0,loosePull:0,looseAfter:h,remark:''}
+  let boxes=0,after=h,remark='',used=0,pull=0
+  if(h>=q){boxes=0;after=h-q;used=q;remark='เศษ'+q}
+  else if(r===0){boxes=q/PACK_SIZE;after=h}
+  else if(h>=r){boxes=Math.floor(q/PACK_SIZE);after=h-r;used=r;remark='เศษ'+r}
+  else{
+    boxes=Math.ceil(q/PACK_SIZE)
+    const newLoose=(boxes*PACK_SIZE)-q
+    after=h+newLoose
+    pull=newLoose
+    remark=newLoose>0?'ดึง'+newLoose:''
+  }
+  return {boxQty:boxes,looseUsed:used,loosePull:pull,looseAfter:after,remark}
+}
+
+function calculatePbl(orderQty){
+  const q=num(orderQty)
+  return {boxQty:q/PACK_SIZE,looseUsed:0,loosePull:0,looseAfter:0,remark:''}
+}
+
+async function preparePreview(parsed){
+  setImportStatus('กำลังจับคู่ Barcode Master และตรวจยอดงานเศษจาก Supabase...','info')
+  const [lookup,looseMap]=await Promise.all([
+    buildProductLookup(parsed.customer),
+    buildLooseMap(parsed.customer)
+  ])
+
+  const workingLoose=new Map(looseMap)
+  const result=[]
+
+  parsed.items.forEach((raw,index)=>{
+    const found=lookup.get(raw.barcode)
+    const item=found?.item || raw.sourceItem || ''
+    const code=found?.code || ''
+    const assort=found?.assort || raw.sourceSize || ''
+    const messages=[]
+    let base='READY'
+
+    if(!found) messages.push('ไม่พบ Barcode Master')
+    if(!item) messages.push('ไม่พบ Item')
+    if(!code) messages.push('ไม่พบ CODE')
+    if(!assort) messages.push('ไม่พบ Size')
+    if(raw.pairQty<=0){base='ERROR';messages.push('จำนวนคู่ต้องมากกว่า 0')}
+    if(parsed.type==='PBL' && raw.pairQty%PACK_SIZE!==0){base='ERROR';messages.push('PBL ต้องหาร 6 ลงตัว')}
+
+    const key=productKey(parsed.customer,item,code,assort)
+    const looseBefore=parsed.type==='ASN' ? num(workingLoose.get(key)||0) : 0
+    const calc=parsed.type==='ASN' ? calculateAsn(raw.pairQty,looseBefore) : calculatePbl(raw.pairQty)
+    if(parsed.type==='ASN' && item && code && assort) workingLoose.set(key,calc.looseAfter)
+
+    const status=base==='ERROR'?'ERROR':messages.length?'WARNING':'READY'
+
+    result.push({
+      lineNo:index+1,
+      sourceRow:raw.sourceRow,
+      barcode:raw.barcode,
+      item,code,assort,
+      orderPairs:raw.pairQty,
+      cartonQty:calc.boxQty,
+      looseBefore,
+      looseUsed:calc.looseUsed,
+      loosePull:calc.loosePull,
+      looseAfter:calc.looseAfter,
+      remark:calc.remark,
+      validationStatus:status,
+      validationMessage:messages.join(' | ')
+    })
+  })
+
+  return result
+}
+
+/* =========================
+   CSV
+   ========================= */
+function csvCell(value){
+  const s=String(value ?? '')
+  return /[",\n\r]/.test(s) ? `"${s.replaceAll('"','""')}"` : s
+}
+function previewToCsv(rows){
+  const headers=[
+    'line_no','barcode','item','code','assort','order_pairs','carton_qty',
+    'loose_before','loose_used','loose_pull','loose_after','remark',
+    'validation_status','validation_message'
+  ]
+  const lines=[headers.join(',')]
+  rows.forEach(r=>{
+    lines.push([
+      r.lineNo,r.barcode,r.item,r.code,r.assort,r.orderPairs,r.cartonQty,
+      r.looseBefore,r.looseUsed,r.loosePull,r.looseAfter,r.remark,
+      r.validationStatus,r.validationMessage
+    ].map(csvCell).join(','))
+  })
+  return '\ufeff'+lines.join('\r\n')
+}
+
+function downloadCsv(){
+  if(!importState.csvText) return
+  const po=importState.parsed?.po || 'PO'
+  const blob=new Blob([importState.csvText],{type:'text/csv;charset=utf-8;'})
+  const url=URL.createObjectURL(blob)
+  const a=document.createElement('a')
+  a.href=url
+  a.download=`${po}_picking_import.csv`
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  URL.revokeObjectURL(url)
+}
+el('downloadCsvBtn').onclick=downloadCsv
+
+/* =========================
+   RENDER PREVIEW + JOB
+   ========================= */
+function renderImportPreview(){
+  const parsed=importState.parsed
+  const rows=importState.preview
+  if(!parsed || !rows.length){
+    el('importStats').className='import-stats'
+    el('importPreviewWrap').className='preview-wrap'
+    el('downloadCsvBtn').disabled=true
+    return
+  }
+
+  const totalPairs=rows.reduce((s,r)=>s+num(r.orderPairs),0)
+  el('statPo').textContent=parsed.po || '-'
+  el('statDelivery').textContent=parsed.deliveryDate || parsed.deliveryRaw || '-'
+  el('statLines').textContent=rows.length
+  el('statPairs').textContent=fmt(totalPairs)
+  el('importStats').className='import-stats show'
+  el('importPreviewWrap').className='preview-wrap show'
+  el('downloadCsvBtn').disabled=false
+
+  el('importPreviewBody').innerHTML=rows.map(r=>`
+    <tr>
+      <td>${r.lineNo}</td>
+      <td>${esc(r.barcode)}</td>
+      <td class="left"><b>${esc(r.item||'-')}</b></td>
+      <td>${esc(r.code||'-')}</td>
+      <td>${esc(r.assort||'-')}</td>
+      <td>${fmt(r.orderPairs)}</td>
+      <td><b>${fmt(r.cartonQty)}</b></td>
+      <td>${fmt(r.looseBefore)}</td>
+      <td>${fmt(r.looseUsed)}</td>
+      <td>${fmt(r.loosePull)}</td>
+      <td>${fmt(r.looseAfter)}</td>
+      <td>${esc(r.remark||'-')}</td>
+      <td><span class="pill ${r.validationStatus.toLowerCase()}">${esc(r.validationStatus)}</span></td>
+    </tr>
+  `).join('')
+}
+
+function previewToJobRows(){
+  jobRows.length=0
+  importState.preview.forEach(r=>{
+    jobRows.push({
+      item:(r.item||'')+(r.code||''),
+      model:r.item||'',
+      color:r.code||'',
+      size:r.assort||'',
+      box:r.cartonQty,
+      pairs:r.orderPairs,
+      loose:r.remark||'',
+      location:''
+    })
+  })
+  renderJobRows()
+
+  const p=importState.parsed
+  if(p){
+    el('customer').value=p.customer || ''
+    el('poNumber').value=p.po || ''
+    el('jobType').value=p.type || 'ASN'
+    if(p.deliveryDate) el('deliveryDate').value=p.deliveryDate
+    el('createdBy').value=el('importCreatedBy').value || 'ADMIN'
+  }
+}
+
+function renderJobRows(){
+  const body=el('jobBody')
+  if(!body) return
+
+  if(jobRows.length===0){
+    body.innerHTML='<tr><td colspan="9" style="padding:18px;color:#9ca3af">ยังไม่มีรายการ</td></tr>'
+  }else{
+    body.innerHTML=jobRows.map((r,i)=>`
+      <tr class="${r.shortage?'shortage-row':''}">
+        <td>${i+1}</td>
+        <td>${esc(r.item||'-')}</td>
+        <td>${esc(r.model||'-')}</td>
+        <td>${esc(r.color||'-')}</td>
+        <td>${esc(r.size||'-')}</td>
+        <td>${fmt(r.box)}</td>
+        <td>${fmt(r.pairs)}</td>
+        <td>${esc(r.loose||'-')}</td>
+        <td class="${r.shortage?'shortage-location':''}"><b>${esc(r.location||'-')}</b></td>
+      </tr>
+    `).join('')
+  }
+
+  updateSummary()
+}
+
+function updateSummary(){
+  el('sumLines').textContent=jobRows.length
+  el('sumBox').textContent=fmt(jobRows.reduce((s,r)=>s+num(r.box),0))
+  el('sumPairs').textContent=fmt(jobRows.reduce((s,r)=>s+num(r.pairs),0))
+}
+
+/* =========================
+   SAVE TO SUPABASE
+   po_headers + po_items
+   ไม่ตัด stock
+   ========================= */
+function totalsForSave(rows){
+  return rows.reduce((a,r)=>({
+    pairs:a.pairs+num(r.orderPairs),
+    boxes:a.boxes+num(r.cartonQty),
+    used:a.used+num(r.looseUsed),
+    pull:a.pull+num(r.loosePull)
+  }),{pairs:0,boxes:0,used:0,pull:0})
+}
+
+async function insertHeaderWithDelivery(payload,deliveryDate){
+  let attempt={...payload}
+  if(deliveryDate) attempt.delivery_date=deliveryDate
+
+  let res=await db.from(HEADER_TABLE).insert(attempt).select('*').single()
+  if(res.error && /delivery_date/i.test(res.error.message||'')){
+    delete attempt.delivery_date
+    res=await db.from(HEADER_TABLE).insert(attempt).select('*').single()
+  }
+  return res
+}
+
+async function saveParsedToSupabase(){
+  const parsed=importState.parsed
+  const rows=importState.preview
+  if(!parsed || !rows.length) throw new Error('ยังไม่มีข้อมูลสำหรับบันทึก')
+  if(!parsed.po) throw new Error('ไม่พบเลข PO ในไฟล์')
+  if(rows.some(r=>r.validationStatus==='ERROR')) throw new Error('มีรายการ ERROR กรุณาตรวจสอบไฟล์ก่อน')
+
+  setImportStatus('แปลงเป็น CSV แล้ว\nกำลังตรวจ PO ซ้ำและบันทึกลง Supabase...','info')
+  el('statDb').textContent='SAVING'
+
+  const duplicate=await db.from(HEADER_TABLE)
+    .select('id,po_no,status')
+    .eq('po_no',parsed.po)
+    .eq('po_type',parsed.type)
+    .eq('customer',parsed.customer)
+    .limit(1)
+
+  if(duplicate.error) throw duplicate.error
+  if(duplicate.data?.length){
+    throw new Error(`PO ${parsed.po} (${parsed.customer} ${parsed.type}) มีอยู่แล้ว · สถานะ ${duplicate.data[0].status||'-'}`)
+  }
+
+  const totals=totalsForSave(rows)
+  const createdBy=txt(el('importCreatedBy').value)||'ADMIN'
+  localStorage.setItem('erp_picking_user',createdBy)
+
+  const headerPayload={
+    po_no:parsed.po,
+    po_type:parsed.type,
+    customer:parsed.customer,
+    source_file_name:importState.file?.name || null,
+    status:'READY_FOR_PICKING',
+    total_pairs:totals.pairs,
+    total_cartons:totals.boxes,
+    total_loose_used:totals.used,
+    total_loose_pull:totals.pull,
+    created_by:createdBy
+  }
+
+  let headerId=null
+  try{
+    const {data:header,error:headerError}=await insertHeaderWithDelivery(headerPayload,parsed.deliveryDate)
+    if(headerError) throw headerError
+    headerId=header.id
+
+    const payload=rows.map(r=>({
+      po_id:headerId,
+      line_no:r.lineNo,
+      barcode:r.barcode || null,
+      item:r.item || null,
+      code:r.code || null,
+      assort:r.assort || null,
+      order_pairs:num(r.orderPairs),
+      carton_qty:num(r.cartonQty),
+      loose_before:num(r.looseBefore),
+      loose_used:num(r.looseUsed),
+      loose_pull:num(r.loosePull),
+      loose_after:num(r.looseAfter),
+      remark:r.remark || null,
+      validation_status:r.validationStatus,
+      validation_message:r.validationMessage || null
+    }))
+
+    for(let i=0;i<payload.length;i+=500){
+      const {error}=await db.from(ITEM_TABLE).insert(payload.slice(i,i+500))
+      if(error) throw error
+    }
+
+    importState.savedHeader=header
+    el('statDb').textContent='SAVED'
+    return header
+  }catch(error){
+    if(headerId){
+      try{await db.from(HEADER_TABLE).delete().eq('id',headerId)}catch(e){}
+    }
+    el('statDb').textContent='ERROR'
+    throw error
+  }
+}
+
+/* =========================
+   ONE CLICK IMPORT FLOW
+   ========================= */
+async function runImport(){
+  const file=el('poExcelFile').files?.[0]
+  if(!file){
+    setImportStatus('กรุณาเลือกไฟล์ PO ก่อน','error')
+    return
+  }
+
+  const customer=el('importCustomer').value
+  const selectedType=el('importType').value
+
+  importState={file,parsed:null,preview:[],csvText:'',savedHeader:null}
+  renderImportPreview()
+  el('statDb').textContent='WAIT'
+
+  const btn=el('importPoBtn')
+  btn.disabled=true
+  btn.textContent='กำลังนำเข้า...'
+
+  try{
+    setImportStatus('1/4 กำลังอ่านไฟล์ Excel / XLS...','info')
+    const source=await readFileRows(file)
+
+    setImportStatus(`1/4 อ่านไฟล์สำเร็จ (${source.sheetName})\n2/4 กำลังอ่าน PO และรายการสินค้า...`,'info')
+    const parsed=parseOrderRows(source.rows,customer,selectedType)
+    importState.parsed=parsed
+
+    if(parsed.type && el('importType').value!==parsed.type){
+      el('importType').value=parsed.type
+    }
+
+    setImportStatus(`พบ PO ${parsed.po||'-'} · ${parsed.items.length} รายการ\n3/4 กำลังจับคู่สินค้าและคำนวณ Carton / Loose...`,'info')
+    importState.preview=await preparePreview(parsed)
+    importState.csvText=previewToCsv(importState.preview)
+
+    renderImportPreview()
+    previewToJobRows()
+
+    const warnings=importState.preview.filter(r=>r.validationStatus==='WARNING').length
+    const errors=importState.preview.filter(r=>r.validationStatus==='ERROR').length
+
+    if(errors){
+      setImportStatus(`แปลง CSV สำเร็จ แต่พบ ERROR ${errors} รายการ\nยังไม่ส่งเข้า Supabase กรุณาตรวจสอบรายการสีแดง`,'error')
+      return
+    }
+
+    setImportStatus(`3/4 แปลงเป็น CSV สำเร็จ${warnings?` · Warning ${warnings} รายการ`:''}\n4/4 กำลังบันทึก Supabase...`,warnings?'warn':'info')
+    const header=await saveParsedToSupabase()
+
+    setImportStatus(
+      `สำเร็จ\nPO ${parsed.po} ถูกอ่านจากไฟล์ → แปลงเป็น CSV → บันทึก Supabase อัตโนมัติ\npo_headers ID: ${header.id}\nรายการสินค้า: ${importState.preview.length} รายการ\nสถานะ: READY_FOR_PICKING\nยังไม่มีการตัด Stock`,
+      warnings?'warn':'ok'
+    )
+    showToast('Import PO สำเร็จ')
+    loadOrders()
+  }catch(error){
+    console.error(error)
+    setImportStatus('นำเข้าไม่สำเร็จ\n'+(error?.message||error),'error')
+  }finally{
+    btn.disabled=false
+    btn.textContent='ตรวจสอบ → แปลง CSV → บันทึก Supabase'
+  }
+}
+
+el('importPoBtn').onclick=runImport
+el('poExcelFile').addEventListener('change',()=>{
+  clearImportStatus()
+  importState={file:null,parsed:null,preview:[],csvText:'',savedHeader:null}
+  renderImportPreview()
+})
+
+el('resetImportBtn').onclick=()=>{
+  el('poExcelFile').value=''
+  importState={file:null,parsed:null,preview:[],csvText:'',savedHeader:null}
+  clearImportStatus()
+  renderImportPreview()
+  jobRows.length=0
+  renderJobRows()
+  el('poNumber').value=''
+}
+
+
+/* =========================
+   ERP STOCK CSV UPLOAD
+   ตรวจ CSV ก่อน และอัปโหลดเข้า erp_stock_ptt โดยตรง
+   ========================= */
+const ERP_EXPECTED_HEADERS = [
+  'item_number',
+  'product_name',
+  'search_name',
+  'product_variant_name',
+  'color_name',
+  'configuration',
+  'size',
+  'color',
+  'style',
+  'version',
+  'site',
+  'warehouse',
+  'location',
+  'batch_number',
+  'number',
+  'ref_so',
+  'customer_reference',
+  'physical_inventory',
+  'physical_reserved',
+  'available_physical',
+  'available_physical_exact_dimensions',
+  'ordered_in_total',
+  'on_order',
+  'ordered_reserved',
+  'available_for_reservation',
+  'total_available',
+  'inventory_unit',
+  'uses_warehouse_management_processes',
+  'product_identification'
+]
+
+
+const ERP_HEADER_MAP = {
+  'item number':'item_number',
+  'product name':'product_name',
+  'search name':'search_name',
+  'product variant name':'product_variant_name',
+  'color name':'color_name',
+  'configuration':'configuration',
+  'size':'size',
+  'color':'color',
+  'style':'style',
+  'version':'version',
+  'site':'site',
+  'warehouse':'warehouse',
+  'location':'location',
+  'batch number':'batch_number',
+  'number':'number',
+  'ref. so':'ref_so',
+  'ref so':'ref_so',
+  'customer reference':'customer_reference',
+  'physical inventory':'physical_inventory',
+  'physical reserved':'physical_reserved',
+  'available physical':'available_physical',
+  'available physical on exact dimensions':'available_physical_exact_dimensions',
+  'ordered in total':'ordered_in_total',
+  'on order':'on_order',
+  'ordered reserved':'ordered_reserved',
+  'available for reservation':'available_for_reservation',
+  'total available':'total_available',
+  'inventory unit':'inventory_unit',
+  'uses warehouse management processes':'uses_warehouse_management_processes',
+  'product identification':'product_identification'
+}
+
+function normalizeErpHeader(header){
+  const clean=String(header ?? '')
+    .replace(/^\uFEFF/,'')
+    .trim()
+
+  // รองรับไฟล์ที่เตรียมชื่อคอลัมน์เป็น snake_case อยู่แล้ว
+  if(ERP_EXPECTED_HEADERS.includes(clean)) return clean
+
+  const key=clean
+    .replace(/\s+/g,' ')
+    .toLowerCase()
+
+  return ERP_HEADER_MAP[key] || clean
+}
+
+const ERP_NUMERIC_COLUMNS = new Set([
+  'physical_inventory',
+  'physical_reserved',
+  'available_physical',
+  'available_physical_exact_dimensions',
+  'ordered_in_total',
+  'on_order',
+  'ordered_reserved',
+  'available_for_reservation',
+  'total_available'
+])
+
+let erpUploadState = {
+  file:null,
+  rows:[],
+  dbCount:null,
+  valid:false
+}
+
+function setErpUploadStatus(message,type='info'){
+  const box=el('erpUploadStatus')
+  if(!box) return
+  box.className='import-status show '+type
+  box.textContent=message
+}
+
+function resetErpUpload(){
+  erpUploadState={file:null,rows:[],dbCount:null,valid:false}
+  if(el('erpCsvFile')) el('erpCsvFile').value=''
+  if(el('erpUploadCsvBtn')) el('erpUploadCsvBtn').disabled=true
+  if(el('erpStockStats')) el('erpStockStats').className='erp-stock-stats'
+  if(el('erpUploadStatus')){
+    el('erpUploadStatus').className='import-status'
+    el('erpUploadStatus').textContent=''
+  }
+  if(el('erpUploadProgress')) el('erpUploadProgress').className='erp-upload-progress'
+  if(el('erpUploadProgressBar')) el('erpUploadProgressBar').style.width='0%'
+}
+
+function normalizeErpRow(raw){
+  const row={}
+  ERP_EXPECTED_HEADERS.forEach(key=>{
+    let value=raw?.[key]
+    if(ERP_NUMERIC_COLUMNS.has(key)){
+      const n=Number(String(value ?? '').replace(/,/g,'').trim())
+      row[key]=Number.isFinite(n) ? n : 0
+    }else{
+      const s=String(value ?? '').trim()
+      row[key]=s==='' ? null : s
+    }
+  })
+  return row
+}
+
+async function currentErpDbCount(){
+  const {count,error}=await db
+    .from(ERP_TABLE)
+    .select('id',{count:'exact',head:true})
+  if(error) throw error
+  return Number(count||0)
+}
+
+function renderErpCsvPreview(){
+  const rows=erpUploadState.rows
+  if(!rows.length) return
+
+  const uniqueItems=new Set(rows.map(r=>r.item_number).filter(Boolean))
+  const warehouses=new Set(rows.map(r=>r.warehouse).filter(Boolean))
+  const totalAvailable=rows.reduce((s,r)=>s+num(r.available_physical),0)
+
+  el('erpStatRows').textContent=rows.length.toLocaleString('th-TH')
+  el('erpStatItems').textContent=uniqueItems.size.toLocaleString('th-TH')
+  el('erpStatWh').textContent=warehouses.size.toLocaleString('th-TH')
+  el('erpStatAvail').textContent=fmt(totalAvailable)
+  el('erpStatDb').textContent=Number(erpUploadState.dbCount||0).toLocaleString('th-TH')
+
+  el('erpStockStats').className='erp-stock-stats show'
+}
+
+async function checkErpCsv(){
+  const file=el('erpCsvFile')?.files?.[0]
+  if(!file){
+    setErpUploadStatus('กรุณาเลือกไฟล์ CSV ก่อน','error')
+    return
+  }
+
+  if(!window.Papa){
+    setErpUploadStatus('ไม่พบตัวอ่าน CSV (PapaParse)','error')
+    return
+  }
+
+  const checkBtn=el('erpCheckCsvBtn')
+  const uploadBtn=el('erpUploadCsvBtn')
+  checkBtn.disabled=true
+  uploadBtn.disabled=true
+  checkBtn.textContent='กำลังตรวจสอบ...'
+
+  try{
+    setErpUploadStatus('กำลังอ่านและตรวจสอบไฟล์ CSV...','info')
+
+    const result=await new Promise((resolve,reject)=>{
+      Papa.parse(file,{
+        header:true,
+        skipEmptyLines:'greedy',
+        transformHeader:h=>normalizeErpHeader(h),
+        complete:resolve,
+        error:reject
+      })
+    })
+
+    if(result.errors?.length){
+      const serious=result.errors.filter(e=>e.type!=='FieldMismatch')
+      if(serious.length){
+        throw new Error(serious.slice(0,5).map(e=>e.message).join(' | '))
+      }
+    }
+
+    const actualHeaders=(result.meta?.fields||[]).map(h=>String(h||'').trim())
+    const missing=ERP_EXPECTED_HEADERS.filter(h=>!actualHeaders.includes(h))
+    if(missing.length){
+      throw new Error(
+        'ไฟล์ ERP Stock ยังขาดคอลัมน์ที่จำเป็น: '+missing.join(', ')+
+        '\nระบบรองรับทั้งหัวคอลัมน์ D365 เดิม และรูปแบบ Supabase'
+      )
+    }
+
+    const normalized=(result.data||[])
+      .map(normalizeErpRow)
+      .filter(r=>r.item_number)
+
+    if(!normalized.length){
+      throw new Error('ไม่พบข้อมูล Item ในไฟล์')
+    }
+
+    const badRows=[]
+    normalized.forEach((r,i)=>{
+      if(!r.item_number) badRows.push(i+2)
+    })
+    if(badRows.length){
+      throw new Error('พบแถวที่ไม่มี item_number: '+badRows.slice(0,20).join(', '))
+    }
+
+    erpUploadState.file=file
+    erpUploadState.rows=normalized
+    erpUploadState.dbCount=await currentErpDbCount()
+    erpUploadState.valid=true
+
+    renderErpCsvPreview()
+
+    if(erpUploadState.dbCount>0){
+      el('erpStatDb').className='erp-db-not-empty'
+      setErpUploadStatus(
+        `ตรวจสอบไฟล์สำเร็จ ${normalized.length.toLocaleString('th-TH')} แถว\n`+
+        `แต่ erp_stock_ptt ยังมีข้อมูลเดิม ${erpUploadState.dbCount.toLocaleString('th-TH')} แถว\n`+
+        `เพื่อป้องกันข้อมูลซ้ำ กรุณากลับหน้า HOME แล้วกด CLEAR ERP STOCK ก่อน`,
+        'warn'
+      )
+      uploadBtn.disabled=true
+    }else{
+      el('erpStatDb').className='erp-db-empty'
+      setErpUploadStatus(
+        `ตรวจสอบไฟล์สำเร็จ ${normalized.length.toLocaleString('th-TH')} แถว\n`+
+        `erp_stock_ptt ว่าง พร้อมอัปโหลดเข้า Supabase`,
+        'ok'
+      )
+      uploadBtn.disabled=false
+    }
+  }catch(error){
+    console.error(error)
+    erpUploadState={file:null,rows:[],dbCount:null,valid:false}
+    setErpUploadStatus('ตรวจสอบไฟล์ไม่สำเร็จ\n'+(error?.message||error),'error')
+  }finally{
+    checkBtn.disabled=false
+    checkBtn.textContent='ตรวจสอบไฟล์'
+  }
+}
+
+async function uploadErpCsvToSupabase(){
+  if(!erpUploadState.valid || !erpUploadState.rows.length){
+    setErpUploadStatus('กรุณาตรวจสอบไฟล์ก่อนอัปโหลด','error')
+    return
+  }
+
+  const uploadBtn=el('erpUploadCsvBtn')
+  uploadBtn.disabled=true
+
+  try{
+    const dbCount=await currentErpDbCount()
+    erpUploadState.dbCount=dbCount
+    el('erpStatDb').textContent=dbCount.toLocaleString('th-TH')
+
+    if(dbCount>0){
+      throw new Error(
+        `erp_stock_ptt มีข้อมูลอยู่ ${dbCount.toLocaleString('th-TH')} แถว `+
+        `กรุณา CLEAR ERP STOCK ก่อน เพื่อป้องกันข้อมูลซ้ำ`
+      )
+    }
+
+    const total=erpUploadState.rows.length
+    const ok=confirm(
+      'ยืนยันอัปโหลด ERP STOCK เข้า Supabase หรือไม่?\n\n'+
+      'ไฟล์: '+(erpUploadState.file?.name||'-')+'\n'+
+      'จำนวน: '+total.toLocaleString('th-TH')+' แถว\n'+
+      'ตาราง: erp_stock_ptt'
+    )
+    if(!ok){
+      uploadBtn.disabled=false
+      return
+    }
+
+    el('erpUploadProgress').className='erp-upload-progress show'
+    el('erpUploadProgressBar').style.width='0%'
+    setErpUploadStatus('กำลังอัปโหลดข้อมูลเข้า Supabase...','info')
+
+    const chunkSize=300
+    let inserted=0
+
+    for(let i=0;i<total;i+=chunkSize){
+      const chunk=erpUploadState.rows.slice(i,i+chunkSize)
+      const {error}=await db.from(ERP_TABLE).insert(chunk)
+      if(error) throw error
+
+      inserted+=chunk.length
+      const pct=Math.round((inserted/total)*100)
+      el('erpUploadProgressBar').style.width=pct+'%'
+      setErpUploadStatus(
+        `กำลังอัปโหลด ${inserted.toLocaleString('th-TH')} / ${total.toLocaleString('th-TH')} แถว (${pct}%)`,
+        'info'
+      )
+    }
+
+    const after=await currentErpDbCount()
+    erpUploadState.dbCount=after
+    el('erpStatDb').textContent=after.toLocaleString('th-TH')
+    el('erpStatDb').className='erp-db-empty'
+
+    if(after!==total){
+      setErpUploadStatus(
+        `อัปโหลดเสร็จ แต่จำนวนในฐานข้อมูลคือ ${after.toLocaleString('th-TH')} แถว `+
+        `ขณะที่ไฟล์มี ${total.toLocaleString('th-TH')} แถว กรุณาตรวจสอบ`,
+        'warn'
+      )
+    }else{
+      setErpUploadStatus(
+        `อัปโหลด ERP STOCK สำเร็จ\n`+
+        `${total.toLocaleString('th-TH')} แถวถูกบันทึกลง erp_stock_ptt แล้ว`,
+        'ok'
+      )
+    }
+
+    await refreshClearErpButtonVisibility()
+    showToast('UPLOAD ERP STOCK สำเร็จ')
+    uploadBtn.disabled=true
+  }catch(error){
+    console.error(error)
+    setErpUploadStatus(
+      'อัปโหลดไม่สำเร็จ\n'+(error?.message||error)+
+      '\n\nหากเป็น Permission / RLS กรุณาตรวจ Policy ของ erp_stock_ptt',
+      'error'
+    )
+    uploadBtn.disabled=false
+  }
+}
+
+if(el('erpCheckCsvBtn')) el('erpCheckCsvBtn').onclick=checkErpCsv
+if(el('erpUploadCsvBtn')) el('erpUploadCsvBtn').onclick=uploadErpCsvToSupabase
+if(el('erpResetCsvBtn')) el('erpResetCsvBtn').onclick=resetErpUpload
+if(el('erpCsvFile')) el('erpCsvFile').addEventListener('change',()=>{
+  erpUploadState={file:null,rows:[],dbCount:null,valid:false}
+  if(el('erpUploadCsvBtn')) el('erpUploadCsvBtn').disabled=true
+  if(el('erpStockStats')) el('erpStockStats').className='erp-stock-stats'
+  if(el('erpUploadStatus')){
+    el('erpUploadStatus').className='import-status'
+    el('erpUploadStatus').textContent=''
+  }
+})
+
+
+
+async function searchErpFromUploadPage(){
+  const q=txt(el('erpUploadSearchInput')?.value)
+  const resultBox=el('erpUploadSearchResult')
+  const body=el('erpUploadSearchBody')
+  const summary=el('erpUploadSearchSummary')
+
+  if(!q){
+    summary.className='erp-search-summary'
+    resultBox.className='erp-search-result'
+    body.innerHTML=''
+    showToast('กรอก Item ที่ต้องการค้นหา')
+    return
+  }
+
+  summary.className='erp-search-summary show'
+  summary.textContent='กำลังค้นหา '+q+' ...'
+  resultBox.className='erp-search-result'
+  body.innerHTML=''
+
+  try{
+    let res=await db.from(ERP_TABLE)
+      .select('item_number,color_name,size,color,warehouse,location,available_physical')
+      .ilike('item_number',q)
+      .order('color',{ascending:true})
+      .order('size',{ascending:true})
+      .limit(1000)
+
+    if(res.error) throw res.error
+    let rows=res.data||[]
+
+    if(!rows.length){
+      res=await db.from(ERP_TABLE)
+        .select('item_number,color_name,size,color,warehouse,location,available_physical')
+        .ilike('item_number',`%${q}%`)
+        .order('item_number',{ascending:true})
+        .order('color',{ascending:true})
+        .order('size',{ascending:true})
+        .limit(1000)
+      if(res.error) throw res.error
+      rows=res.data||[]
+    }
+
+    if(!rows.length){
+      summary.textContent='ไม่พบ Item '+q
+      return
+    }
+
+    const exact=rows.filter(r=>norm(r.item_number)===norm(q))
+    const used=exact.length ? exact : rows
+    const totalAvailable=used.reduce((s,r)=>s+num(r.available_physical),0)
+    const locations=new Set(
+      used.map(r=>[txt(r.warehouse),txt(r.location)].filter(Boolean).join(' | ')).filter(Boolean)
+    )
+    const items=[...new Set(used.map(r=>txt(r.item_number)).filter(Boolean))]
+
+    summary.innerHTML=
+      '<b>ผลการค้นหา:</b> '+esc(items.join(', '))+
+      ' &nbsp; | &nbsp; <b>Total Available:</b> '+fmt(totalAvailable)+
+      ' &nbsp; | &nbsp; <b>Location:</b> '+locations.size.toLocaleString('th-TH')+
+      ' &nbsp; | &nbsp; <b>Rows:</b> '+used.length.toLocaleString('th-TH')
+
+    body.innerHTML=used.map(r=>`
+      <tr>
+        <td><b>${esc(r.item_number||'-')}</b></td>
+        <td>${esc(r.color_name||'-')}</td>
+        <td>${esc(r.size||'-')}</td>
+        <td>${esc(r.color||'-')}</td>
+        <td>${esc(r.warehouse||'-')}</td>
+        <td>${esc(r.location||'-')}</td>
+        <td><b>${fmt(r.available_physical)}</b></td>
+      </tr>
+    `).join('')
+
+    resultBox.className='erp-search-result show'
+  }catch(error){
+    console.error(error)
+    summary.textContent='ค้นหาไม่สำเร็จ: '+(error?.message||error)
+  }
+}
+
+if(el('erpUploadSearchBtn')) el('erpUploadSearchBtn').onclick=searchErpFromUploadPage
+if(el('erpUploadSearchInput')) el('erpUploadSearchInput').addEventListener('keydown',e=>{
+  if(e.key==='Enter') searchErpFromUploadPage()
+})
+if(el('erpUploadSearchClearBtn')) el('erpUploadSearchClearBtn').onclick=()=>{
+  el('erpUploadSearchInput').value=''
+  el('erpUploadSearchSummary').className='erp-search-summary'
+  el('erpUploadSearchSummary').textContent=''
+  el('erpUploadSearchResult').className='erp-search-result'
+  el('erpUploadSearchBody').innerHTML=''
+}
+
+
+/* =========================
+   ORDERS
+   ========================= */
+async function loadOrders(){
+  const body=el('ordersBody')
+  body.innerHTML='<tr><td colspan="8">กำลังโหลด...</td></tr>'
+  try{
+    const {data,error}=await db.from(HEADER_TABLE)
+      .select('id,po_no,customer,po_type,total_pairs,total_cartons,status')
+      .order('id',{ascending:false})
+      .limit(100)
+    if(error) throw error
+
+    body.innerHTML=(data||[]).length ? data.map(r=>`
+      <tr>
+        <td>${esc(r.id)}</td>
+        <td><b>${esc(r.po_no||'-')}</b></td>
+        <td>${esc(r.customer||'-')}</td>
+        <td>${esc(r.po_type||'-')}</td>
+        <td>${fmt(r.total_pairs)}</td>
+        <td>${fmt(r.total_cartons)}</td>
+        <td><span class="status ${poStatusClass(r.status)}">${esc(poStatusLabel(r.status))}</span></td>
+        <td><button class="btn btn-primary" style="padding:7px 10px;min-height:34px" data-open-po="${esc(r.id)}">เปิด</button></td>
+      </tr>
+    `).join('') : '<tr><td colspan="8">ยังไม่มี PO</td></tr>'
+
+    body.querySelectorAll('[data-open-po]').forEach(btn=>{
+      btn.onclick=()=>openPickingDetail(Number(btn.dataset.openPo),'orders')
+    })
+  }catch(error){
+    body.innerHTML=`<tr><td colspan="8" style="color:#b91c1c">โหลดไม่สำเร็จ: ${esc(error?.message||error)}</td></tr>`
+  }
+}
+el('reloadOrdersBtn').onclick=loadOrders
+
+
+
+/* =========================
+   LOCATION QR MASTER
+   Table: location_qr_master
+   Storage bucket: location-qr
+   ========================= */
+let locationQrRows=[]
+let locationQrExistingImagePath=''
+let locationQrExistingImageUrl=''
+
+function setLocationQrStatus(message,type='info'){
+  const box=el('locationQrStatus')
+  if(!box) return
+  box.className='location-qr-status show '+type
+  box.textContent=message
+}
+
+function clearLocationQrStatus(){
+  const box=el('locationQrStatus')
+  if(!box) return
+  box.className='location-qr-status'
+  box.textContent=''
+}
+
+function sanitizeStorageName(value){
+  return txt(value)
+    .replace(/[^\w\-ก-๙]+/g,'_')
+    .replace(/^_+|_+$/g,'') || 'QR'
+}
+
+function resetLocationQrForm(){
+  el('locationQrEditId').value=''
+  el('locationQrWarehouse').value=''
+  el('locationQrLocation').value=''
+  el('locationQrValue').value=''
+  el('locationQrImageFile').value=''
+  locationQrExistingImagePath=''
+  locationQrExistingImageUrl=''
+  clearLocationQrStatus()
+
+  el('locationQrPreview').innerHTML=`
+    <div>
+      <div>ยังไม่ได้เลือกรูป QR</div>
+      <div id="locationQrPreviewName" class="qr-preview-name"></div>
+    </div>
+  `
+}
+
+function showLocationQrPreview(url,warehouse='',location=''){
+  const preview=el('locationQrPreview')
+  if(!url){
+    preview.innerHTML=`
+      <div>
+        <div>ยังไม่ได้เลือกรูป QR</div>
+        <div class="qr-preview-name">${esc(location||'')}</div>
+      </div>
+    `
+    return
+  }
+
+  preview.innerHTML=`
+    <div>
+      <img src="${esc(url)}" alt="QR ${esc(location)}">
+      <div class="qr-preview-name">
+        ${esc(warehouse||'')}<br>${esc(location||'')}
+      </div>
+    </div>
+  `
+}
+
+el('locationQrLocation')?.addEventListener('input',()=>{
+  const location=txt(el('locationQrLocation').value).toUpperCase()
+  el('locationQrLocation').value=location
+
+  // ถ้า QR VALUE ยังว่าง หรือค่าเดิมเท่ากับ Location ให้ sync อัตโนมัติ
+  const qrValue=txt(el('locationQrValue').value)
+  if(!qrValue || qrValue===location.slice(0,-1)){
+    el('locationQrValue').value=location
+  }
+})
+
+el('locationQrWarehouse')?.addEventListener('input',()=>{
+  el('locationQrWarehouse').value=txt(el('locationQrWarehouse').value).toUpperCase()
+})
+
+el('locationQrImageFile')?.addEventListener('change',()=>{
+  const file=el('locationQrImageFile').files?.[0]
+  if(!file){
+    showLocationQrPreview(
+      locationQrExistingImageUrl,
+      el('locationQrWarehouse').value,
+      el('locationQrLocation').value
+    )
+    return
+  }
+
+  const url=URL.createObjectURL(file)
+  showLocationQrPreview(
+    url,
+    el('locationQrWarehouse').value,
+    el('locationQrLocation').value
+  )
+})
+
+async function loadLocationQrMaster(search=''){
+  const body=el('locationQrListBody')
+  if(!body) return
+
+  body.innerHTML='<tr><td colspan="6"><div class="location-qr-empty">กำลังโหลด...</div></td></tr>'
+
+  try{
+    let query=db.from(LOCATION_QR_TABLE)
+      .select('*')
+      .order('warehouse',{ascending:true})
+      .order('location',{ascending:true})
+      .limit(1000)
+
+    const q=txt(search)
+    if(q){
+      query=query.or(
+        `warehouse.ilike.%${q}%,location.ilike.%${q}%,qr_value.ilike.%${q}%`
+      )
+    }
+
+    const {data,error}=await query
+    if(error) throw error
+
+    locationQrRows=data||[]
+    renderLocationQrRows()
+  }catch(error){
+    console.error(error)
+    body.innerHTML=`
+      <tr>
+        <td colspan="6">
+          <div class="location-qr-empty" style="color:#b91c1c">
+            โหลดข้อมูลไม่สำเร็จ<br>${esc(error?.message||error)}
+          </div>
+        </td>
+      </tr>
+    `
+  }
+}
+
+function renderLocationQrRows(){
+  const body=el('locationQrListBody')
+  const rows=locationQrRows||[]
+
+  if(!rows.length){
+    body.innerHTML='<tr><td colspan="6"><div class="location-qr-empty">ยังไม่มี Location QR</div></td></tr>'
+    return
+  }
+
+  body.innerHTML=rows.map(row=>`
+    <tr>
+      <td>
+        ${row.qr_image_url
+          ? `<img class="location-qr-thumb" src="${esc(row.qr_image_url)}" alt="${esc(row.location)}">`
+          : '-'}
+      </td>
+      <td><b>${esc(row.warehouse||'-')}</b></td>
+      <td><b>${esc(row.location||'-')}</b></td>
+      <td>${esc(row.qr_value||'-')}</td>
+      <td>
+        <span class="status ${row.is_active===false?'draft':'done'}">
+          ${row.is_active===false?'INACTIVE':'ACTIVE'}
+        </span>
+      </td>
+      <td>
+        <div class="location-qr-actions">
+          <button class="qr-edit-btn" data-qr-edit="${row.id}">แก้ไข</button>
+          <button class="qr-delete-btn" data-qr-delete="${row.id}">ลบ</button>
+        </div>
+      </td>
+    </tr>
+  `).join('')
+
+  body.querySelectorAll('[data-qr-edit]').forEach(btn=>{
+    btn.onclick=()=>editLocationQr(Number(btn.dataset.qrEdit))
+  })
+
+  body.querySelectorAll('[data-qr-delete]').forEach(btn=>{
+    btn.onclick=()=>deleteLocationQr(Number(btn.dataset.qrDelete))
+  })
+}
+
+function editLocationQr(id){
+  const row=locationQrRows.find(r=>Number(r.id)===Number(id))
+  if(!row) return
+
+  el('locationQrEditId').value=row.id
+  el('locationQrWarehouse').value=row.warehouse||''
+  el('locationQrLocation').value=row.location||''
+  el('locationQrValue').value=row.qr_value||row.location||''
+  el('locationQrImageFile').value=''
+
+  locationQrExistingImagePath=row.qr_image_path||''
+  locationQrExistingImageUrl=row.qr_image_url||''
+
+  showLocationQrPreview(
+    row.qr_image_url||'',
+    row.warehouse||'',
+    row.location||''
+  )
+
+  setLocationQrStatus(
+    'กำลังแก้ไข '+(row.warehouse||'')+' / '+(row.location||''),
+    'info'
+  )
+
+  window.scrollTo({top:0,behavior:'smooth'})
+}
+
+async function uploadLocationQrImage(file,warehouse,location){
+  const ext=(file.name.split('.').pop()||'png').toLowerCase()
+  const safeWarehouse=sanitizeStorageName(warehouse)
+  const safeLocation=sanitizeStorageName(location)
+
+  const path=`${safeWarehouse}/${safeLocation}.${ext}`
+
+  const {error:uploadError}=await db.storage
+    .from(LOCATION_QR_BUCKET)
+    .upload(path,file,{
+      cacheControl:'3600',
+      upsert:true,
+      contentType:file.type||undefined
+    })
+
+  if(uploadError) throw uploadError
+
+  const {data:publicData}=db.storage
+    .from(LOCATION_QR_BUCKET)
+    .getPublicUrl(path)
+
+  return {
+    path,
+    url:publicData?.publicUrl||''
+  }
+}
+
+async function saveLocationQr(){
+  const id=Number(el('locationQrEditId').value||0)
+  const warehouse=txt(el('locationQrWarehouse').value).toUpperCase()
+  const location=txt(el('locationQrLocation').value).toUpperCase()
+  const qrValue=txt(el('locationQrValue').value)||location
+  const file=el('locationQrImageFile').files?.[0]
+
+  if(!warehouse){
+    setLocationQrStatus('กรุณากรอก Warehouse','warn')
+    el('locationQrWarehouse').focus()
+    return
+  }
+
+  if(!location){
+    setLocationQrStatus('กรุณากรอก Location','warn')
+    el('locationQrLocation').focus()
+    return
+  }
+
+  if(!qrValue){
+    setLocationQrStatus('กรุณากรอก QR Value','warn')
+    el('locationQrValue').focus()
+    return
+  }
+
+  if(!file && !locationQrExistingImageUrl){
+    setLocationQrStatus('กรุณาอัปโหลดรูป QR Code','warn')
+    return
+  }
+
+  const btn=el('saveLocationQrBtn')
+  btn.disabled=true
+  const oldText=btn.textContent
+  btn.textContent='กำลังบันทึก...'
+
+  try{
+    setLocationQrStatus('กำลังบันทึก Location QR...','info')
+
+    let imagePath=locationQrExistingImagePath||null
+    let imageUrl=locationQrExistingImageUrl||null
+
+    if(file){
+      const uploaded=await uploadLocationQrImage(file,warehouse,location)
+      imagePath=uploaded.path
+      imageUrl=uploaded.url
+    }
+
+    const payload={
+      warehouse,
+      location,
+      qr_value:qrValue,
+      qr_image_path:imagePath,
+      qr_image_url:imageUrl,
+      is_active:true,
+      updated_at:new Date().toISOString()
+    }
+
+    let result
+
+    if(id){
+      result=await db.from(LOCATION_QR_TABLE)
+        .update(payload)
+        .eq('id',id)
+        .select('*')
+        .single()
+    }else{
+      result=await db.from(LOCATION_QR_TABLE)
+        .insert({
+          ...payload,
+          created_by:txt(el('importCreatedBy')?.value)||'ADMIN'
+        })
+        .select('*')
+        .single()
+    }
+
+    if(result.error) throw result.error
+
+    setLocationQrStatus(
+      'บันทึก '+warehouse+' / '+location+' สำเร็จ',
+      'ok'
+    )
+
+    resetLocationQrForm()
+    setLocationQrStatus(
+      'บันทึก '+warehouse+' / '+location+' สำเร็จ',
+      'ok'
+    )
+
+    await loadLocationQrMaster(txt(el('locationQrSearchInput').value))
+    showToast('บันทึก Location QR สำเร็จ')
+
+  }catch(error){
+    console.error(error)
+
+    let message=error?.message||String(error)
+
+    if(/bucket/i.test(message) || /not found/i.test(message)){
+      message=
+        'ไม่พบ Storage bucket "location-qr" กรุณาสร้าง bucket นี้ใน Supabase Storage ก่อน'
+    }
+
+    setLocationQrStatus('บันทึกไม่สำเร็จ\n'+message,'error')
+  }finally{
+    btn.disabled=false
+    btn.textContent=oldText
+  }
+}
+
+async function deleteLocationQr(id){
+  const row=locationQrRows.find(r=>Number(r.id)===Number(id))
+  if(!row) return
+
+  const ok=confirm(
+    'ลบ Location QR นี้หรือไม่?\n\n'+
+    (row.warehouse||'')+' / '+(row.location||'')
+  )
+  if(!ok) return
+
+  try{
+    const {error}=await db.from(LOCATION_QR_TABLE)
+      .delete()
+      .eq('id',id)
+
+    if(error) throw error
+
+    // ลบรูปจาก Storage ด้วย ถ้ามี
+    if(row.qr_image_path){
+      try{
+        await db.storage
+          .from(LOCATION_QR_BUCKET)
+          .remove([row.qr_image_path])
+      }catch(e){
+        console.warn('ลบไฟล์ QR ไม่สำเร็จ',e)
+      }
+    }
+
+    await loadLocationQrMaster(txt(el('locationQrSearchInput').value))
+    showToast('ลบ Location QR แล้ว')
+  }catch(error){
+    alert('ลบไม่สำเร็จ\n\n'+(error?.message||error))
+  }
+}
+
+el('saveLocationQrBtn')?.addEventListener('click',saveLocationQr)
+el('resetLocationQrBtn')?.addEventListener('click',resetLocationQrForm)
+
+el('locationQrSearchBtn')?.addEventListener('click',()=>{
+  loadLocationQrMaster(el('locationQrSearchInput').value)
+})
+
+el('locationQrSearchInput')?.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    loadLocationQrMaster(el('locationQrSearchInput').value)
+  }
+})
+
+
+/* =========================
+   ACTIVE PICKING + PICKING DETAIL
+   ========================= */
+let currentPickingPoId=null
+let currentPickingSource='active'
+let currentPickingHeader=null
+
+// Location ที่ผู้ใช้ติ๊กเลือกใน PO ปัจจุบัน
+// Map<poItemId, Set<locationIndex>>
+const pickingLocationSelections=new Map()
+const pickingLineData=new Map()
+
+// เก็บ Location ที่เลือกไว้ใน Browser เพื่อไม่ให้หายเมื่อ Refresh
+const PICKING_SELECTION_STORAGE_PREFIX='gambol_picking_selection_v1_'
+const PICKING_CURRENT_PO_KEY='gambol_picking_current_po_v1'
+
+function pickingSelectionStorageKey(poId){
+  return PICKING_SELECTION_STORAGE_PREFIX+String(poId||'')
+}
+
+function locationStableKey(locationRow){
+  return [
+    norm(locationRow?.warehouse),
+    norm(locationRow?.location)
+  ].join('|')
+}
+
+function readPersistedPickingSelections(poId){
+  try{
+    const raw=localStorage.getItem(pickingSelectionStorageKey(poId))
+    if(!raw) return {}
+    const parsed=JSON.parse(raw)
+    return parsed && typeof parsed==='object' ? parsed : {}
+  }catch(error){
+    console.warn('อ่าน Location ที่บันทึกไว้ไม่สำเร็จ',error)
+    return {}
+  }
+}
+
+function savePersistedPickingSelections(poId){
+  if(!poId) return
+
+  try{
+    const payload={}
+
+    pickingLineData.forEach((data,itemId)=>{
+      const selected=getSelectedLocationSet(itemId)
+      const keys=[]
+
+      selected.forEach(index=>{
+        const loc=data.locations?.[Number(index)]
+        if(!loc) return
+        const key=locationStableKey(loc)
+        if(key && !keys.includes(key)) keys.push(key)
+      })
+
+      if(keys.length){
+        payload[String(itemId)]=keys
+      }
+    })
+
+    localStorage.setItem(
+      pickingSelectionStorageKey(poId),
+      JSON.stringify(payload)
+    )
+  }catch(error){
+    console.warn('บันทึก Location ที่เลือกไม่สำเร็จ',error)
+  }
+}
+
+function restorePersistedPickingLineSelection(poId,itemId,locations){
+  const persisted=readPersistedPickingSelections(poId)
+  const savedKeys=Array.isArray(persisted?.[String(itemId)])
+    ? persisted[String(itemId)]
+    : []
+
+  if(!savedKeys.length) return
+
+  const selected=getSelectedLocationSet(itemId)
+  selected.clear()
+
+  locations.forEach((loc,index)=>{
+    if(savedKeys.includes(locationStableKey(loc))){
+      selected.add(index)
+    }
+  })
+}
+
+function rememberCurrentPickingPo(poId,source='active'){
+  try{
+    sessionStorage.setItem(
+      PICKING_CURRENT_PO_KEY,
+      JSON.stringify({
+        poId:Number(poId),
+        source:source||'active'
+      })
+    )
+  }catch(error){
+    console.warn('จำ PO ปัจจุบันไม่สำเร็จ',error)
+  }
+}
+
+function readRememberedPickingPo(){
+  try{
+    const raw=sessionStorage.getItem(PICKING_CURRENT_PO_KEY)
+    if(!raw) return null
+    const parsed=JSON.parse(raw)
+    if(!Number(parsed?.poId)) return null
+    return {
+      poId:Number(parsed.poId),
+      source:parsed.source||'active'
+    }
+  }catch(error){
+    return null
+  }
+}
+
+
+function poStatusLabel(status){
+  const s=String(status||'').trim()
+  if(s==='READY_FOR_PICKING') return 'READY FOR PICKING'
+  if(s==='PICKING') return 'PICKING'
+  if(s==='JOB_CREATED') return 'ทำใบจัดแล้ว'
+  if(s==='COMPLETED') return 'COMPLETED'
+  return s||'-'
+}
+
+function poStatusClass(status){
+  const s=String(status||'')
+  if(s==='COMPLETED') return 'done'
+  if(s==='JOB_CREATED') return 'done'
+  return 'pick'
+}
+
+function setDetailMessage(message,type='info'){
+  const box=el('detailMessage')
+  box.className='detail-message show '+type
+  box.textContent=message
+}
+
+async function loadActivePicking(){
+  const list=el('activePickingList')
+  const summary=el('activeSummary')
+  list.innerHTML='<div class="empty"><div><strong>กำลังโหลด PO</strong></div></div>'
+  summary.textContent='กำลังโหลด...'
+
+  try{
+    const {data,error}=await db.from(HEADER_TABLE)
+      .select('id,po_no,customer,po_type,total_pairs,total_cartons,status,created_by')
+      .eq('status','JOB_CREATED')
+      .order('id',{ascending:false})
+      .limit(200)
+
+    if(error) throw error
+    const rows=data||[]
+
+    summary.textContent='พบ '+rows.length.toLocaleString('th-TH')+' PO ที่ทำใบจัดแล้ว'
+
+    if(!rows.length){
+      list.innerHTML=
+        '<div class="empty"><div><strong>ยังไม่มี Active Picking</strong>'+
+        'PO จะมาแสดงที่นี่หลังจากกด “สร้างใบจัดงาน” แล้ว</div></div>'
+      return
+    }
+
+    list.innerHTML=rows.map(r=>`
+      <div class="po-card">
+        <div class="po-main">
+          <strong>PO ${esc(r.po_no||'-')}</strong>
+          <span>${esc(r.customer||'-')} · ${esc(r.po_type||'-')} · ทำใบจัดแล้ว</span>
+        </div>
+        <div class="po-metric"><small>PAIRS</small><b>${fmt(r.total_pairs)}</b></div>
+        <div class="po-metric"><small>CARTONS</small><b>${fmt(r.total_cartons)}</b></div>
+        <div class="po-metric"><small>STATUS</small><b>ทำใบจัดแล้ว</b></div>
+        <button class="po-action" data-active-job-po="${esc(r.id)}">เปิด Active Sheet</button>
+      </div>
+    `).join('')
+
+    list.querySelectorAll('[data-active-job-po]').forEach(btn=>{
+      btn.onclick=()=>openActiveJobSheet(Number(btn.dataset.activeJobPo))
+    })
+  }catch(error){
+    console.error(error)
+    summary.textContent='โหลดไม่สำเร็จ'
+    list.innerHTML=
+      '<div class="empty"><div><strong style="color:#b91c1c">โหลดไม่สำเร็จ</strong>'+
+      esc(error?.message||error)+'</div></div>'
+  }
+}
+
+
+let activeJobPoId=null
+let activeJobHeader=null
+let activeJobRowsState=[]
+let activeJobAllRowsState=[]
+
+function renderActiveJobRows(){
+  const body=el('activeJobRows')
+  const progress=el('activeScanProgress')
+  const rows=activeJobRowsState||[]
+
+  const total=rows.length
+  const scanned=rows.filter(r=>Boolean(r.scanned)).length
+
+  el('activeJobTotalLines').textContent=total.toLocaleString('th-TH')
+  el('activeJobScannedLines').textContent=scanned.toLocaleString('th-TH')
+
+  if(total===0){
+    progress.className='active-scan-progress'
+    progress.textContent='ไม่มีรายการ Location สำหรับสแกน'
+    body.innerHTML='<tr><td colspan="6">ไม่มีรายการ</td></tr>'
+    return
+  }
+
+  progress.className='active-scan-progress'+(scanned===total?' done':'')
+  progress.textContent=
+    scanned===total
+      ? '✓ สแกนครบทุกรายการ '+scanned+' / '+total
+      : 'สแกนแล้ว '+scanned+' / '+total+' รายการ · เหลือ '+(total-scanned)+' รายการ'
+
+  body.innerHTML=rows.map(r=>`
+    <tr class="${r.scanned?'scanned-row':''}" data-active-job-row="${esc(r.id)}">
+      <td style="text-align:center">
+        <input
+          type="checkbox"
+          class="active-scan-check"
+          data-scan-row-id="${esc(r.id)}"
+          ${r.scanned?'checked':''}
+          aria-label="สแกนแล้ว ${esc(r.item_code||'')}"
+        >
+      </td>
+      <td class="active-item-code">${esc(r.item_code||'-')}</td>
+      <td>${esc(r.size||'-')}</td>
+      <td>${fmt(r.pick_qty)}</td>
+      <td class="active-location">${esc(r.location||'-')}</td>
+      <td>
+        <button
+          class="loc-qr-btn has-qr"
+          type="button"
+          data-view-location-qr="1"
+          data-warehouse="${esc(r.warehouse||'')}"
+          data-location="${esc(r.location||'')}"
+          title="แสดง QR ${esc(r.location||'')}"
+        >QR</button>
+      </td>
+      <td>
+        <span class="active-scanned-label ${r.scanned?'done':''}">
+          ${r.scanned?'✓ สแกนแล้ว':'ยังไม่สแกน'}
+        </span>
+      </td>
+    </tr>
+  `).join('')
+
+  bindLocationQrViewButtons()
+
+  body.querySelectorAll('[data-scan-row-id]').forEach(check=>{
+    check.addEventListener('change',async()=>{
+      const rowId=Number(check.dataset.scanRowId)
+      const row=activeJobRowsState.find(x=>Number(x.id)===rowId)
+      if(!row) return
+
+      const nextValue=Boolean(check.checked)
+      check.disabled=true
+
+      try{
+        const payload={
+          scanned:nextValue,
+          scanned_at:nextValue ? new Date().toISOString() : null,
+          scanned_by:nextValue ? (activeJobHeader?.created_by||'ADMIN') : null,
+          updated_at:new Date().toISOString()
+        }
+
+        const {error}=await db.from(PICKING_JOB_TABLE)
+          .update(payload)
+          .eq('id',rowId)
+
+        if(error) throw error
+
+        row.scanned=nextValue
+        row.scanned_at=payload.scanned_at
+        row.scanned_by=payload.scanned_by
+
+        renderActiveJobRows()
+      }catch(error){
+        console.error(error)
+        check.checked=!nextValue
+        alert('บันทึกสถานะสแกนไม่สำเร็จ\n\n'+(error?.message||error))
+      }finally{
+        check.disabled=false
+      }
+    })
+  })
+}
+
+async function openActiveJobSheet(poId,options={}){
+  activeJobPoId=Number(poId)
+  showPage('activejob')
+
+  el('activeJobRows').innerHTML='<tr><td colspan="7">กำลังโหลด...</td></tr>'
+  el('activeScanProgress').className='active-scan-progress'
+  el('activeScanProgress').textContent='กำลังโหลด...'
+
+  const notice=el('activeJobNotice')
+  notice.className='detail-message'
+
+  try{
+    const [headerRes,rowsRes]=await Promise.all([
+      db.from(HEADER_TABLE)
+        .select('id,po_no,customer,po_type,total_pairs,total_cartons,status,created_by')
+        .eq('id',activeJobPoId)
+        .single(),
+
+      db.from(PICKING_JOB_TABLE)
+        .select('id,po_id,po_item_id,line_no,item_code,model,color,size,warehouse,location,pick_qty,box_qty,loose_text,is_shortage,scanned,scanned_at,scanned_by,created_by,created_at')
+        .eq('po_id',activeJobPoId)
+        .order('line_no',{ascending:true})
+        .order('id',{ascending:true})
+    ])
+
+    if(headerRes.error) throw headerRes.error
+    if(rowsRes.error) throw rowsRes.error
+
+    activeJobHeader=headerRes.data
+    activeJobAllRowsState=rowsRes.data||[]
+    activeJobRowsState=activeJobAllRowsState.filter(r=>!r.is_shortage)
+
+    el('activeJobPo').textContent=activeJobHeader.po_no||'-'
+    el('activeJobCustomer').textContent=activeJobHeader.customer||'-'
+
+    if(options.showCreatedSuccess){
+      notice.className='detail-message show ok'
+      notice.textContent=
+        '✓ สร้างใบจัดงานสำเร็จ · ใบจัดงานนี้อยู่ใน ACTIVE PICKING แล้ว'
+    }
+
+    renderActiveJobRows()
+  }catch(error){
+    console.error(error)
+    activeJobHeader=null
+    activeJobRowsState=[]
+    activeJobAllRowsState=[]
+    el('activeScanProgress').textContent='โหลดไม่สำเร็จ'
+    el('activeJobRows').innerHTML=
+      `<tr><td colspan="7" style="color:#b91c1c">โหลดไม่สำเร็จ: ${esc(error?.message||error)}</td></tr>`
+  }
+}
+
+
+function activeJobRowsForPdf(){
+  return (activeJobAllRowsState||[]).map((r,index)=>({
+    no:index+1,
+    poItemId:r.po_item_id||null,
+    lineNo:r.line_no||null,
+    itemCode:r.item_code||'-',
+    model:r.model||'-',
+    color:r.color||'-',
+    size:r.size||'-',
+    box:num(r.box_qty),
+    pairs:num(r.pick_qty),
+    loose:r.loose_text||'',
+    warehouse:r.warehouse||'-',
+    location:r.location||'-',
+    shortage:Boolean(r.is_shortage)
+  }))
+}
+
+function buildActiveJobPdfSheet(){
+  if(!activeJobHeader || !activeJobAllRowsState.length){
+    showToast('ไม่พบข้อมูลใบจัดงาน')
+    return null
+  }
+
+  const rows=activeJobRowsForPdf()
+  const h=activeJobHeader
+
+  const po=txt(h.po_no)||'-'
+  const customer=txt(h.customer)||'-'
+  const type=txt(h.po_type)||'-'
+  const totalPairs=fmt(h.total_pairs)
+  const totalCartons=fmt(h.total_cartons)
+  const createdBy=txt(h.created_by)||'ADMIN'
+
+  const firstCreated=activeJobAllRowsState.find(r=>r.created_at)?.created_at
+  const createdAt=firstCreated
+    ? new Date(firstCreated).toLocaleString('th-TH',{
+        year:'numeric',month:'2-digit',day:'2-digit',
+        hour:'2-digit',minute:'2-digit'
+      })
+    : new Date().toLocaleString('th-TH',{
+        year:'numeric',month:'2-digit',day:'2-digit',
+        hour:'2-digit',minute:'2-digit'
+      })
+
+  const sheet=el('selectedJobPdfSheet')
+
+  sheet.innerHTML=`
+    <div class="pdf-job-title">ใบจัดงาน ${esc(customer)} - CARTON & LOOSE</div>
+    <div class="pdf-job-sub">แสดงจำนวนที่ต้องหยิบและ Location ที่เลือกจาก ERP Stock</div>
+
+    <table class="pdf-meta">
+      <tr>
+        <td class="label">CUSTOMER</td>
+        <td class="value">${esc(customer)}</td>
+        <td class="label">PO NUMBER</td>
+        <td class="value">${esc(po)}</td>
+      </tr>
+      <tr>
+        <td class="label">JOB TYPE</td>
+        <td class="value">${esc(type)}</td>
+        <td class="label">TOTAL PAIRS</td>
+        <td class="value">${esc(totalPairs)}</td>
+      </tr>
+      <tr>
+        <td class="label">CREATED BY</td>
+        <td class="value">${esc(createdBy)}</td>
+        <td class="label">TOTAL CARTONS</td>
+        <td class="value">${esc(totalCartons)}</td>
+      </tr>
+    </table>
+
+    <div class="pdf-section">ITEM / SIZE / LOCATION BREAKDOWN</div>
+
+    <table class="pdf-detail-table">
+      <thead>
+        <tr>
+          <th>No.</th>
+          <th>Item Code</th>
+          <th>Model</th>
+          <th>Color</th>
+          <th>Size</th>
+          <th>Box</th>
+          <th>Pairs</th>
+          <th>เศษ</th>
+          <th>Warehouse</th>
+          <th>Location</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.map(r=>`
+          <tr class="${r.shortage?'job-shortage':''}">
+            <td>${r.no}</td>
+            <td class="item">${esc(r.itemCode)}</td>
+            <td>${esc(r.model)}</td>
+            <td>${esc(r.color)}</td>
+            <td>${esc(r.size)}</td>
+            <td>${fmt(r.box)}</td>
+            <td>${fmt(r.pairs)}</td>
+            <td>${esc(r.loose||'-')}</td>
+            <td>${esc(r.warehouse)}</td>
+            <td class="loc"><b>${esc(r.location)}</b></td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+
+    <div class="pdf-footer-note">
+      CREATED AT ${esc(createdAt)}
+    </div>
+  `
+
+  return {sheet,po,customer,rows}
+}
+
+async function printActiveJob(){
+  const built=buildActiveJobPdfSheet()
+  if(!built) return
+
+  const btn=el('activeJobPrintBtn')
+  if(btn) btn.disabled=true
+
+  try{
+    const qrPages=await buildLocationQrPdfSheets(built.rows,built.po)
+
+    const printArea=el('printArea')
+    printArea.innerHTML=''
+
+    const jobClone=built.sheet.cloneNode(true)
+    jobClone.removeAttribute('id')
+    printArea.appendChild(jobClone)
+
+    qrPages.forEach(page=>{
+      const clone=page.cloneNode(true)
+      clone.classList.add('print-page-break')
+      printArea.appendChild(clone)
+    })
+
+    await waitForElementImages(printArea)
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))
+    window.print()
+  }catch(error){
+    console.error(error)
+    alert('เตรียมใบพิมพ์ไม่สำเร็จ\n\n'+(error?.message||error))
+  }finally{
+    if(btn) btn.disabled=false
+  }
+}
+
+async function saveActiveJobPdf(){
+  const built=buildActiveJobPdfSheet()
+  if(!built) return
+
+  const btn=el('activeJobPdfBtn')
+  if(btn){
+    btn.disabled=true
+    btn.textContent='กำลังสร้าง PDF...'
+  }
+
+  const stage=el('pdfCaptureStage')
+  const addedQrPages=[]
+
+  try{
+    if(!window.html2canvas || !window.jspdf?.jsPDF){
+      throw new Error('ไม่พบไลบรารี PDF')
+    }
+
+    const qrPages=await buildLocationQrPdfSheets(built.rows,built.po)
+    qrPages.forEach(page=>{
+      stage.appendChild(page)
+      addedQrPages.push(page)
+    })
+
+    const {jsPDF}=window.jspdf
+    const pdf=new jsPDF({
+      orientation:'portrait',
+      unit:'mm',
+      format:'a4',
+      compress:true
+    })
+
+    const jobCanvas=await canvasForPdfElement(built.sheet)
+    addCanvasAcrossPdfPages(pdf,jobCanvas,{startOnNewPage:false,alias:'ACTIVEJOB'})
+
+    for(let i=0;i<qrPages.length;i++){
+      const qrCanvas=await canvasForPdfElement(qrPages[i])
+      addCanvasAcrossPdfPages(pdf,qrCanvas,{
+        startOnNewPage:true,
+        alias:'ACTIVEQR'+i
+      })
+    }
+
+    const safePo=String(built.po||'PO').replace(/[\\/:*?"<>|]/g,'_')
+    pdf.save(`JOB_${safePo}.pdf`)
+    showToast('บันทึก PDF สำเร็จ')
+  }catch(error){
+    console.error(error)
+    alert('สร้าง PDF ไม่สำเร็จ\n\n'+(error?.message||error))
+  }finally{
+    addedQrPages.forEach(page=>page.remove())
+    if(btn){
+      btn.disabled=false
+      btn.textContent='PDF บันทึกไฟล์'
+    }
+  }
+}
+
+async function fetchErpRowsForItems(items){
+  const unique=[...new Set(items.map(x=>txt(x)).filter(Boolean))]
+  let all=[]
+  for(let i=0;i<unique.length;i+=40){
+    const {data,error}=await db.from(ERP_TABLE)
+      .select('item_number,color_name,size,color,warehouse,location,available_physical')
+      .in('item_number',unique.slice(i,i+40))
+      .limit(5000)
+    if(error) throw error
+    all=all.concat(data||[])
+  }
+  return all
+}
+
+function matchErp(item,erpRows){
+  return erpRows.filter(r=>
+    norm(r.item_number)===norm(item.item) &&
+    (!item.code || norm(r.color)===norm(item.code)) &&
+    (!item.assort || norm(r.size)===norm(item.assort))
+  )
+}
+
+
+function getSelectedLocationSet(itemId){
+  const key=String(itemId)
+  if(!pickingLocationSelections.has(key)){
+    pickingLocationSelections.set(key,new Set())
+  }
+  return pickingLocationSelections.get(key)
+}
+
+function selectedAllocationForLine(itemId){
+  const data=pickingLineData.get(String(itemId))
+  if(!data){
+    return {
+      picked:0,
+      remaining:0,
+      shortage:0,
+      targetFromStock:0,
+      required:0,
+      allocations:new Map()
+    }
+  }
+
+  const required=Math.max(0,num(data.required))
+  const availableTotal=Math.max(
+    0,
+    Number.isFinite(Number(data.availableTotal))
+      ? num(data.availableTotal)
+      : data.locations.reduce((s,r)=>s+Math.max(0,num(r.available_physical)),0)
+  )
+
+  // ยอดที่สามารถหยิบจาก ERP ได้จริง
+  const targetFromStock=Math.min(required,availableTotal)
+  // ส่วนที่ไม่มีของให้หยิบ = งานขาด
+  const shortage=Math.max(0,required-availableTotal)
+
+  let remaining=targetFromStock
+  const allocations=new Map()
+  const selected=getSelectedLocationSet(itemId)
+
+  // Set รักษาลำดับการติ๊กของผู้ใช้
+  selected.forEach(index=>{
+    const loc=data.locations[Number(index)]
+    if(!loc || remaining<=0){
+      allocations.set(Number(index),0)
+      return
+    }
+
+    const available=Math.max(0,num(loc.available_physical))
+    const pick=Math.min(available,remaining)
+    allocations.set(Number(index),pick)
+    remaining-=pick
+  })
+
+  return {
+    picked:targetFromStock-remaining,
+    remaining,
+    shortage,
+    targetFromStock,
+    required,
+    allocations
+  }
+}
+
+function updateLineLocationSelection(itemId){
+  const data=pickingLineData.get(String(itemId))
+  if(!data) return
+
+  const result=selectedAllocationForLine(itemId)
+
+  data.locations.forEach((loc,index)=>{
+    const row=el(`locRow_${itemId}_${index}`)
+    const qty=el(`locPick_${itemId}_${index}`)
+    const selected=getSelectedLocationSet(itemId).has(index)
+
+    if(row) row.classList.toggle('loc-row-selected',selected)
+    if(qty) qty.textContent=fmt(result.allocations.get(index)||0)
+  })
+
+  const status=el(`linePickStatus_${itemId}`)
+  if(status){
+    if(result.remaining<=0){
+      status.className='line-pick-status ready'
+
+      if(result.shortage>0 && result.targetFromStock<=0){
+        status.textContent='งานขาด '+fmt(result.shortage)+' คู่ · ไม่มีสินค้าใน ERP Stock'
+      }else if(result.shortage>0){
+        status.textContent='✓ เลือกของที่มีครบ '+fmt(result.picked)+' คู่ · งานขาด '+fmt(result.shortage)+' คู่'
+      }else{
+        status.textContent='✓ เลือก Location ครบ · หยิบ '+fmt(result.picked)+' / '+fmt(result.required)+' คู่'
+      }
+    }else{
+      status.className='line-pick-status pending'
+      status.textContent=
+        'เลือกแล้ว '+fmt(result.picked)+' / '+fmt(result.targetFromStock)+
+        ' คู่ · เหลือเลือก '+fmt(result.remaining)+' คู่'+
+        (result.shortage>0?' · งานขาด '+fmt(result.shortage)+' คู่':'')
+    }
+  }
+
+  updateOverallLocationSelectionStatus()
+}
+
+function updatePdfActionButtons(isReady){
+  const btn=el('openJobOrderBtn')
+  if(!btn) return
+
+  btn.classList.toggle('ready',Boolean(isReady))
+  btn.disabled=!isReady
+}
+
+function updateOverallLocationSelectionStatus(){
+  const lines=[...pickingLineData.entries()]
+  if(!lines.length){
+    updatePdfActionButtons(false)
+    return
+  }
+
+  let ready=0
+  let missing=0
+  let shortageLines=0
+  let shortagePairs=0
+
+  lines.forEach(([itemId,data])=>{
+    const result=selectedAllocationForLine(itemId)
+    if(result.remaining<=0) ready++
+    else missing++
+
+    if(result.shortage>0){
+      shortageLines++
+      shortagePairs+=result.shortage
+    }
+  })
+
+  const allReady=missing===0
+  updatePdfActionButtons(allReady)
+
+  if(allReady){
+    if(shortageLines>0){
+      setDetailMessage(
+        '✓ เลือก Location ครบทุกรายการ · มีงานขาด '+
+        shortageLines+' รายการ ('+fmt(shortagePairs)+' คู่) · สามารถสร้างใบจัดงานได้',
+        'warn'
+      )
+    }else{
+      setDetailMessage(
+        '✓ เลือก Location ครบทุกรายการ · สามารถสร้างใบจัดงานได้',
+        'ok'
+      )
+    }
+  }else{
+    setDetailMessage(
+      'เลือก Location ครบ '+ready+' / '+lines.length+
+      ' รายการ · เหลือ '+missing+' รายการ',
+      'info'
+    )
+  }
+}
+
+function allPickingLocationsReady(){
+  const lines=[...pickingLineData.keys()]
+  if(!lines.length) return false
+  return lines.every(itemId=>selectedAllocationForLine(itemId).remaining<=0)
+}
+
+
+async function findLocationQrRecord(warehouse,location){
+  const wh=txt(warehouse)
+  const loc=txt(location)
+
+  if(!loc) return null
+
+  // จับคู่ Warehouse + Location ก่อน
+  if(wh){
+    const exact=await db.from(LOCATION_QR_TABLE)
+      .select('id,warehouse,location,qr_value,qr_image_path,qr_image_url,is_active')
+      .eq('warehouse',wh)
+      .eq('location',loc)
+      .eq('is_active',true)
+      .limit(1)
+
+    if(exact.error) throw exact.error
+    if(exact.data?.length) return exact.data[0]
+  }
+
+  // fallback: หา Location อย่างเดียว กรณีชื่อ Warehouse ใน ERP กับ Master ต่างกัน
+  const fallback=await db.from(LOCATION_QR_TABLE)
+    .select('id,warehouse,location,qr_value,qr_image_path,qr_image_url,is_active')
+    .eq('location',loc)
+    .eq('is_active',true)
+    .limit(1)
+
+  if(fallback.error) throw fallback.error
+  return fallback.data?.[0] || null
+}
+
+function closeLocationQrViewer(){
+  const modal=el('locationQrViewModal')
+  if(!modal) return
+  modal.classList.remove('show')
+  modal.setAttribute('aria-hidden','true')
+}
+
+async function openLocationQrViewer(warehouse,location){
+  const modal=el('locationQrViewModal')
+  const body=el('locationQrViewBody')
+  if(!modal || !body) return
+
+  modal.classList.add('show')
+  modal.setAttribute('aria-hidden','false')
+
+  body.innerHTML=`
+    <div class="location-qr-view-error" style="color:#475569">
+      กำลังโหลด QR ของ ${esc(location||'-')}...
+    </div>
+  `
+
+  try{
+    const row=await findLocationQrRecord(warehouse,location)
+
+    if(!row){
+      body.innerHTML=`
+        <div class="location-qr-view-error">
+          ยังไม่มี QR ใน LOCATION QR MASTER<br>
+          <span style="font-size:18px">${esc(location||'-')}</span>
+        </div>
+      `
+      return
+    }
+
+    if(!row.qr_image_url){
+      body.innerHTML=`
+        <div class="location-qr-view-error">
+          พบ Location แล้ว แต่ยังไม่มีรูป QR<br>
+          <span style="font-size:18px">${esc(row.location||location||'-')}</span>
+        </div>
+      `
+      return
+    }
+
+    body.innerHTML=`
+      <div class="location-qr-view-image-box">
+        <img
+          class="location-qr-view-image"
+          src="${esc(row.qr_image_url)}"
+          alt="QR ${esc(row.location||location||'')}"
+        >
+      </div>
+
+      <div class="location-qr-view-location">${esc(row.location||location||'-')}</div>
+      <div class="location-qr-view-warehouse">${esc(row.warehouse||warehouse||'-')}</div>
+      <div class="location-qr-view-value">
+        QR VALUE: ${esc(row.qr_value||row.location||location||'-')}
+      </div>
+    `
+
+    const img=body.querySelector('.location-qr-view-image')
+    if(img){
+      img.addEventListener('error',()=>{
+        body.innerHTML=`
+          <div class="location-qr-view-error">
+            โหลดรูป QR ไม่สำเร็จ<br>
+            กรุณาตรวจสอบ Storage URL ของ ${esc(row.location||location||'-')}
+          </div>
+        `
+      },{once:true})
+    }
+  }catch(error){
+    console.error(error)
+    body.innerHTML=`
+      <div class="location-qr-view-error">
+        โหลด QR ไม่สำเร็จ<br>
+        ${esc(error?.message||error)}
+      </div>
+    `
+  }
+}
+
+function bindLocationQrViewButtons(){
+  document.querySelectorAll('[data-view-location-qr]').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      e.preventDefault()
+      e.stopPropagation()
+      openLocationQrViewer(
+        btn.dataset.warehouse||'',
+        btn.dataset.location||''
+      )
+    })
+  })
+}
+
+el('locationQrViewCloseBtn')?.addEventListener('click',closeLocationQrViewer)
+
+el('locationQrViewModal')?.addEventListener('click',e=>{
+  if(e.target===el('locationQrViewModal')){
+    closeLocationQrViewer()
+  }
+})
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape' && el('locationQrViewModal')?.classList.contains('show')){
+    closeLocationQrViewer()
+  }
+})
+
+function bindLocationCheckboxes(){
+  document.querySelectorAll('.loc-check[data-item-id]').forEach(check=>{
+    check.addEventListener('change',()=>{
+      const itemId=String(check.dataset.itemId)
+      const index=Number(check.dataset.locIndex)
+      const selected=getSelectedLocationSet(itemId)
+
+      if(check.checked) selected.add(index)
+      else selected.delete(index)
+
+      updateLineLocationSelection(itemId)
+      savePersistedPickingSelections(currentPickingPoId)
+    })
+  })
+}
+
+async function openPickingDetail(poId,source='active'){
+  const nextPoId=Number(poId)
+  const isNewPo=currentPickingPoId!==nextPoId
+
+  if(isNewPo){
+    // ล้างเฉพาะ state ใน RAM แล้ว Restore จาก localStorage ด้านล่าง
+    pickingLocationSelections.clear()
+  }
+  pickingLineData.clear()
+
+  currentPickingPoId=nextPoId
+  currentPickingSource=source
+  rememberCurrentPickingPo(currentPickingPoId,currentPickingSource)
+  showPage('detail')
+  updatePdfActionButtons(false)
+  el('pickingDetailList').innerHTML='<div class="empty"><div><strong>กำลังโหลดรายละเอียด PO</strong></div></div>'
+  el('detailMessage').className='detail-message'
+
+  try{
+    const [hRes,iRes]=await Promise.all([
+      db.from(HEADER_TABLE).select('*').eq('id',currentPickingPoId).single(),
+      db.from(ITEM_TABLE)
+        .select('id,line_no,barcode,item,code,assort,order_pairs,carton_qty,remark')
+        .eq('po_id',currentPickingPoId)
+        .order('line_no',{ascending:true})
+    ])
+    if(hRes.error) throw hRes.error
+    if(iRes.error) throw iRes.error
+
+    const h=hRes.data
+    const items=iRes.data||[]
+    currentPickingHeader=h
+
+    el('detailPo').textContent=h.po_no||'-'
+    el('detailCustomer').textContent=h.customer||'-'
+    el('detailType').textContent=h.po_type||'-'
+    el('detailPairs').textContent=fmt(h.total_pairs)
+    el('detailCartons').textContent=fmt(h.total_cartons)
+    el('detailStatusBadge').textContent=poStatusLabel(h.status)
+
+    const startBtn=el('startPickingBtn')
+    startBtn.style.display=h.status==='READY_FOR_PICKING'?'':'none'
+    startBtn.disabled=false
+
+    if(!items.length){
+      el('pickingDetailList').innerHTML='<div class="empty"><div><strong>PO นี้ไม่มีรายการสินค้า</strong></div></div>'
+      return
+    }
+
+    setDetailMessage('กำลังค้นหา Location จาก ERP Stock...','info')
+    const erpRows=await fetchErpRowsForItems(items.map(r=>r.item))
+    let missing=0, shortage=0
+
+    el('pickingDetailList').innerHTML=items.map((item,index)=>{
+      // เรียง Location ที่มียอดมากไว้ด้านบน แต่ยังแสดง Location = 0 แบบ disabled
+      const locs=matchErp(item,erpRows)
+        .slice()
+        .sort((a,b)=>num(b.available_physical)-num(a.available_physical))
+
+      const total=locs.reduce((s,r)=>s+num(r.available_physical),0)
+      const required=num(item.order_pairs)
+
+      if(!locs.length) missing++
+      else if(total<required) shortage++
+
+      pickingLineData.set(String(item.id),{
+        item,
+        required,
+        availableTotal:total,
+        locations:locs
+      })
+
+      // ถ้าเพิ่งเปิดหน้าใหม่ / Refresh Browser ให้คืน Location ที่เคยเลือก
+      if(isNewPo || getSelectedLocationSet(item.id).size===0){
+        restorePersistedPickingLineSelection(
+          currentPickingPoId,
+          item.id,
+          locs
+        )
+      }
+
+      const selectedSet=getSelectedLocationSet(item.id)
+
+      const locations=locs.length ? `
+        <div class="loc-table-wrap">
+          <table class="loc-table">
+            <thead>
+              <tr>
+                <th class="loc-select-cell">เลือก</th>
+                <th>Warehouse</th>
+                <th>Location</th>
+                <th>Available</th>
+                <th>Pick Qty</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${locs.map((loc,locIndex)=>{
+                const available=Math.max(0,num(loc.available_physical))
+                const checked=selectedSet.has(locIndex)
+                return `
+                  <tr id="locRow_${item.id}_${locIndex}" class="${checked?'loc-row-selected':''}">
+                    <td class="loc-select-cell">
+                      <input
+                        class="loc-check"
+                        type="checkbox"
+                        data-item-id="${esc(item.id)}"
+                        data-loc-index="${locIndex}"
+                        ${checked?'checked':''}
+                        ${available<=0?'disabled':''}
+                        aria-label="เลือก Location ${esc(loc.location||'-')}"
+                      >
+                    </td>
+                    <td>${esc(loc.warehouse||'-')}</td>
+                    <td><b>${esc(loc.location||'-')}</b></td>
+                    <td class="${available>0?'loc-ok':'loc-short'}">${fmt(available)}</td>
+                    <td id="locPick_${item.id}_${locIndex}" class="loc-pick-qty">0</td>
+                  </tr>`
+              }).join('')}
+            </tbody>
+          </table>
+        </div>` :
+        '<div class="no-location">ไม่พบ Item / Color / Size นี้ใน ERP Stock</div>'
+
+      return `
+        <div class="pick-line">
+          <div class="pick-line-head">
+            <div><small>NO.</small><b>${index+1}</b></div>
+            <div><small>ITEM</small><b>${esc(item.item||'-')} ${esc(item.code||'')}</b></div>
+            <div><small>SIZE</small><b>${esc(item.assort||'-')}</b></div>
+            <div><small>PAIRS</small><b>${fmt(item.order_pairs)}</b></div>
+            <div><small>BOX</small><b>${fmt(item.carton_qty)}</b></div>
+            <div><small>ERP TOTAL</small><b class="${total>=required?'loc-ok':'loc-short'}">${fmt(total)}</b></div>
+          </div>
+          ${locations}
+          <div id="linePickStatus_${item.id}" class="line-pick-status pending">
+            ${total<=0
+              ? 'งานขาด '+fmt(required)+' คู่ · ไม่มีสินค้าใน ERP Stock'
+              : 'ยังไม่ได้เลือก Location · ต้องการ '+fmt(required)+' คู่'}
+          </div>
+        </div>`
+    }).join('')
+
+    bindLocationCheckboxes()
+
+    // คืนสถานะ checkbox เดิมเมื่อกด Refresh Location ใน PO เดิม
+    pickingLineData.forEach((data,itemId)=>{
+      updateLineLocationSelection(itemId)
+    })
+
+    // Normalize และบันทึก index ใหม่ตาม ERP Location ปัจจุบัน
+    savePersistedPickingSelections(currentPickingPoId)
+    updateOverallLocationSelectionStatus()
+
+  }catch(error){
+    console.error(error)
+    setDetailMessage('โหลดรายละเอียดไม่สำเร็จ: '+(error?.message||error),'warn')
+  }
+}
+
+
+function selectedPickingRowsForPdf(){
+  const rows=[]
+  let no=1
+
+  pickingLineData.forEach((data,itemId)=>{
+    const result=selectedAllocationForLine(itemId)
+    const selected=getSelectedLocationSet(itemId)
+    let first=true
+
+    selected.forEach(index=>{
+      const qty=num(result.allocations.get(Number(index))||0)
+      if(qty<=0) return
+
+      const loc=data.locations[Number(index)]
+      if(!loc) return
+
+      const item=data.item
+      const boxQty=Math.floor(qty/6)
+      const looseQty=qty%6
+
+      rows.push({
+        no:no++,
+        poItemId:Number(item.id)||null,
+        lineNo:Number(item.line_no)||null,
+        itemCode:(txt(item.item)||'')+(txt(item.code)||''),
+        model:txt(item.item)||'-',
+        color:txt(item.code)||'-',
+        size:txt(item.assort)||'-',
+        box:boxQty,
+        pairs:qty,
+        loose:first && txt(item.remark)
+          ? txt(item.remark)
+          : (looseQty>0 ? 'เศษ'+looseQty : ''),
+        warehouse:txt(loc.warehouse)||'-',
+        location:txt(loc.location)||'-',
+        shortage:false
+      })
+
+      first=false
+    })
+
+    // ถ้ายอด ERP ไม่พอ ให้สร้างแถว "งานขาด" อัตโนมัติ
+    if(result.shortage>0){
+      const item=data.item
+      const shortage=result.shortage
+
+      rows.push({
+        no:no++,
+        poItemId:Number(item.id)||null,
+        lineNo:Number(item.line_no)||null,
+        itemCode:(txt(item.item)||'')+(txt(item.code)||''),
+        model:txt(item.item)||'-',
+        color:txt(item.code)||'-',
+        size:txt(item.assort)||'-',
+        box:Math.floor(shortage/6),
+        pairs:shortage,
+        loose:shortage%6>0 ? 'เศษ'+(shortage%6) : '',
+        warehouse:'-',
+        location:'งานขาด',
+        shortage:true
+      })
+    }
+  })
+
+  return rows
+}
+
+
+function uniqueSelectedLocationsForQr(rows){
+  const map=new Map()
+
+  ;(rows||[]).forEach(r=>{
+    if(r.shortage) return
+    const location=txt(r.location)
+    const warehouse=txt(r.warehouse)
+    if(!location || location==='-' || norm(location)==='งานขาด') return
+
+    const key=norm(warehouse)+'||'+norm(location)
+    if(!map.has(key)){
+      map.set(key,{warehouse,location})
+    }
+  })
+
+  return [...map.values()]
+}
+
+async function fetchQrMasterForJobLocations(locations){
+  if(!locations.length) return []
+
+  const uniqueLocations=[...new Set(locations.map(x=>txt(x.location)).filter(Boolean))]
+  const {data,error}=await db.from(LOCATION_QR_TABLE)
+    .select('id,warehouse,location,qr_value,qr_image_path,qr_image_url,is_active')
+    .in('location',uniqueLocations)
+    .eq('is_active',true)
+    .limit(1000)
+
+  if(error) throw error
+  return data||[]
+}
+
+function matchQrMaster(locationInfo,masterRows){
+  const exact=(masterRows||[]).find(r=>
+    norm(r.warehouse)===norm(locationInfo.warehouse) &&
+    norm(r.location)===norm(locationInfo.location)
+  )
+  if(exact) return exact
+
+  return (masterRows||[]).find(r=>norm(r.location)===norm(locationInfo.location)) || null
+}
+
+async function imageUrlToDataUrl(url){
+  if(!url) return ''
+  if(String(url).startsWith('data:')) return url
+
+  try{
+    const response=await fetch(url,{cache:'no-store'})
+    if(!response.ok) throw new Error('HTTP '+response.status)
+    const blob=await response.blob()
+    return await new Promise((resolve,reject)=>{
+      const reader=new FileReader()
+      reader.onload=()=>resolve(String(reader.result||''))
+      reader.onerror=reject
+      reader.readAsDataURL(blob)
+    })
+  }catch(error){
+    console.warn('แปลง QR เป็น data URL ไม่สำเร็จ',url,error)
+    return url
+  }
+}
+
+async function buildLocationQrPdfSheets(rows,po){
+  const locations=uniqueSelectedLocationsForQr(rows)
+  if(!locations.length) return []
+
+  const masters=await fetchQrMasterForJobLocations(locations)
+  const enriched=[]
+
+  for(const loc of locations){
+    const master=matchQrMaster(loc,masters)
+    let imageUrl=master?.qr_image_url||''
+
+    // แปลงเป็น data URL ก่อน Print/PDF เพื่อลดปัญหารูปไม่โหลดทัน / CORS
+    if(imageUrl){
+      imageUrl=await imageUrlToDataUrl(imageUrl)
+    }
+
+    enriched.push({
+      warehouse:loc.warehouse,
+      location:loc.location,
+      qrValue:master?.qr_value||loc.location,
+      imageUrl,
+      found:Boolean(master && master.qr_image_url)
+    })
+  }
+
+  const pages=[]
+  const perPage=4
+
+  for(let start=0;start<enriched.length;start+=perPage){
+    const pageItems=enriched.slice(start,start+perPage)
+    const page=document.createElement('div')
+    page.className='pdf-qr-sheet'
+    page.innerHTML=`
+      <div class="pdf-qr-title">LOCATION QR SHEET</div>
+      <div class="pdf-qr-subtitle">
+        PO ${esc(po||'-')} · ${enriched.length} Location${enriched.length>1?'s':''}
+      </div>
+
+      <div class="pdf-qr-grid">
+        ${pageItems.map(item=>`
+          <div class="pdf-qr-card">
+            ${item.found
+              ? `<img src="${esc(item.imageUrl)}" alt="QR ${esc(item.location)}">`
+              : `<div class="pdf-qr-missing">ไม่พบ QR ใน LOCATION QR MASTER</div>`
+            }
+            <div class="pdf-qr-warehouse">${esc(item.warehouse||'-')}</div>
+            <div class="pdf-qr-location">${esc(item.location||'-')}</div>
+            <div class="pdf-qr-value">QR VALUE: ${esc(item.qrValue||item.location||'-')}</div>
+          </div>
+        `).join('')}
+      </div>
+    `
+    pages.push(page)
+  }
+
+  return pages
+}
+
+async function waitForElementImages(root){
+  const images=[...root.querySelectorAll('img')]
+  await Promise.all(images.map(img=>{
+    if(img.complete && img.naturalWidth>0) return Promise.resolve()
+    return new Promise(resolve=>{
+      const done=()=>resolve()
+      img.addEventListener('load',done,{once:true})
+      img.addEventListener('error',done,{once:true})
+      setTimeout(done,5000)
+    })
+  }))
+}
+
+async function canvasForPdfElement(element){
+  element.style.width='794px'
+  element.style.minHeight='1123px'
+  element.style.boxSizing='border-box'
+
+  if(document.fonts?.ready){
+    try{await document.fonts.ready}catch(e){}
+  }
+  await waitForElementImages(element)
+  await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))
+
+  const captureWidth=794
+  const captureHeight=Math.max(1123,element.scrollHeight)
+
+  return await html2canvas(element,{
+    scale:2,
+    width:captureWidth,
+    height:captureHeight,
+    windowWidth:captureWidth,
+    windowHeight:captureHeight,
+    backgroundColor:'#ffffff',
+    useCORS:true,
+    allowTaint:false,
+    logging:false,
+    scrollX:0,
+    scrollY:0
+  })
+}
+
+function addCanvasAcrossPdfPages(pdf,canvas,{startOnNewPage=false,alias='PAGE'}={}){
+  const pageWidth=pdf.internal.pageSize.getWidth()
+  const pageHeight=pdf.internal.pageSize.getHeight()
+  const margin=8
+  const usableWidth=pageWidth-(margin*2)
+  const usableHeight=pageHeight-(margin*2)
+  const imgWidth=usableWidth
+  const imgHeight=(canvas.height*imgWidth)/canvas.width
+  const imageData=canvas.toDataURL('image/png')
+
+  if(startOnNewPage) pdf.addPage()
+
+  let remainingHeight=imgHeight
+  let y=margin
+  pdf.addImage(imageData,'PNG',margin,y,imgWidth,imgHeight,alias,'FAST')
+  remainingHeight-=usableHeight
+
+  while(remainingHeight>0.5){
+    y=margin-(imgHeight-remainingHeight)
+    pdf.addPage()
+    pdf.addImage(imageData,'PNG',margin,y,imgWidth,imgHeight,alias,'FAST')
+    remainingHeight-=usableHeight
+  }
+}
+
+function buildSelectedJobPdfSheet(){
+  if(!allPickingLocationsReady()){
+    showToast('กรุณาเลือก Location ให้ครบก่อน')
+    return null
+  }
+
+  const rows=selectedPickingRowsForPdf()
+  if(!rows.length){
+    showToast('ไม่พบรายการสำหรับสร้างใบจัดงาน')
+    return null
+  }
+
+  const po=txt(el('detailPo')?.textContent)||'-'
+  const customer=txt(el('detailCustomer')?.textContent)||'-'
+  const type=txt(el('detailType')?.textContent)||'-'
+  const totalPairs=txt(el('detailPairs')?.textContent)||'0'
+  const totalCartons=txt(el('detailCartons')?.textContent)||'0'
+  const createdBy=txt(el('importCreatedBy')?.value)||txt(el('createdBy')?.value)||'ADMIN'
+  const createdAt=new Date().toLocaleString('th-TH',{
+    year:'numeric',month:'2-digit',day:'2-digit',
+    hour:'2-digit',minute:'2-digit'
+  })
+
+  const sheet=el('selectedJobPdfSheet')
+
+  sheet.innerHTML=`
+    <div class="pdf-job-title">ใบจัดงาน ${esc(customer)} - CARTON & LOOSE</div>
+    <div class="pdf-job-sub">แสดงจำนวนที่ต้องหยิบและ Location ที่เลือกจาก ERP Stock</div>
+
+    <table class="pdf-meta">
+      <tr>
+        <td class="label">CUSTOMER</td>
+        <td class="value">${esc(customer)}</td>
+        <td class="label">PO NUMBER</td>
+        <td class="value">${esc(po)}</td>
+      </tr>
+      <tr>
+        <td class="label">JOB TYPE</td>
+        <td class="value">${esc(type)}</td>
+        <td class="label">TOTAL PAIRS</td>
+        <td class="value">${esc(totalPairs)}</td>
+      </tr>
+      <tr>
+        <td class="label">CREATED BY</td>
+        <td class="value">${esc(createdBy)}</td>
+        <td class="label">TOTAL CARTONS</td>
+        <td class="value">${esc(totalCartons)}</td>
+      </tr>
+    </table>
+
+    <div class="pdf-section">ITEM / SIZE / LOCATION BREAKDOWN</div>
+
+    <table class="pdf-detail-table">
+      <thead>
+        <tr>
+          <th>No.</th>
+          <th>Item Code</th>
+          <th>Model</th>
+          <th>Color</th>
+          <th>Size</th>
+          <th>Box</th>
+          <th>Pairs</th>
+          <th>เศษ</th>
+          <th>Warehouse</th>
+          <th>Location</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.map(r=>`
+          <tr class="${r.shortage?'job-shortage':''}">
+            <td>${r.no}</td>
+            <td class="item">${esc(r.itemCode)}</td>
+            <td>${esc(r.model)}</td>
+            <td>${esc(r.color)}</td>
+            <td>${esc(r.size)}</td>
+            <td>${fmt(r.box)}</td>
+            <td>${fmt(r.pairs)}</td>
+            <td>${esc(r.loose||'-')}</td>
+            <td>${esc(r.warehouse)}</td>
+            <td class="loc"><b>${esc(r.location)}</b></td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+
+    <div class="pdf-footer-note">
+      CREATED AT ${esc(createdAt)}
+    </div>
+  `
+
+  return {sheet,po,customer,rows}
+}
+
+
+function syncJobOrderEditorFromSelections(){
+  if(!allPickingLocationsReady()) return false
+
+  const rows=selectedPickingRowsForPdf()
+
+  jobRows.length=0
+  rows.forEach(r=>{
+    jobRows.push({
+      item:r.itemCode,
+      model:r.model,
+      color:r.color,
+      size:r.size,
+      box:r.box,
+      pairs:r.pairs,
+      loose:r.loose,
+      location:r.location,
+      shortage:Boolean(r.shortage)
+    })
+  })
+  renderJobRows()
+
+  const h=currentPickingHeader||{}
+  el('customer').value=h.customer||el('detailCustomer').textContent||''
+  el('poNumber').value=h.po_no||el('detailPo').textContent||''
+  el('jobType').value=h.po_type||el('detailType').textContent||'ASN'
+
+  if(el('deliveryDate')){
+    el('deliveryDate').value=h.delivery_date||''
+  }
+
+  el('createdBy').value=
+    h.created_by||
+    el('importCreatedBy')?.value||
+    'ADMIN'
+
+  el('createdAt').textContent=nowThai()
+
+  const shortageRows=rows.filter(r=>r.shortage)
+  const notice=el('jobOrderNotice')
+
+  if(shortageRows.length){
+    const shortagePairs=shortageRows.reduce((s,r)=>s+num(r.pairs),0)
+    notice.className='detail-message show warn'
+    notice.textContent=
+      'ใบจัดงานมีงานขาด '+shortageRows.length+
+      ' รายการ รวม '+fmt(shortagePairs)+
+      ' คู่ · ระบบระบุ Location = งานขาด ให้แล้ว'
+  }else{
+    notice.className='detail-message show ok'
+    notice.textContent='Location ครบทุกรายการ · Print/PDF จะสร้าง LOCATION QR SHEET ต่อท้ายอัตโนมัติ'
+  }
+
+  return true
+}
+
+
+function pickingJobStableKey(row){
+  return [
+    String(row.poItemId||''),
+    norm(row.warehouse),
+    norm(row.location),
+    row.shortage?'1':'0'
+  ].join('|')
+}
+
+async function persistCurrentJobOrder(){
+  if(!currentPickingPoId){
+    throw new Error('ไม่พบ PO ปัจจุบัน')
+  }
+
+  const rows=selectedPickingRowsForPdf()
+  if(!rows.length){
+    throw new Error('ไม่พบรายการสำหรับสร้างใบจัดงาน')
+  }
+
+  // เก็บสถานะ scanned เดิมไว้ หากมีการสร้างใบจัดซ้ำ
+  const existingRes=await db.from(PICKING_JOB_TABLE)
+    .select('id,po_item_id,warehouse,location,is_shortage,scanned,scanned_at,scanned_by')
+    .eq('po_id',currentPickingPoId)
+
+  if(existingRes.error) throw existingRes.error
+
+  const oldScanMap=new Map()
+  ;(existingRes.data||[]).forEach(r=>{
+    oldScanMap.set(
+      [
+        String(r.po_item_id||''),
+        norm(r.warehouse),
+        norm(r.location),
+        r.is_shortage?'1':'0'
+      ].join('|'),
+      {
+        scanned:Boolean(r.scanned),
+        scanned_at:r.scanned_at||null,
+        scanned_by:r.scanned_by||null
+      }
+    )
+  })
+
+  // ใช้ delete + insert เพื่อให้ Allocation ใน Supabase ตรงกับใบจัดล่าสุด
+  const delRes=await db.from(PICKING_JOB_TABLE)
+    .delete()
+    .eq('po_id',currentPickingPoId)
+
+  if(delRes.error) throw delRes.error
+
+  const nowIso=new Date().toISOString()
+  const createdBy=currentPickingHeader?.created_by||'ADMIN'
+
+  const payload=rows.map(r=>{
+    const old=oldScanMap.get(pickingJobStableKey(r))
+    const shortage=Boolean(r.shortage)
+
+    return {
+      po_id:currentPickingPoId,
+      po_item_id:r.poItemId||null,
+      line_no:r.lineNo||null,
+      item_code:r.itemCode||null,
+      model:r.model||null,
+      color:r.color||null,
+      size:r.size||null,
+      warehouse:r.warehouse||null,
+      location:r.location||null,
+      pick_qty:num(r.pairs),
+      box_qty:num(r.box),
+      loose_text:r.loose||null,
+      is_shortage:shortage,
+
+      // งานขาดไม่ต้องสแกน
+      scanned:shortage ? true : Boolean(old?.scanned),
+      scanned_at:shortage ? nowIso : (old?.scanned_at||null),
+      scanned_by:shortage ? createdBy : (old?.scanned_by||null),
+
+      created_by:createdBy,
+      created_at:nowIso,
+      updated_at:nowIso
+    }
+  })
+
+  const insertRes=await db.from(PICKING_JOB_TABLE)
+    .insert(payload)
+
+  if(insertRes.error) throw insertRes.error
+
+  const headerRes=await db.from(HEADER_TABLE)
+    .update({status:'JOB_CREATED'})
+    .eq('id',currentPickingPoId)
+
+  if(headerRes.error) throw headerRes.error
+
+  if(currentPickingHeader){
+    currentPickingHeader.status='JOB_CREATED'
+  }
+
+  return rows
+}
+
+async function openJobOrderPreview(){
+  if(!allPickingLocationsReady()){
+    setDetailMessage('กรุณาเลือก Location ให้ครบก่อนสร้างใบจัดงาน','warn')
+    showToast('ยังเลือก Location ไม่ครบ')
+    return
+  }
+
+  if(!syncJobOrderEditorFromSelections()) return
+
+  const btn=el('openJobOrderBtn')
+  if(btn){
+    btn.disabled=true
+    btn.textContent='กำลังสร้างใบจัดงาน...'
+  }
+
+  try{
+    await persistCurrentJobOrder()
+
+    el('detailStatusBadge').textContent='ทำใบจัดแล้ว'
+    setDetailMessage(
+      '✓ สร้างใบจัดงานแล้ว · PO นี้ถูกย้ายไป ACTIVE PICKING',
+      'ok'
+    )
+
+    await loadOrders()
+    await loadActivePicking()
+
+    await openActiveJobSheet(currentPickingPoId,{showCreatedSuccess:true})
+  }catch(error){
+    console.error(error)
+    setDetailMessage('สร้างใบจัดงานไม่สำเร็จ: '+(error?.message||error),'warn')
+    alert(
+      'สร้างใบจัดงานไม่สำเร็จ\n\n'+
+      (error?.message||error)+
+      '\n\nตรวจสอบว่ารัน SQL สร้างตาราง picking_job_locations แล้ว'
+    )
+  }finally{
+    if(btn){
+      btn.disabled=false
+      btn.textContent='สร้างใบจัดงาน'
+    }
+  }
+}
+
+async function printSelectedJob(){
+  const built=buildSelectedJobPdfSheet()
+  if(!built) return
+
+  const btn=el('printSelectedJobBtn')
+  if(btn) btn.disabled=true
+
+  try{
+    const qrPages=await buildLocationQrPdfSheets(built.rows,built.po)
+
+    const printArea=el('printArea')
+    printArea.innerHTML=''
+
+    const jobClone=built.sheet.cloneNode(true)
+    jobClone.removeAttribute('id')
+    printArea.appendChild(jobClone)
+
+    qrPages.forEach(page=>{
+      const clone=page.cloneNode(true)
+      clone.classList.add('print-page-break')
+      printArea.appendChild(clone)
+    })
+
+    await waitForElementImages(printArea)
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))
+
+    window.print()
+  }catch(error){
+    console.error(error)
+    alert('เตรียมใบพิมพ์ไม่สำเร็จ\n\n'+(error?.message||error))
+  }finally{
+    if(btn) btn.disabled=false
+  }
+}
+
+async function saveSelectedJobPdf(){
+  const built=buildSelectedJobPdfSheet()
+  if(!built) return
+
+  const btn=el('saveSelectedPdfBtn')
+  btn.disabled=true
+  const oldText=btn.textContent
+  btn.textContent='กำลังสร้าง PDF...'
+
+  const stage=el('pdfCaptureStage')
+  const addedQrPages=[]
+
+  try{
+    if(!window.html2canvas || !window.jspdf?.jsPDF){
+      throw new Error('ไม่พบไลบรารี PDF')
+    }
+
+    const qrPages=await buildLocationQrPdfSheets(built.rows,built.po)
+    qrPages.forEach(page=>{
+      stage.appendChild(page)
+      addedQrPages.push(page)
+    })
+
+    const {jsPDF}=window.jspdf
+    const pdf=new jsPDF({
+      orientation:'portrait',
+      unit:'mm',
+      format:'a4',
+      compress:true
+    })
+
+    // หน้าแรก = ใบจัดงาน
+    const jobCanvas=await canvasForPdfElement(built.sheet)
+    addCanvasAcrossPdfPages(pdf,jobCanvas,{startOnNewPage:false,alias:'JOB'})
+
+    // หน้าถัดไป = QR Location ไม่ซ้ำของ PO นี้
+    for(let i=0;i<qrPages.length;i++){
+      const qrCanvas=await canvasForPdfElement(qrPages[i])
+      addCanvasAcrossPdfPages(pdf,qrCanvas,{startOnNewPage:true,alias:'QR'+i})
+    }
+
+    const safePo=String(built.po||'PO').replace(/[\\/:*?"<>|]/g,'_')
+    pdf.save(`JOB_${safePo}.pdf`)
+    showToast(
+      qrPages.length
+        ? 'บันทึก PDF พร้อม Location QR สำเร็จ'
+        : 'บันทึก PDF สำเร็จ'
+    )
+  }catch(error){
+    console.error(error)
+    alert('สร้าง PDF ไม่สำเร็จ\n\n'+(error?.message||error))
+  }finally{
+    addedQrPages.forEach(page=>page.remove())
+    btn.disabled=false
+    btn.textContent=oldText
+  }
+}
+
+async function startCurrentPicking(){
+  if(!currentPickingPoId) return
+
+  if(!allPickingLocationsReady()){
+    setDetailMessage('กรุณาติ๊กเลือก Location ให้ครบยอดของทุกรายการก่อน START PICKING','warn')
+    showToast('ยังเลือก Location ไม่ครบ')
+    return
+  }
+
+  if(!confirm('ยืนยัน START PICKING ตาม Location ที่เลือกหรือไม่?')) return
+
+  const btn=el('startPickingBtn')
+  btn.disabled=true
+  try{
+    const {error}=await db.from(HEADER_TABLE)
+      .update({status:'PICKING'})
+      .eq('id',currentPickingPoId)
+    if(error) throw error
+
+    el('detailStatusBadge').textContent='PICKING'
+    btn.style.display='none'
+    setDetailMessage('เริ่ม PICKING แล้ว · เมื่อกดสร้างใบจัดงาน PO จึงจะไปแสดงใน ACTIVE PICKING','ok')
+    await loadActivePicking()
+  }catch(error){
+    setDetailMessage('เปลี่ยนสถานะไม่สำเร็จ: '+(error?.message||error),'warn')
+    btn.disabled=false
+  }
+}
+
+el('reloadActiveBtn').onclick=loadActivePicking
+el('activeJobPrintBtn').onclick=printActiveJob
+el('activeJobPdfBtn').onclick=saveActiveJobPdf
+el('activeJobBackBtn').onclick=()=>showPage('active')
+el('openJobOrderBtn').onclick=openJobOrderPreview
+el('printSelectedJobBtn').onclick=printSelectedJob
+el('saveSelectedPdfBtn').onclick=saveSelectedJobPdf
+el('startPickingBtn').onclick=startCurrentPicking
+el('reloadDetailBtn').onclick=()=>{
+  if(currentPickingPoId) openPickingDetail(currentPickingPoId,currentPickingSource)
+}
+el('detailBackBtn').onclick=()=>showPage(currentPickingSource==='orders'?'orders':'active')
+el('jobOrderBackBtn').onclick=()=>showPage('detail')
+
+
+/* =========================
+   ERP STOCK SEARCH
+   ========================= */
+async function refreshErpDbStatus(){
+  const badge=el('erpDbCountBadge')
+  const note=el('stockDbNote')
+  try{
+    const {data,error,count}=await db
+      .from(ERP_TABLE)
+      .select('id',{count:'exact'})
+      .limit(1)
+
+    if(error) throw error
+
+    const total=Number(count||0)
+    badge.textContent='DB: '+total.toLocaleString('th-TH')+' ROWS'
+
+    if(total===0 && (!data || data.length===0)){
+      note.className='stock-db-note show warn'
+      note.textContent='หน้าเว็บมองเห็นฐาน ERP = 0 แถว หาก Supabase มีข้อมูลอยู่จริง ให้รัน RLS Policy สำหรับ erp_stock_ptt ก่อน'
+    }else{
+      note.className='stock-db-note show ok'
+      note.textContent='เชื่อมต่อ erp_stock_ptt สำเร็จ · พบ '+total.toLocaleString('th-TH')+' แถว'
+    }
+  }catch(error){
+    badge.textContent='DB: ERROR'
+    note.className='stock-db-note show warn'
+    note.textContent='เชื่อมฐานข้อมูลไม่สำเร็จ: '+(error?.message||error)
+  }
+}
+
+function renderStockSummary(rows,query){
+  const box=el('stockSummary')
+  if(!rows.length){
+    box.className='stock-summary'
+    return
+  }
+
+  const exactRows=rows.filter(r=>norm(r.item_number)===norm(query))
+  const used=exactRows.length ? exactRows : rows
+
+  const itemNames=[...new Set(used.map(r=>txt(r.item_number)).filter(Boolean))]
+  const locations=new Set(
+    used.map(r=>[txt(r.warehouse),txt(r.location)].filter(Boolean).join(' | ')).filter(Boolean)
+  )
+  const totalAvailable=used.reduce((sum,r)=>sum+num(r.available_physical),0)
+
+  el('stockSumItem').textContent=itemNames.length===1 ? itemNames[0] : itemNames.length+' Items'
+  el('stockSumAvailable').textContent=fmt(totalAvailable)
+  el('stockSumLocations').textContent=locations.size.toLocaleString('th-TH')
+  el('stockSumRows').textContent=used.length.toLocaleString('th-TH')
+  box.className='stock-summary show'
+}
+
+async function searchErpStock(){
+  const q=txt(el('stockSearchInput').value)
+  const body=el('stockBody')
+
+  if(!q){
+    el('stockSummary').className='stock-summary'
+    body.innerHTML='<tr><td colspan="7">กรอก Item ก่อน</td></tr>'
+    return
+  }
+
+  body.innerHTML='<tr><td colspan="7">กำลังค้นหา...</td></tr>'
+  el('stockSummary').className='stock-summary'
+
+  try{
+    // 1) ค้นแบบตรง Item ก่อน
+    let result=await db.from(ERP_TABLE)
+      .select('item_number,color_name,size,color,warehouse,location,available_physical')
+      .ilike('item_number',q)
+      .order('item_number',{ascending:true})
+      .order('color',{ascending:true})
+      .order('size',{ascending:true})
+      .limit(1000)
+
+    if(result.error) throw result.error
+    let rows=result.data||[]
+
+    // 2) ถ้าไม่พบแบบตรง ให้ค้นแบบบางส่วน
+    if(!rows.length){
+      result=await db.from(ERP_TABLE)
+        .select('item_number,color_name,size,color,warehouse,location,available_physical')
+        .ilike('item_number',`%${q}%`)
+        .order('item_number',{ascending:true})
+        .order('color',{ascending:true})
+        .order('size',{ascending:true})
+        .limit(1000)
+
+      if(result.error) throw result.error
+      rows=result.data||[]
+    }
+
+    if(!rows.length){
+      body.innerHTML='<tr><td colspan="7">ไม่พบ Item '+esc(q)+' หรือ RLS ยังไม่อนุญาตให้หน้าเว็บอ่านข้อมูล</td></tr>'
+      return
+    }
+
+    renderStockSummary(rows,q)
+
+    body.innerHTML=rows.map(r=>`
+      <tr>
+        <td><b>${esc(r.item_number||'-')}</b></td>
+        <td>${esc(r.color_name||'-')}</td>
+        <td>${esc(r.size||'-')}</td>
+        <td>${esc(r.color||'-')}</td>
+        <td>${esc(r.warehouse||'-')}</td>
+        <td>${esc(r.location||'-')}</td>
+        <td><b>${fmt(r.available_physical)}</b></td>
+      </tr>
+    `).join('')
+  }catch(error){
+    body.innerHTML=`<tr><td colspan="7" style="color:#b91c1c">ค้นหาไม่สำเร็จ: ${esc(error?.message||error)}</td></tr>`
+  }
+}
+el('stockSearchBtn').onclick=searchErpStock
+el('stockSearchInput').addEventListener('keydown',e=>{if(e.key==='Enter')searchErpStock()})
+el('stockClearSearchBtn').onclick=()=>{
+  el('stockSearchInput').value=''
+  el('stockSummary').className='stock-summary'
+  el('stockBody').innerHTML='<tr><td colspan="7">พิมพ์ Item แล้วกดค้นหา</td></tr>'
+}
+
+window.addEventListener('hashchange',()=>{
+  const page=location.hash.replace('#','')||'home'
+
+  if(page==='detail' || page==='joborder'){
+    const remembered=readRememberedPickingPo()
+
+    if(remembered){
+      openPickingDetail(remembered.poId,remembered.source).then(()=>{
+        if(page==='joborder' && allPickingLocationsReady()){
+          syncJobOrderEditorFromSelections()
+          showPage('joborder',false)
+        }
+      })
+      return
+    }
+  }
+
+  showPage(page,false)
+})
+
+renderJobRows()
+
+const initialPage=location.hash.replace('#','')||'home'
+const rememberedPicking=readRememberedPickingPo()
+
+if((initialPage==='detail' || initialPage==='joborder') && rememberedPicking){
+  openPickingDetail(rememberedPicking.poId,rememberedPicking.source).then(()=>{
+    if(initialPage==='joborder' && allPickingLocationsReady()){
+      syncJobOrderEditorFromSelections()
+      showPage('joborder',false)
+    }
+  })
+}else{
+  showPage(initialPage,false)
+}
+
+refreshClearErpButtonVisibility()
 </script>
-
 </body>
 </html>
