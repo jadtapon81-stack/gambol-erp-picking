@@ -979,6 +979,26 @@ table.general th{background:#f9fafb;font-size:12px}
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+/* SIDEBAR */
+.app-side-overlay{position:fixed;inset:0;background:rgba(15,23,42,.48);z-index:11000;opacity:0;pointer-events:none;transition:.18s ease}
+.app-side-overlay.show{opacity:1;pointer-events:auto}
+.app-sidebar{position:fixed;left:0;top:0;bottom:0;width:min(330px,88vw);z-index:11001;background:#fff;box-shadow:18px 0 50px rgba(15,23,42,.25);transform:translateX(-105%);transition:.2s ease;display:flex;flex-direction:column}
+.app-sidebar.show{transform:translateX(0)}
+.app-sidebar-head{padding:22px 18px;background:linear-gradient(180deg,var(--red-dark),var(--red));color:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.app-sidebar-head strong{font-size:20px}.app-sidebar-close{width:38px;height:38px;border:0;border-radius:10px;background:rgba(255,255,255,.15);color:#fff;font-size:22px;cursor:pointer}
+.app-sidebar-body{padding:12px;overflow:auto}.side-section{padding:9px 10px 5px;color:#94a3b8;font-size:10px;font-weight:900}
+.side-item{width:100%;border:0;background:#fff;padding:12px 13px;border-radius:11px;display:flex;align-items:center;gap:11px;text-align:left;cursor:pointer;color:#111827;font-weight:800;margin-bottom:4px}.side-item:hover{background:#f8fafc}
+.side-icon{width:34px;height:34px;border-radius:9px;background:#fff1ef;color:var(--red);display:grid;place-items:center;flex:0 0 34px}
+
+/* LOOSE LOCATION MASTER */
+.loose-master-toolbar{display:grid;grid-template-columns:180px 1fr auto;gap:9px;align-items:end;margin-bottom:12px}
+.loose-master-toolbar .field input,.loose-master-toolbar .field select{min-height:42px}
+.loose-master-note{padding:10px 12px;border-radius:10px;background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;font-size:11px;line-height:1.5;margin-bottom:12px}
+.loose-master-status{display:none;margin-bottom:12px;padding:10px 12px;border-radius:10px;font-size:11px;line-height:1.5}.loose-master-status.show{display:block}.loose-master-status.ok{background:#ecfdf5;border:1px solid #86efac;color:#166534}.loose-master-status.warn{background:#fff7ed;border:1px solid #fdba74;color:#9a3412}.loose-master-status.error{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
+.loose-location-table-wrap{overflow:auto;border:1px solid #e5e7eb;border-radius:12px}.loose-location-table{width:100%;border-collapse:collapse;min-width:620px}.loose-location-table th,.loose-location-table td{padding:10px 11px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:11px}.loose-location-table th{background:#f8fafc;font-size:10px;color:#4b5563}.loose-master-check{width:22px;height:22px;accent-color:#16a34a}.loose-tag{display:inline-block;padding:4px 7px;border-radius:999px;background:#ecfdf5;color:#166534;font-size:9px;font-weight:900}.loc-loose-row{background:#fff7ed}.loc-loose-badge{display:inline-block;margin-left:6px;padding:3px 6px;border-radius:999px;background:#ffedd5;color:#c2410c;font-size:8px;font-weight:900}
+@media(max-width:760px){.loose-master-toolbar{grid-template-columns:1fr}.app-sidebar{width:88vw}}
+
+
 /* CLEAR ERP STOCK CONFIRM MODAL */
 .erp-clear-modal{
   position:fixed;
@@ -2649,6 +2669,24 @@ table.general th{background:#f9fafb;font-size:12px}
 </head>
 
 <body>
+<div class="app-side-overlay" id="sideOverlay"></div>
+<aside class="app-sidebar" id="appSidebar" aria-hidden="true">
+  <div class="app-sidebar-head"><div><strong>GAMBOL</strong><div style="font-size:11px;margin-top:4px;letter-spacing:2px">ERP PICKING</div></div><button class="app-sidebar-close" id="sideCloseBtn">×</button></div>
+  <div class="app-sidebar-body">
+    <div class="side-section">MAIN</div>
+    <button class="side-item" data-side-page="home"><span class="side-icon">⌂</span>HOME</button>
+    <button class="side-item" data-side-page="create"><span class="side-icon">＋</span>CREATE PICKING</button>
+    <button class="side-item" data-side-page="pblmanual"><span class="side-icon">✎</span>CREATE PBL</button>
+    <button class="side-item" data-side-page="active"><span class="side-icon">⌁</span>ACTIVE PICKING</button>
+    <div class="side-section">MASTER / MANAGEMENT</div>
+    <button class="side-item" data-side-page="upload"><span class="side-icon">⇧</span>UPLOAD ERP STOCK</button>
+    <button class="side-item" data-side-page="looselocations"><span class="side-icon">◫</span>LOOSE LOCATION</button>
+    <button class="side-item" data-side-page="locationqr"><span class="side-icon">▦</span>LOCATION QR MASTER</button>
+    <button class="side-item" data-side-page="stock"><span class="side-icon">▣</span>ERP STOCK</button>
+    <div class="side-section">HISTORY</div>
+    <button class="side-item" data-side-page="completed"><span class="side-icon">✓</span>COMPLETED JOBS</button>
+  </div>
+</aside>
 <div class="app">
 <header class="topbar">
   <button class="icon-btn" id="menuBtn">☰</button>
@@ -2686,6 +2724,7 @@ table.general th{background:#f9fafb;font-size:12px}
 
   <div class="section-label">LOCATION MASTER</div>
   <section class="small-grid" style="grid-template-columns:1fr;">
+    <div class="small-card" data-page="looselocations"><div class="small-icon">◫</div><div><strong>LOOSE LOCATION</strong><span>กำหนด Location งานเศษ LOTUS / BIG C</span></div></div>
     <div class="small-card" data-page="locationqr">
       <div class="small-icon">▦</div>
       <div>
@@ -3264,8 +3303,8 @@ table.general th{background:#f9fafb;font-size:12px}
       </div>
 
       <div class="erp-upload-note">
-        เพื่อป้องกันข้อมูลซ้ำ ระบบจะตรวจจำนวนแถวใน <b>erp_stock_ptt</b> ก่อนอัปโหลด
-        หากยังมีข้อมูลเดิม ระบบจะไม่เขียนทับ กรุณาใช้ปุ่ม <b>CLEAR ERP STOCK</b> ในหน้า HOME ก่อน
+        สามารถอัปโหลดข้อมูล ERP Stock เพิ่มต่อจากข้อมูลเดิมได้
+        โดยระบบจะ <b>Append</b> ข้อมูลใหม่เข้า <b>erp_stock_ptt</b> และไม่ลบข้อมูลเดิม
       </div>
 
       <div class="erp-upload-actions">
@@ -3318,6 +3357,19 @@ table.general th{background:#f9fafb;font-size:12px}
 </div>
 </section>
 
+
+<section class="page" id="page-looselocations">
+<div class="page-box">
+  <div class="page-head"><div class="head-left"><button class="back-btn" data-page="home">←</button><div><h2 class="page-title">LOOSE LOCATION</h2><p class="page-sub">กำหนด Location ที่ใช้หยิบงานเศษสำหรับ ASN</p></div></div><div class="badge">LOOSE MASTER</div></div>
+  <div class="loose-master-toolbar">
+    <div class="field"><label>CUSTOMER</label><select id="looseMasterCustomer"><option value="LOTUS">LOTUS</option><option value="BIG C">BIG C</option></select></div>
+    <div class="field"><label>ค้นหา Warehouse / Location</label><input id="looseMasterSearch" placeholder="เช่น WMT-LT-CTY หรือ LT-I-3"></div>
+    <button class="btn btn-secondary" id="looseMasterReloadBtn">รีเฟรช</button>
+  </div>
+  <div class="loose-master-note">LOTUS: แสดงเฉพาะ Warehouse WMT-LT-* · BIG C: แสดงเฉพาะ WMT-BC</div>
+  <div id="looseMasterStatus" class="loose-master-status"></div>
+  <div class="loose-location-table-wrap"><table class="loose-location-table"><thead><tr><th style="width:90px">งานเศษ</th><th>Customer</th><th>Warehouse</th><th>Location</th><th style="width:130px">Available</th></tr></thead><tbody id="looseMasterBody"><tr><td colspan="5">กำลังโหลด...</td></tr></tbody></table></div>
+</div></section>
 
 <section class="page" id="page-locationqr">
 <div class="page-box">
@@ -3549,9 +3601,10 @@ const LOCATION_QR_TABLE = 'location_qr_master'
 const LOCATION_QR_BUCKET = 'location-qr'
 const PICKING_JOB_TABLE = 'picking_job_locations'
 const PBL_TEMPLATE_TABLE = 'pbl_template_items'
+const LOOSE_LOCATION_TABLE = 'picking_loose_locations'
 const PACK_SIZE = 6
 
-const pages = ['home','create','pblmanual','orders','stock','active','activejob','detail','joborder','upload','locationqr','completed']
+const pages = ['home','create','pblmanual','orders','stock','active','activejob','detail','joborder','upload','looselocations','locationqr','completed']
 const jobRows = []
 let importState = {
   file:null,
@@ -3582,6 +3635,7 @@ function showPage(name, updateHash=true){
   if(name==='completed') loadCompletedJobs()
   if(name==='stock') refreshErpDbStatus()
   if(name==='locationqr') loadLocationQrMaster()
+  if(name==='looselocations') loadLooseLocationMaster()
   if(name==='pblmanual'){
     const savedUser=localStorage.getItem('erp_picking_user')
     if(savedUser && el('manualPblCreatedBy')) el('manualPblCreatedBy').value=savedUser
@@ -3600,7 +3654,12 @@ function showToast(message){
   clearTimeout(window.__toast)
   window.__toast=setTimeout(()=>toast.classList.remove('show'),1700)
 }
-el('menuBtn').onclick=()=>showToast('เมนูด้านข้างจะทำในขั้นต่อไป')
+function openSidebar(){el('appSidebar')?.classList.add('show');el('sideOverlay')?.classList.add('show');el('appSidebar')?.setAttribute('aria-hidden','false')}
+function closeSidebar(){el('appSidebar')?.classList.remove('show');el('sideOverlay')?.classList.remove('show');el('appSidebar')?.setAttribute('aria-hidden','true')}
+el('menuBtn').onclick=openSidebar
+el('sideCloseBtn')?.addEventListener('click',closeSidebar)
+el('sideOverlay')?.addEventListener('click',closeSidebar)
+document.querySelectorAll('[data-side-page]').forEach(btn=>btn.addEventListener('click',()=>{closeSidebar();showPage(btn.dataset.sidePage)}))
 
 /* =========================
    CLEAR ERP STOCK
@@ -5684,15 +5743,7 @@ async function uploadErpCsvToSupabase(){
     const dbCount=await currentErpDbCount()
     erpUploadState.dbCount=dbCount
     el('erpStatDb').textContent=dbCount.toLocaleString('th-TH')
-
-    if(dbCount>0){
-      throw new Error(
-        `erp_stock_ptt มีข้อมูลอยู่ ${dbCount.toLocaleString('th-TH')} แถว `+
-        `กรุณา CLEAR ERP STOCK ก่อน เพื่อป้องกันข้อมูลซ้ำ`
-      )
-    }
-
-    const total=erpUploadState.rows.length
+const total=erpUploadState.rows.length
     const ok=confirm(
       'ยืนยันอัปโหลด ERP STOCK เข้า Supabase หรือไม่?\n\n'+
       'ไฟล์: '+(erpUploadState.file?.name||'-')+'\n'+
@@ -7148,6 +7199,25 @@ el('manualPblClearAllBtn')?.addEventListener('click',()=>{
 
 
 /* =========================
+   LOOSE LOCATION MASTER
+   ========================= */
+let looseLocationRows=[]
+let activeLooseLocationKeys=new Set()
+function customerWarehouseAllowed(customer,warehouse){const c=norm(customer);const w=txt(warehouse).toUpperCase();if(c==='BIGC')return w==='WMT-BC';if(c==='LOTUS')return w.startsWith('WMT-LT-');return true}
+function looseLocationKey(warehouse,location){return norm(warehouse)+'||'+norm(location)}
+function setLooseMasterStatus(message,type='ok'){const box=el('looseMasterStatus');if(!box)return;box.className='loose-master-status show '+type;box.textContent=message}
+async function fetchLooseLocationSettings(customer){const {data,error}=await db.from(LOOSE_LOCATION_TABLE).select('id,customer,warehouse,location,is_active').eq('customer',customer).eq('is_active',true).limit(2000);if(error)throw error;return data||[]}
+async function loadLooseLocationMaster(){const customer=el('looseMasterCustomer')?.value||'LOTUS';const body=el('looseMasterBody');if(!body)return;body.innerHTML='<tr><td colspan="5">กำลังโหลด Location จาก ERP Stock...</td></tr>';try{const [erpRes,settingRows]=await Promise.all([db.from(ERP_TABLE).select('warehouse,location,available_physical').limit(10000),fetchLooseLocationSettings(customer)]);if(erpRes.error)throw erpRes.error;const grouped=new Map();(erpRes.data||[]).forEach(r=>{const warehouse=txt(r.warehouse),location=txt(r.location);if(!warehouse||!location||!customerWarehouseAllowed(customer,warehouse))return;const key=looseLocationKey(warehouse,location);if(!grouped.has(key))grouped.set(key,{customer,warehouse,location,available:0});grouped.get(key).available+=num(r.available_physical)});looseLocationRows=[...grouped.values()].sort((a,b)=>a.warehouse.localeCompare(b.warehouse)||a.location.localeCompare(b.location));activeLooseLocationKeys=new Set((settingRows||[]).map(r=>looseLocationKey(r.warehouse,r.location)));renderLooseLocationMaster();setLooseMasterStatus(`${customer} · พบ ${looseLocationRows.length.toLocaleString('th-TH')} Location · กำหนดงานเศษ ${activeLooseLocationKeys.size.toLocaleString('th-TH')} Location`,'ok')}catch(error){console.error(error);body.innerHTML='<tr><td colspan="5" style="color:#b91c1c">โหลดไม่สำเร็จ</td></tr>';setLooseMasterStatus('โหลด LOOSE LOCATION ไม่สำเร็จ: '+(error?.message||error)+'\nหากยังไม่ได้สร้างตาราง picking_loose_locations ให้รัน SQL ที่แนบมาก่อน','error')}}
+function renderLooseLocationMaster(){const body=el('looseMasterBody'),q=norm(el('looseMasterSearch')?.value);if(!body)return;const rows=looseLocationRows.filter(r=>!q||norm(r.warehouse).includes(q)||norm(r.location).includes(q));if(!rows.length){body.innerHTML='<tr><td colspan="5">ไม่พบ Location</td></tr>';return}body.innerHTML=rows.map(r=>{const key=looseLocationKey(r.warehouse,r.location),checked=activeLooseLocationKeys.has(key);return `<tr class="${checked?'loc-loose-row':''}"><td><input type="checkbox" class="loose-master-check" data-loose-wh="${esc(r.warehouse)}" data-loose-loc="${esc(r.location)}" ${checked?'checked':''}></td><td><b>${esc(r.customer)}</b></td><td>${esc(r.warehouse)}</td><td><b>${esc(r.location)}</b>${checked?'<span class="loc-loose-badge">งานเศษ</span>':''}</td><td>${fmt(r.available)}</td></tr>`}).join('');body.querySelectorAll('.loose-master-check').forEach(check=>check.addEventListener('change',()=>saveLooseLocationSetting(el('looseMasterCustomer').value,check.dataset.looseWh,check.dataset.looseLoc,check.checked)))}
+async function saveLooseLocationSetting(customer,warehouse,location,isActive){const key=looseLocationKey(warehouse,location);try{if(isActive){const {error}=await db.from(LOOSE_LOCATION_TABLE).upsert({customer,warehouse,location,is_active:true,updated_at:new Date().toISOString()},{onConflict:'customer,warehouse,location'});if(error)throw error;activeLooseLocationKeys.add(key)}else{const {error}=await db.from(LOOSE_LOCATION_TABLE).delete().eq('customer',customer).eq('warehouse',warehouse).eq('location',location);if(error)throw error;activeLooseLocationKeys.delete(key)}renderLooseLocationMaster();setLooseMasterStatus(`${customer} · บันทึก ${warehouse} / ${location} ${isActive?'เป็นงานเศษ':'ออกจากงานเศษ'}แล้ว`,'ok')}catch(error){console.error(error);setLooseMasterStatus('บันทึกไม่สำเร็จ: '+(error?.message||error),'error');await loadLooseLocationMaster()}}
+el('looseMasterCustomer')?.addEventListener('change',loadLooseLocationMaster)
+el('looseMasterReloadBtn')?.addEventListener('click',loadLooseLocationMaster)
+el('looseMasterSearch')?.addEventListener('input',renderLooseLocationMaster)
+let currentPickingLooseKeys=new Set()
+async function loadPickingLooseLocationKeys(customer){try{const rows=await fetchLooseLocationSettings(customer);currentPickingLooseKeys=new Set(rows.map(r=>looseLocationKey(r.warehouse,r.location)))}catch(error){console.warn('โหลดงานเศษไม่สำเร็จ',error);currentPickingLooseKeys=new Set()}}
+function isLooseLocationRow(row){return currentPickingLooseKeys.has(looseLocationKey(row?.warehouse,row?.location))}
+
+/* =========================
    ACTIVE PICKING + PICKING DETAIL
    ========================= */
 let currentPickingPoId=null
@@ -7959,12 +8029,17 @@ async function fetchErpRowsForItems(items){
   return all
 }
 
-function matchErp(item,erpRows){
-  return erpRows.filter(r=>
-    norm(r.item_number)===norm(item.item) &&
-    (!item.code || norm(r.color)===norm(item.code)) &&
-    (!item.assort || norm(r.size)===norm(item.assort))
-  )
+function matchErp(item,erpRows,header=currentPickingHeader){
+  const customer=txt(header?.customer)
+  const poType=norm(header?.po_type)
+  return erpRows.filter(r=>{
+    if(norm(r.item_number)!==norm(item.item)) return false
+    if(item.code && norm(r.color)!==norm(item.code)) return false
+    if(item.assort && norm(r.size)!==norm(item.assort)) return false
+    if(!customerWarehouseAllowed(customer,r.warehouse)) return false
+    if(poType==='PBL' && isLooseLocationRow(r)) return false
+    return true
+  }).map(r=>({...r,_isLoose:isLooseLocationRow(r)}))
 }
 
 
@@ -7978,6 +8053,7 @@ function getSelectedLocationSet(itemId){
 
 function selectedAllocationForLine(itemId){
   const data=pickingLineData.get(String(itemId))
+
   if(!data){
     return {
       picked:0,
@@ -7985,19 +8061,15 @@ function selectedAllocationForLine(itemId){
       shortage:0,
       targetFromStock:0,
       required:0,
-      allocations:new Map()
+      allocations:new Map(),
+      loosePicked:0,
+      looseRequired:0,
+      normalRequired:0
     }
   }
 
   const required=Math.max(0,num(data.required))
-  const availableTotal=Math.max(
-    0,
-    Number.isFinite(Number(data.availableTotal))
-      ? num(data.availableTotal)
-      : data.locations.reduce((s,r)=>s+Math.max(0,num(r.available_physical)),0)
-  )
 
-  // ของจริงไม่มี แม้ ERP จะมียอด -> บังคับเป็นงานขาดทั้งรายการ
   if(isForcedNoStock(itemId)){
     return {
       picked:0,
@@ -8006,40 +8078,95 @@ function selectedAllocationForLine(itemId){
       targetFromStock:0,
       required,
       allocations:new Map(),
-      forcedNoStock:true
+      forcedNoStock:true,
+      loosePicked:0,
+      looseRequired:0,
+      normalRequired:0
     }
   }
 
-  // ยอดที่สามารถหยิบจาก ERP ได้จริง
-  const targetFromStock=Math.min(required,availableTotal)
-  // ส่วนที่ไม่มีของให้หยิบ = งานขาด
-  const shortage=Math.max(0,required-availableTotal)
-
-  let remaining=targetFromStock
+  const isAsn=norm(data.jobType)==='ASN'
   const allocations=new Map()
+
+  /*
+    ASN:
+    1) ใช้ Location งานเศษก่อน "เท่าที่มี" จนกว่าจะครบจำนวนที่ต้องการ
+    2) ถ้างานเศษยังไม่ครบ ให้ผู้ใช้เลือก Location ปกติเพิ่ม
+    ตัวอย่าง ต้องการ 12 / งานเศษมี 4+2 = 6
+    -> งานเศษ 6
+    -> เหลือเลือก Location ปกติอีก 6
+  */
+  let looseRemain=required
+  let loosePicked=0
+
+  if(isAsn){
+    data.locations.forEach((loc,index)=>{
+      if(!loc._isLoose || looseRemain<=0) return
+
+      const available=Math.max(0,num(loc.available_physical))
+      const pick=Math.min(available,looseRemain)
+
+      if(pick>0){
+        allocations.set(index,pick)
+        loosePicked+=pick
+        looseRemain-=pick
+      }
+    })
+  }
+
+  // PBL ไม่ใช้ Loose Location อยู่แล้ว เพราะ matchErp ซ่อนไว้
+  // ASN หลังใช้ Loose แล้ว เหลือเท่าไรค่อยไป Location ปกติ
+  const normalRequired=isAsn ? Math.max(0,required-loosePicked) : required
+  let normalRemain=normalRequired
+
   const selected=getSelectedLocationSet(itemId)
 
-  // Set รักษาลำดับการติ๊กของผู้ใช้
   selected.forEach(index=>{
-    const loc=data.locations[Number(index)]
-    if(!loc || remaining<=0){
-      allocations.set(Number(index),0)
+    const i=Number(index)
+    const loc=data.locations[i]
+
+    // Location งานเศษถูกระบบคำนวณให้อัตโนมัติ
+    if(!loc || loc._isLoose || normalRemain<=0){
+      if(!allocations.has(i)) allocations.set(i,0)
       return
     }
 
     const available=Math.max(0,num(loc.available_physical))
-    const pick=Math.min(available,remaining)
-    allocations.set(Number(index),pick)
-    remaining-=pick
+    const pick=Math.min(available,normalRemain)
+
+    allocations.set(i,pick)
+    normalRemain-=pick
   })
 
+  const normalAvailable=data.locations
+    .filter(loc=>!loc._isLoose)
+    .reduce((s,r)=>s+Math.max(0,num(r.available_physical)),0)
+
+  // ถ้ารวมงานเศษ + Location ปกติแล้วยังไม่พอ จึงค่อยเป็นงานขาด
+  const shortage=Math.max(0,normalRequired-normalAvailable)
+
+  // ของมี แต่ผู้ใช้ยังไม่ได้เลือก Location ปกติ
+  const normalPossible=Math.min(normalRequired,normalAvailable)
+  const remaining=Math.max(0,Math.min(normalRemain,normalPossible))
+
+  const normalPicked=normalRequired-normalRemain
+  const picked=loosePicked+Math.max(0,normalPicked)
+
   return {
-    picked:targetFromStock-remaining,
+    picked,
     remaining,
     shortage,
-    targetFromStock,
+    targetFromStock:required-shortage,
     required,
-    allocations
+    allocations,
+    loosePicked,
+    looseRequired:Math.min(required,
+      data.locations
+        .filter(loc=>loc._isLoose)
+        .reduce((s,r)=>s+Math.max(0,num(r.available_physical)),0)
+    ),
+    normalRequired,
+    looseShortage:0
   }
 }
 
@@ -8061,12 +8188,28 @@ function updateLineLocationSelection(itemId){
     )
     const selected=getSelectedLocationSet(itemId).has(index)
 
-    if(row) row.classList.toggle('loc-row-selected',selected && !forcedNoStock)
+    const autoLooseSelected=
+      loc._isLoose &&
+      norm(data.jobType)==='ASN' &&
+      num(result.allocations.get(index))>0
+
+    if(row) row.classList.toggle(
+      'loc-row-selected',
+      !forcedNoStock && (selected || autoLooseSelected)
+    )
+
     if(qty) qty.textContent=fmt(result.allocations.get(index)||0)
+
     if(check){
       const available=Math.max(0,num(loc.available_physical))
-      check.disabled=forcedNoStock || available<=0
-      check.checked=!forcedNoStock && selected
+      if(loc._isLoose && norm(data.jobType)==='ASN'){
+        // งานเศษถูกเลือกอัตโนมัติ ระบบล็อกไว้เพื่อไม่ให้เผลอเอาออก
+        check.disabled=true
+        check.checked=!forcedNoStock && autoLooseSelected
+      }else{
+        check.disabled=forcedNoStock || available<=0
+        check.checked=!forcedNoStock && selected
+      }
     }
   })
 
@@ -8082,6 +8225,13 @@ function updateLineLocationSelection(itemId){
         status.textContent='งานขาด '+fmt(result.shortage)+' คู่ · ไม่มีสินค้าใน ERP Stock'
       }else if(result.shortage>0){
         status.textContent='✓ เลือกของที่มีครบ '+fmt(result.picked)+' คู่ · งานขาด '+fmt(result.shortage)+' คู่'
+      }else if(result.loosePicked>0){
+        status.textContent=
+          '✓ เลือก Location ครบ · หยิบ '+fmt(result.picked)+' / '+fmt(result.required)+
+          ' คู่ · งานเศษ '+fmt(result.loosePicked)+' คู่'+
+          (result.normalRequired>0
+            ? ' · Location อื่น '+fmt(result.normalRequired)+' คู่'
+            : '')
       }else{
         status.textContent='✓ เลือก Location ครบ · หยิบ '+fmt(result.picked)+' / '+fmt(result.required)+' คู่'
       }
@@ -8089,7 +8239,8 @@ function updateLineLocationSelection(itemId){
       status.className='line-pick-status pending'
       status.textContent=
         'เลือกแล้ว '+fmt(result.picked)+' / '+fmt(result.targetFromStock)+
-        ' คู่ · เหลือเลือก '+fmt(result.remaining)+' คู่'+
+        ' คู่ · งานเศษ '+fmt(result.loosePicked)+' คู่'+
+        ' · เหลือเลือก Location อื่น '+fmt(result.remaining)+' คู่'+
         (result.shortage>0?' · งานขาด '+fmt(result.shortage)+' คู่':'')
     }
   }
@@ -8456,6 +8607,12 @@ function bindLocationCheckboxes(){
       const itemId=String(check.dataset.itemId)
       const index=Number(check.dataset.locIndex)
       const selected=getSelectedLocationSet(itemId)
+      const lineData=pickingLineData.get(String(itemId))
+      const loc=lineData?.locations?.[index]
+      if(loc?._isLoose && norm(lineData?.jobType)==='ASN'){
+        check.checked=num(selectedAllocationForLine(itemId).allocations.get(index))>0
+        return
+      }
 
       if(isForcedNoStock(itemId)){
         check.checked=false
@@ -8525,6 +8682,7 @@ async function openPickingDetail(poId,source='active'){
     }
 
     setDetailMessage('กำลังค้นหา Location จาก ERP Stock...','info')
+    await loadPickingLooseLocationKeys(h.customer)
     const erpRows=await fetchErpRowsForItems(items.map(r=>r.item))
     let missing=0, shortage=0
 
@@ -8536,15 +8694,15 @@ async function openPickingDetail(poId,source='active'){
 
       const total=locs.reduce((s,r)=>s+num(r.available_physical),0)
       const required=num(item.order_pairs)
+      const isAsn=norm(h.po_type)==='ASN'
+      const looseRequired=isAsn ? (required % PACK_SIZE) : 0
+      const cartonRequired=required-looseRequired
 
       if(!locs.length) missing++
       else if(total<required) shortage++
 
       pickingLineData.set(String(item.id),{
-        item,
-        required,
-        availableTotal:total,
-        locations:locs
+        item,required,availableTotal:total,locations:locs,jobType:txt(h.po_type),looseRequired,cartonRequired
       })
 
       // ถ้าเพิ่งเปิดหน้าใหม่ / Refresh Browser ให้คืน Location ที่เคยเลือก
@@ -8588,7 +8746,7 @@ async function openPickingDetail(poId,source='active'){
                       >
                     </td>
                     <td>${esc(loc.warehouse||'-')}</td>
-                    <td><b>${esc(loc.location||'-')}</b></td>
+                    <td><b>${esc(loc.location||'-')}</b>${loc._isLoose?'<span class="loc-loose-badge">งานเศษ</span>':''}</td>
                     <td class="${available>0?'loc-ok':'loc-short'}">${fmt(available)}</td>
                     <td id="locPick_${item.id}_${locIndex}" class="loc-pick-qty">0</td>
                   </tr>`
@@ -8654,10 +8812,9 @@ function selectedPickingRowsForPdf(){
 
   pickingLineData.forEach((data,itemId)=>{
     const result=selectedAllocationForLine(itemId)
-    const selected=getSelectedLocationSet(itemId)
     let first=true
 
-    selected.forEach(index=>{
+    ;[...result.allocations.keys()].forEach(index=>{
       const qty=num(result.allocations.get(Number(index))||0)
       if(qty<=0) return
 
