@@ -536,6 +536,78 @@ table.general th{background:#f9fafb;font-size:12px}
   color:#15803d;
 }
 
+.line-real-stock-control{
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  gap:8px;
+  padding:8px 10px;
+  border-bottom:1px solid #eef2f7;
+  background:#fffaf0;
+}
+.line-real-stock-control label{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  color:#b45309;
+  font-size:10px;
+  font-weight:900;
+  cursor:pointer;
+}
+.line-no-stock-check{
+  width:20px;
+  height:20px;
+  accent-color:#dc2626;
+  cursor:pointer;
+}
+.pick-line.real-no-stock{
+  border-color:#fca5a5;
+}
+.pick-line.real-no-stock .loc-table-wrap{
+  opacity:.48;
+}
+.pick-line.real-no-stock .line-real-stock-control{
+  background:#fff1f2;
+}
+.pick-line.real-no-stock .line-real-stock-control label{
+  color:#b91c1c;
+}
+.detail-delivery-field{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:9px 11px;
+  border:1px solid #dbe3ef;
+  border-radius:10px;
+  background:#fff;
+}
+.detail-delivery-field label{
+  font-size:10px;
+  color:#6b7280;
+  font-weight:900;
+  white-space:nowrap;
+}
+.detail-delivery-field input{
+  min-height:36px;
+  border:1px solid #d1d5db;
+  border-radius:8px;
+  padding:7px 9px;
+  font-weight:800;
+}
+.bigc-delivery-input{
+  width:145px;
+  min-height:38px;
+  padding:7px 8px;
+  border:1px solid #d1d5db;
+  border-radius:8px;
+  background:#fff;
+  font-weight:800;
+}
+.bigc-delivery-input.missing{
+  border-color:#f59e0b;
+  background:#fff7ed;
+}
+
 .loc-qr-btn{
   border:1px solid #cbd5e1;
   background:#fff;
@@ -1686,6 +1758,23 @@ table.general th{background:#f9fafb;font-size:12px}
   .pick-line-head>div:nth-child(5),.pick-line-head>div:nth-child(6){display:none}
 
   .loc-check{width:24px;height:24px}
+  .line-no-stock-check{width:24px;height:24px}
+  .line-real-stock-control{justify-content:flex-start}
+  .detail-delivery-field{
+    width:100%;
+    align-items:flex-start;
+    flex-direction:column;
+  }
+  .detail-delivery-field input{
+    width:100%;
+    min-height:44px;
+    font-size:16px;
+  }
+  .bigc-delivery-input{
+    width:150px;
+    min-height:44px;
+    font-size:16px;
+  }
 
   .location-qr-layout{grid-template-columns:1fr}
   .location-qr-form,.location-qr-list-card{padding:12px}
@@ -2649,6 +2738,11 @@ table.general th{background:#f9fafb;font-size:12px}
       </div>
 
       <div class="field">
+        <label>DELIVERY DATE *</label>
+        <input id="importDeliveryDate" type="date" required>
+      </div>
+
+      <div class="field">
         <label>CREATED BY</label>
         <input id="importCreatedBy" value="ADMIN" placeholder="ชื่อผู้สร้าง">
       </div>
@@ -2686,7 +2780,9 @@ table.general th{background:#f9fafb;font-size:12px}
           <th>PO</th>
           <th>รายการ</th>
           <th>จำนวนรวม</th>
+          <th>กล่อง</th>
           <th>JOB TYPE</th>
+          <th>DELIVERY DATE *</th>
         </tr>
       </thead>
       <tbody id="bigcPoTypeBody"></tbody>
@@ -2759,7 +2855,7 @@ table.general th{background:#f9fafb;font-size:12px}
     </div>
 
     <div class="field">
-      <label>DELIVERY DATE</label>
+      <label>DELIVERY DATE *</label>
       <input id="manualPblDeliveryDate" type="date">
     </div>
 
@@ -3054,6 +3150,10 @@ table.general th{background:#f9fafb;font-size:12px}
   </div>
 
   <div class="detail-actions">
+    <div class="detail-delivery-field">
+      <label>DELIVERY DATE *</label>
+      <input id="detailDeliveryDate" type="date" required>
+    </div>
     <button class="btn btn-primary" id="startPickingBtn">START PICKING</button>
     <button class="btn btn-secondary" id="reloadDetailBtn">รีเฟรช Location</button>
     <button class="btn pdf-action btn-pdf-save" id="openJobOrderBtn">
@@ -4505,6 +4605,7 @@ async function saveParsedToSupabase(parsedArg=null,rowsArg=null,sourceFileName=n
   const rows=rowsArg || importState.preview
   if(!parsed || !rows.length) throw new Error('ยังไม่มีข้อมูลสำหรับบันทึก')
   if(!parsed.po) throw new Error('ไม่พบเลข PO ในไฟล์')
+  if(!txt(parsed.deliveryDate)) throw new Error('กรุณาระบุ DELIVERY DATE ก่อนบันทึก')
   if(rows.some(r=>r.validationStatus==='ERROR')) throw new Error('มีรายการ ERROR กรุณาตรวจสอบไฟล์ก่อน')
 
   setImportStatus('แปลงเป็น CSV แล้ว\nกำลังตรวจ PO ซ้ำและบันทึกลง Supabase...','info')
@@ -4586,6 +4687,72 @@ async function saveParsedToSupabase(parsedArg=null,rowsArg=null,sourceFileName=n
    ========================= */
 
 
+
+function snapshotBigCAsnPreview(batchItem){
+  if(batchItem._asnSnapshot) return
+  batchItem._asnSnapshot=(batchItem.preview||[]).map(r=>({
+    cartonQty:num(r.cartonQty),
+    looseBefore:num(r.looseBefore),
+    looseUsed:num(r.looseUsed),
+    loosePull:num(r.loosePull),
+    looseAfter:num(r.looseAfter),
+    remark:r.remark||'',
+    validationStatus:r.validationStatus,
+    validationMessage:r.validationMessage||''
+  }))
+}
+
+function applyBigCJobType(batchItem,type){
+  if(!batchItem) return
+  snapshotBigCAsnPreview(batchItem)
+
+  batchItem.parsed.type=type
+
+  ;(batchItem.preview||[]).forEach((r,index)=>{
+    r.jobType=type
+
+    if(type==='PBL'){
+      // PBL = กล่องเต็ม 6 คู่/กล่อง
+      r.cartonQty=num(r.orderPairs)/PACK_SIZE
+      r.looseBefore=0
+      r.looseUsed=0
+      r.loosePull=0
+      r.looseAfter=0
+      r.remark=''
+
+      const snap=batchItem._asnSnapshot?.[index]
+      const baseMessages=String(snap?.validationMessage||'')
+        .split(' | ')
+        .filter(Boolean)
+        .filter(x=>!x.includes('PBL ต้องหาร 6 ลงตัว'))
+
+      if(num(r.orderPairs)%PACK_SIZE!==0){
+        r.validationStatus='ERROR'
+        baseMessages.push('PBL ต้องหาร 6 ลงตัว')
+      }else{
+        r.validationStatus=snap?.validationStatus||'READY'
+      }
+      r.validationMessage=baseMessages.join(' | ')
+    }else if(type==='ASN'){
+      const snap=batchItem._asnSnapshot?.[index]
+      if(snap){
+        r.cartonQty=snap.cartonQty
+        r.looseBefore=snap.looseBefore
+        r.looseUsed=snap.looseUsed
+        r.loosePull=snap.loosePull
+        r.looseAfter=snap.looseAfter
+        r.remark=snap.remark
+        r.validationStatus=snap.validationStatus
+        r.validationMessage=snap.validationMessage
+      }
+    }
+  })
+}
+
+function bigCBatchCartons(batchItem){
+  return (batchItem?.preview||[]).reduce((s,r)=>s+num(r.cartonQty),0)
+}
+
 function renderBigCPoTypePanel(){
   const panel=el('bigcPoTypePanel')
   const body=el('bigcPoTypeBody')
@@ -4604,12 +4771,22 @@ function renderBigCPoTypePanel(){
       <td><b>${esc(parsed.po)}</b></td>
       <td>${preview.length}</td>
       <td>${fmt(preview.reduce((s,r)=>s+num(r.orderPairs),0))}</td>
+      <td><b>${fmt(bigCBatchCartons({parsed,preview}))}</b></td>
       <td>
         <select class="bigc-po-type-select ${parsed.type?'':'missing'}" data-bigc-po-type="${esc(parsed.po)}">
           <option value="">เลือกประเภท</option>
           <option value="ASN" ${parsed.type==='ASN'?'selected':''}>ASN</option>
           <option value="PBL" ${parsed.type==='PBL'?'selected':''}>PBL</option>
         </select>
+      </td>
+      <td>
+        <input
+          class="bigc-delivery-input ${parsed.deliveryDate?'':'missing'}"
+          type="date"
+          data-bigc-po-date="${esc(parsed.po)}"
+          value="${esc(parsed.deliveryDate||'')}"
+          required
+        >
       </td>
     </tr>
   `).join('')
@@ -4619,31 +4796,43 @@ function renderBigCPoTypePanel(){
       const po=select.dataset.bigcPoType
       const item=batch.find(x=>x.parsed.po===po)
       if(item){
-        item.parsed.type=select.value
-        item.preview.forEach(r=>{
-          r.jobType=select.value
-        })
+        applyBigCJobType(item,select.value)
       }
 
       select.classList.toggle('missing',!select.value)
       refreshBigCTypeCompletion()
       importState.csvText=previewToCsv(importState.preview||[])
       renderImportPreview()
+      renderBigCPoTypePanel()
+    })
+  })
+
+  body.querySelectorAll('[data-bigc-po-date]').forEach(input=>{
+    input.addEventListener('change',()=>{
+      const po=input.dataset.bigcPoDate
+      const item=batch.find(x=>x.parsed.po===po)
+      if(item){
+        item.parsed.deliveryDate=txt(input.value)
+        item.parsed.deliveryRaw=txt(input.value)
+      }
+      input.classList.toggle('missing',!input.value)
+      refreshBigCTypeCompletion()
     })
   })
 
   status.className='location-qr-status show info'
-  status.textContent='กรุณาเลือก ASN หรือ PBL ให้ครบทุก PO ก่อนบันทึก'
+  status.textContent='กรุณาเลือก ASN / PBL และระบุ DELIVERY DATE ให้ครบทุก PO ก่อนบันทึก'
   refreshBigCTypeCompletion()
 }
 
 function refreshBigCTypeCompletion(){
   const batch=importState.batch||[]
-  const missing=batch.filter(x=>!txt(x.parsed.type))
+  const missingType=batch.filter(x=>!txt(x.parsed.type))
+  const missingDate=batch.filter(x=>!txt(x.parsed.deliveryDate))
   const btn=el('saveBigCBatchBtn')
   const status=el('bigcPoTypeStatus')
 
-  btn.disabled=missing.length>0
+  btn.disabled=missingType.length>0 || missingDate.length>0
 
   if(!batch.length){
     status.className='location-qr-status'
@@ -4651,12 +4840,15 @@ function refreshBigCTypeCompletion(){
     return
   }
 
-  if(missing.length){
+  if(missingType.length || missingDate.length){
     status.className='location-qr-status show warn'
-    status.textContent='ยังไม่ได้ระบุ JOB TYPE '+missing.length+' PO'
+    const parts=[]
+    if(missingType.length) parts.push('JOB TYPE '+missingType.length+' PO')
+    if(missingDate.length) parts.push('DELIVERY DATE '+missingDate.length+' PO')
+    status.textContent='ยังขาด '+parts.join(' · ')
   }else{
     status.className='location-qr-status show ok'
-    status.textContent='ระบุ JOB TYPE ครบ '+batch.length+' PO · พร้อมบันทึก Supabase'
+    status.textContent='ระบุ JOB TYPE และ DELIVERY DATE ครบ '+batch.length+' PO · พร้อมบันทึก Supabase'
   }
 }
 
@@ -4664,10 +4856,7 @@ function setAllBigCPoTypes(type){
   const batch=importState.batch||[]
 
   batch.forEach(x=>{
-    x.parsed.type=type
-    x.preview.forEach(r=>{
-      r.jobType=type
-    })
+    applyBigCJobType(x,type)
   })
 
   renderBigCPoTypePanel()
@@ -4676,6 +4865,7 @@ function setAllBigCPoTypes(type){
 }
 
 async function runBigCImport(file){
+  const defaultDeliveryDate=txt(el('importDeliveryDate')?.value)
   setImportStatus('กำลังอ่านทุก Sheet ในไฟล์ BIG C...','info')
 
   const sheets=await readBigCWorkbook(file)
@@ -4718,6 +4908,11 @@ async function runBigCImport(file){
 
   for(let i=0;i<parsedList.length;i++){
     const parsed=parsedList[i]
+
+    if(defaultDeliveryDate){
+      parsed.deliveryDate=defaultDeliveryDate
+      parsed.deliveryRaw=defaultDeliveryDate
+    }
 
     setImportStatus(
       `กำลังตรวจสอบ ${i+1}/${parsedList.length} · PO ${parsed.po}`,
@@ -4785,15 +4980,20 @@ async function saveBigCBatchToSupabase(){
     return
   }
 
-  const missing=batch.filter(x=>!txt(x.parsed.type))
-  if(missing.length){
+  const missingType=batch.filter(x=>!txt(x.parsed.type))
+  const missingDate=batch.filter(x=>!txt(x.parsed.deliveryDate))
+
+  if(missingType.length || missingDate.length){
     setImportStatus(
-      'กรุณาระบุ ASN / PBL ให้ครบทุก PO ก่อนบันทึก',
+      'กรุณาระบุ ASN / PBL และ DELIVERY DATE ให้ครบทุก PO ก่อนบันทึก',
       'warn'
     )
     renderBigCPoTypePanel()
     return
   }
+
+  // คำนวณจำนวนกล่องใหม่อีกครั้งตาม JOB TYPE ก่อนบันทึก
+  batch.forEach(x=>applyBigCJobType(x,x.parsed.type))
 
   const errorRows=(importState.preview||[]).filter(r=>r.validationStatus==='ERROR')
   if(errorRows.length){
@@ -4947,6 +5147,21 @@ async function runImport(){
 
     setImportStatus(`1/4 อ่านไฟล์สำเร็จ (${source.sheetName})\n2/4 กำลังอ่าน PO และรายการสินค้า...`,'info')
     const parsed=parseOrderRows(source.rows,customer,selectedType)
+
+    const enteredDeliveryDate=txt(el('importDeliveryDate')?.value)
+    if(enteredDeliveryDate){
+      parsed.deliveryDate=enteredDeliveryDate
+      parsed.deliveryRaw=enteredDeliveryDate
+    }else if(parsed.deliveryDate){
+      el('importDeliveryDate').value=parsed.deliveryDate
+    }
+
+    if(!txt(parsed.deliveryDate)){
+      setImportStatus('กรุณาระบุ DELIVERY DATE ก่อนบันทึก PO','warn')
+      el('importDeliveryDate')?.focus()
+      return
+    }
+
     importState.parsed=parsed
 
     if(parsed.type && el('importType').value!==parsed.type){
@@ -5061,6 +5276,7 @@ el('poExcelFile').addEventListener('change',()=>{
 
 el('resetImportBtn').onclick=()=>{
   el('poExcelFile').value=''
+  if(el('importDeliveryDate')) el('importDeliveryDate').value=''
   importState={file:null,parsed:null,preview:[],csvText:'',savedHeader:null,batch:[]}
   clearImportStatus()
   renderImportPreview()
@@ -6726,6 +6942,12 @@ async function createManualPblJob(){
   const deliveryDate=txt(el('manualPblDeliveryDate').value)
   const createdBy=txt(el('manualPblCreatedBy').value)||'ADMIN'
 
+  if(!deliveryDate){
+    showToast('กรุณาระบุ DELIVERY DATE')
+    el('manualPblDeliveryDate')?.focus()
+    return
+  }
+
   if(!po){
     po=manualPblAutoPo()
     el('manualPblPo').value=po
@@ -6784,7 +7006,7 @@ async function createManualPblJob(){
       total_loose_used:0,
       total_loose_pull:0,
       created_by:createdBy,
-      delivery_date:deliveryDate || null
+      delivery_date:deliveryDate
     }
 
     const {data:header,error:headerError}=await db.from(HEADER_TABLE)
@@ -6936,6 +7158,45 @@ let currentPickingHeader=null
 // Map<poItemId, Set<locationIndex>>
 const pickingLocationSelections=new Map()
 const pickingLineData=new Map()
+
+// ผู้ใช้ตรวจของจริงแล้วพบว่าไม่มีสินค้า แม้ ERP จะแสดงว่ามี
+const pickingForcedShortage=new Set()
+const PICKING_NO_STOCK_STORAGE_PREFIX='gambol_picking_no_stock_v1_'
+
+function pickingNoStockStorageKey(poId){
+  return PICKING_NO_STOCK_STORAGE_PREFIX+String(poId||'')
+}
+
+function readPersistedNoStock(poId){
+  try{
+    const raw=localStorage.getItem(pickingNoStockStorageKey(poId))
+    const arr=raw ? JSON.parse(raw) : []
+    return Array.isArray(arr) ? arr.map(String) : []
+  }catch(error){
+    return []
+  }
+}
+
+function savePersistedNoStock(poId){
+  if(!poId) return
+  try{
+    localStorage.setItem(
+      pickingNoStockStorageKey(poId),
+      JSON.stringify([...pickingForcedShortage])
+    )
+  }catch(error){
+    console.warn('บันทึกสถานะไม่มีสินค้าจริงไม่สำเร็จ',error)
+  }
+}
+
+function restorePersistedNoStock(poId){
+  pickingForcedShortage.clear()
+  readPersistedNoStock(poId).forEach(id=>pickingForcedShortage.add(String(id)))
+}
+
+function isForcedNoStock(itemId){
+  return pickingForcedShortage.has(String(itemId))
+}
 
 // เก็บ Location ที่เลือกไว้ใน Browser เพื่อไม่ให้หายเมื่อ Refresh
 const PICKING_SELECTION_STORAGE_PREFIX='gambol_picking_selection_v1_'
@@ -7736,6 +7997,19 @@ function selectedAllocationForLine(itemId){
       : data.locations.reduce((s,r)=>s+Math.max(0,num(r.available_physical)),0)
   )
 
+  // ของจริงไม่มี แม้ ERP จะมียอด -> บังคับเป็นงานขาดทั้งรายการ
+  if(isForcedNoStock(itemId)){
+    return {
+      picked:0,
+      remaining:0,
+      shortage:required,
+      targetFromStock:0,
+      required,
+      allocations:new Map(),
+      forcedNoStock:true
+    }
+  }
+
   // ยอดที่สามารถหยิบจาก ERP ได้จริง
   const targetFromStock=Math.min(required,availableTotal)
   // ส่วนที่ไม่มีของให้หยิบ = งานขาด
@@ -7775,18 +8049,33 @@ function updateLineLocationSelection(itemId){
 
   const result=selectedAllocationForLine(itemId)
 
+  const forcedNoStock=isForcedNoStock(itemId)
+  const lineCard=el(`pickLine_${itemId}`)
+  if(lineCard) lineCard.classList.toggle('real-no-stock',forcedNoStock)
+
   data.locations.forEach((loc,index)=>{
     const row=el(`locRow_${itemId}_${index}`)
     const qty=el(`locPick_${itemId}_${index}`)
+    const check=document.querySelector(
+      `.loc-check[data-item-id="${CSS.escape(String(itemId))}"][data-loc-index="${index}"]`
+    )
     const selected=getSelectedLocationSet(itemId).has(index)
 
-    if(row) row.classList.toggle('loc-row-selected',selected)
+    if(row) row.classList.toggle('loc-row-selected',selected && !forcedNoStock)
     if(qty) qty.textContent=fmt(result.allocations.get(index)||0)
+    if(check){
+      const available=Math.max(0,num(loc.available_physical))
+      check.disabled=forcedNoStock || available<=0
+      check.checked=!forcedNoStock && selected
+    }
   })
 
   const status=el(`linePickStatus_${itemId}`)
   if(status){
-    if(result.remaining<=0){
+    if(result.forcedNoStock){
+      status.className='line-pick-status ready'
+      status.textContent='งานขาด '+fmt(result.required)+' คู่ · ยืนยันของจริงไม่มีสินค้า'
+    }else if(result.remaining<=0){
       status.className='line-pick-status ready'
 
       if(result.shortage>0 && result.targetFromStock<=0){
@@ -8144,11 +8433,34 @@ document.addEventListener('keydown',e=>{
 })
 
 function bindLocationCheckboxes(){
+  document.querySelectorAll('.line-no-stock-check[data-item-id]').forEach(check=>{
+    check.addEventListener('change',()=>{
+      const itemId=String(check.dataset.itemId)
+      const selected=getSelectedLocationSet(itemId)
+
+      if(check.checked){
+        pickingForcedShortage.add(itemId)
+        selected.clear()
+      }else{
+        pickingForcedShortage.delete(itemId)
+      }
+
+      savePersistedNoStock(currentPickingPoId)
+      savePersistedPickingSelections(currentPickingPoId)
+      updateLineLocationSelection(itemId)
+    })
+  })
+
   document.querySelectorAll('.loc-check[data-item-id]').forEach(check=>{
     check.addEventListener('change',()=>{
       const itemId=String(check.dataset.itemId)
       const index=Number(check.dataset.locIndex)
       const selected=getSelectedLocationSet(itemId)
+
+      if(isForcedNoStock(itemId)){
+        check.checked=false
+        return
+      }
 
       if(check.checked) selected.add(index)
       else selected.delete(index)
@@ -8172,6 +8484,7 @@ async function openPickingDetail(poId,source='active'){
   currentPickingPoId=nextPoId
   currentPickingSource=source
   rememberCurrentPickingPo(currentPickingPoId,currentPickingSource)
+  restorePersistedNoStock(currentPickingPoId)
   showPage('detail')
   updatePdfActionButtons(false)
   el('pickingDetailList').innerHTML='<div class="empty"><div><strong>กำลังโหลดรายละเอียด PO</strong></div></div>'
@@ -8198,6 +8511,9 @@ async function openPickingDetail(poId,source='active'){
     el('detailPairs').textContent=fmt(h.total_pairs)
     el('detailCartons').textContent=fmt(h.total_cartons)
     el('detailStatusBadge').textContent=poStatusLabel(h.status)
+    if(el('detailDeliveryDate')){
+      el('detailDeliveryDate').value=txt(h.delivery_date)
+    }
 
     const startBtn=el('startPickingBtn')
     startBtn.style.display=h.status==='READY_FOR_PICKING'?'':'none'
@@ -8282,8 +8598,10 @@ async function openPickingDetail(poId,source='active'){
         </div>` :
         '<div class="no-location">ไม่พบ Item / Color / Size นี้ใน ERP Stock</div>'
 
+      const forcedNoStock=isForcedNoStock(item.id)
+
       return `
-        <div class="pick-line">
+        <div class="pick-line ${forcedNoStock?'real-no-stock':''}" id="pickLine_${item.id}">
           <div class="pick-line-head">
             <div><small>NO.</small><b>${index+1}</b></div>
             <div><small>ITEM</small><b>${esc(item.item||'-')} ${esc(item.code||'')}</b></div>
@@ -8291,6 +8609,17 @@ async function openPickingDetail(poId,source='active'){
             <div><small>PAIRS</small><b>${fmt(item.order_pairs)}</b></div>
             <div><small>BOX</small><b>${fmt(item.carton_qty)}</b></div>
             <div><small>ERP TOTAL</small><b class="${total>=required?'loc-ok':'loc-short'}">${fmt(total)}</b></div>
+          </div>
+          <div class="line-real-stock-control">
+            <label>
+              <input
+                type="checkbox"
+                class="line-no-stock-check"
+                data-item-id="${esc(item.id)}"
+                ${forcedNoStock?'checked':''}
+              >
+              ไม่มีสินค้าจริง / ให้เป็นงานขาด
+            </label>
           </div>
           ${locations}
           <div id="linePickStatus_${item.id}" class="line-pick-status pending">
@@ -8826,6 +9155,31 @@ async function persistCurrentJobOrder(){
 }
 
 async function openJobOrderPreview(){
+  const deliveryDate=txt(el('detailDeliveryDate')?.value)
+
+  if(!deliveryDate){
+    setDetailMessage('กรุณาระบุ DELIVERY DATE ก่อนสร้างใบจัดงาน','warn')
+    el('detailDeliveryDate')?.focus()
+    showToast('กรุณาระบุวันที่จัดส่ง')
+    return
+  }
+
+  // บันทึกวันที่ล่าสุดลง po_headers ก่อนสร้างใบจัดงาน
+  if(!currentPickingHeader || txt(currentPickingHeader.delivery_date)!==deliveryDate){
+    const dateRes=await db.from(HEADER_TABLE)
+      .update({delivery_date:deliveryDate})
+      .eq('id',currentPickingPoId)
+
+    if(dateRes.error){
+      setDetailMessage('บันทึก DELIVERY DATE ไม่สำเร็จ: '+(dateRes.error.message||dateRes.error),'warn')
+      return
+    }
+
+    if(currentPickingHeader){
+      currentPickingHeader.delivery_date=deliveryDate
+    }
+  }
+
   if(!allPickingLocationsReady()){
     setDetailMessage('กรุณาเลือก Location ให้ครบก่อนสร้างใบจัดงาน','warn')
     showToast('ยังเลือก Location ไม่ครบ')
@@ -8853,6 +9207,10 @@ async function openJobOrderPreview(){
 
   try{
     await persistCurrentJobOrder()
+
+    try{
+      localStorage.removeItem(pickingNoStockStorageKey(currentPickingPoId))
+    }catch(e){}
 
     el('detailStatusBadge').textContent='ทำใบจัดแล้ว'
     setDetailMessage(
