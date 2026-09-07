@@ -3782,24 +3782,69 @@ function aliasIndex(headers,aliases){
   return -1
 }
 
+/* จำนวนต้อง Exact Match เท่านั้น
+   เพื่อไม่ให้หัวข้อ "จำนวน" ถูกอ่านแทน "จำนวนรวม" */
+function exactHeaderIndex(headers,aliases){
+  const targets=aliases.map(norm)
+  for(let i=0;i<headers.length;i++){
+    const h=norm(headers[i])
+    if(!h) continue
+    if(targets.some(t=>h===t)) return i
+  }
+  return -1
+}
+
 function detectLotusHeader(rows){
   let best=null
+
   for(let r=0;r<Math.min(rows.length,70);r++){
     const h=rows[r]||[]
+
     const columns={
       barcode:aliasIndex(h,['UPC','BARCODE','EAN']),
       item:aliasIndex(h,['SPN','ITEM','MODEL']),
       pack:aliasIndex(h,['จำนวนชิ้นต่อลัง','จำนวนชิ้นต่อลังสินค้า','PACK']),
-      pair:aliasIndex(h,['จำนวนที่สั่งซื้อ (หน่วย)','จำนวนที่สั่งซื้อ','ORDERQTY','QTY']),
       box:aliasIndex(h,['จำนวนลังสินค้าที่สั่งซื้อ','จำนวนลัง','BOX']),
       color:aliasIndex(h,['รหัสสี/สี','COLOR']),
-      size:aliasIndex(h,['ขนาด/รายละเอียด','SIZE'])
+      size:aliasIndex(h,['ขนาด/รายละเอียด','SIZE']),
+
+      // ห้ามใช้ aliasIndex ตรงนี้ เพราะ "จำนวน" อาจ match "จำนวนรวม"
+      confirmed:exactHeaderIndex(h,[
+        'จำนวนที่ยืนยัน',
+        'จำนวน ที่ยืนยัน',
+        'จำนวนยืนยัน',
+        'ยืนยันจำนวน',
+        'CONFIRMED QTY',
+        'CONFIRMED QUANTITY'
+      ]),
+
+      total:exactHeaderIndex(h,[
+        'จำนวนรวม',
+        'จำนวน รวม',
+        'จำนวนทั้งหมด',
+        'TOTAL QTY',
+        'TOTAL QUANTITY'
+      ])
     }
-    if(columns.barcode<0 || columns.pair<0) continue
+
+    // ต้องมี Barcode และอย่างน้อย confirmed หรือ total
+    if(columns.barcode<0 || (columns.confirmed<0 && columns.total<0)) continue
+
     let score=0
-    Object.values(columns).forEach(v=>{if(v>=0)score++})
-    if(!best || score>best.score) best={row:r,columns,score}
+    if(columns.barcode>=0) score+=3
+    if(columns.confirmed>=0) score+=4
+    if(columns.total>=0) score+=3
+    if(columns.item>=0) score++
+    if(columns.pack>=0) score++
+    if(columns.box>=0) score++
+    if(columns.color>=0) score++
+    if(columns.size>=0) score++
+
+    if(!best || score>best.score){
+      best={row:r,columns,score}
+    }
   }
+
   return best
 }
 
@@ -3809,8 +3854,9 @@ function detectLotusHeader(rows){
    - 1 ไฟล์มีหลาย Sheet
    - ชื่อ Sheet ที่เป็นเลข = PO
    - อ่าน "รหัสสินค้า"
-   - ถ้ามี "จำนวนที่ยืนยัน" และ cell มีค่า ให้ใช้ก่อน
-   - ถ้าไม่มี/ว่าง ใช้ "จำนวนรวม"
+   - Priority 1: "จำนวนที่ยืนยัน"
+   - Priority 2: "จำนวนรวม"
+   - ห้ามอ่านคอลัมน์ชื่อ "จำนวน"
    - ตำแหน่งคอลัมน์เปลี่ยนได้
    - หยุดก่อนแถว "หมายเหตุ"
    ========================= */
@@ -3828,7 +3874,9 @@ function bigCHeaderIndex(headers,aliases){
     const h=norm(headers[i])
     if(!h) continue
 
-    if(aliasNorm.some(a=>h===a || h.includes(a) || a.includes(h))){
+    // Exact Match เท่านั้น
+    // ป้องกัน "จำนวน" ไป match กับ "จำนวนรวม"
+    if(aliasNorm.some(a=>h===a)){
       return i
     }
   }
@@ -4046,7 +4094,7 @@ function toIsoDate(value){
 
 function parseOrderRows(rows,customer,selectedType){
   const header=detectLotusHeader(rows)
-  if(!header) throw new Error('ไม่พบหัวตาราง UPC / จำนวนที่สั่งซื้อ ในไฟล์')
+  if(!header) throw new Error('ไม่พบหัวตาราง UPC / จำนวนที่ยืนยัน / จำนวนรวม ในไฟล์')
 
   const po=normalizePo(valueNextToLabel(rows,['เลขที่ใบสั่งซื้อ','เลขที่ PO','PO NUMBER','PO']))
   const deliveryRaw=valueNextToLabel(rows,['วันที่ส่งสินค้า','กำหนดส่ง','DELIVERY DATE','DUE DATE'])
@@ -4068,7 +4116,25 @@ function parseOrderRows(rows,customer,selectedType){
 
     const barcode=c.barcode>=0 ? cleanBarcode(row[c.barcode]) : ''
     const item=c.item>=0 ? txt(row[c.item]).toUpperCase() : ''
-    const pairQty=c.pair>=0 ? num(row[c.pair]) : 0
+
+    let qtyValue=''
+    let qtySource=''
+
+    // Priority 1 = จำนวนที่ยืนยัน
+    // ถ้ามีค่า 0 ถือว่าเป็นค่าที่ยืนยันจริง และจะไม่ fallback ไปจำนวนรวม
+    if(c.confirmed>=0 && cellHasRealValue(row[c.confirmed])){
+      qtyValue=row[c.confirmed]
+      qtySource='จำนวนที่ยืนยัน'
+
+    // Priority 2 = จำนวนรวม
+    }else if(c.total>=0 && cellHasRealValue(row[c.total])){
+      qtyValue=row[c.total]
+      qtySource='จำนวนรวม'
+    }
+
+    // ไม่อ่านคอลัมน์ "จำนวน" เด็ดขาด
+    const pairQty=num(qtyValue)
+
     const packSize=c.pack>=0 ? num(row[c.pack]) : 0
     let sourceBox=c.box>=0 ? num(row[c.box]) : 0
     const sourceColor=c.color>=0 ? txt(row[c.color]) : ''
@@ -4079,7 +4145,7 @@ function parseOrderRows(rows,customer,selectedType){
 
     out.push({
       sourceRow:r+1,barcode,sourceItem:item,sourceColor,sourceSize,
-      packSize,pairQty,sourceBox
+      packSize,pairQty,sourceBox,qtySource
     })
   }
 
@@ -4091,6 +4157,9 @@ function parseOrderRows(rows,customer,selectedType){
       const a=agg.get(key)
       a.pairQty+=row.pairQty
       a.sourceBox+=row.sourceBox
+      if(row.qtySource==='จำนวนที่ยืนยัน'){
+        a.qtySource='จำนวนที่ยืนยัน'
+      }
     }
   })
 
@@ -5400,18 +5469,19 @@ async function uploadErpCsvToSupabase(){
     erpUploadState.dbCount=dbCount
     el('erpStatDb').textContent=dbCount.toLocaleString('th-TH')
 
-    const total=erpUploadState.rows.length
+    if(dbCount>0){
+      throw new Error(
+        `erp_stock_ptt มีข้อมูลอยู่ ${dbCount.toLocaleString('th-TH')} แถว `+
+        `กรุณา CLEAR ERP STOCK ก่อน เพื่อป้องกันข้อมูลซ้ำ`
+      )
+    }
 
+    const total=erpUploadState.rows.length
     const ok=confirm(
-      (dbCount>0
-        ? `erp_stock_ptt มีข้อมูลเดิม ${dbCount.toLocaleString('th-TH')} แถว\n\n`
-        : `erp_stock_ptt ยังไม่มีข้อมูล\n\n`
-      )+
-      `กำลังเพิ่มข้อมูลใหม่ ${total.toLocaleString('th-TH')} แถว\n`+
-      `ไฟล์: ${erpUploadState.file?.name||'-'}\n\n`+
-      `ข้อมูลเดิมจะไม่ถูกลบ\n`+
-      `ตาราง: erp_stock_ptt\n\n`+
-      `ดำเนินการต่อหรือไม่?`
+      'ยืนยันอัปโหลด ERP STOCK เข้า Supabase หรือไม่?\n\n'+
+      'ไฟล์: '+(erpUploadState.file?.name||'-')+'\n'+
+      'จำนวน: '+total.toLocaleString('th-TH')+' แถว\n'+
+      'ตาราง: erp_stock_ptt'
     )
     if(!ok){
       uploadBtn.disabled=false
