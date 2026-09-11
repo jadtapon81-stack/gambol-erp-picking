@@ -1052,6 +1052,75 @@ table.general th{background:#f9fafb;font-size:12px}
 @media(max-width:760px){.loose-master-toolbar{grid-template-columns:1fr}.app-sidebar{width:88vw}}
 
 
+
+/* FORBIDDEN LOCATION MASTER */
+.forbidden-master-toolbar{
+  display:grid;
+  grid-template-columns:180px 1fr auto;
+  gap:9px;
+  align-items:end;
+  margin-bottom:12px;
+}
+.forbidden-master-toolbar .field input,
+.forbidden-master-toolbar .field select{
+  min-height:42px;
+}
+.forbidden-master-status{
+  display:none;
+  margin-bottom:12px;
+  padding:10px 12px;
+  border-radius:10px;
+  font-size:11px;
+  line-height:1.5;
+}
+.forbidden-master-status.show{display:block}
+.forbidden-master-status.ok{background:#ecfdf5;border:1px solid #86efac;color:#166534}
+.forbidden-master-status.warn{background:#fff7ed;border:1px solid #fdba74;color:#9a3412}
+.forbidden-master-status.error{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
+.forbidden-location-table-wrap{
+  overflow:auto;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+}
+.forbidden-location-table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:620px;
+}
+.forbidden-location-table th,
+.forbidden-location-table td{
+  padding:10px 11px;
+  border-bottom:1px solid #e5e7eb;
+  text-align:left;
+  font-size:11px;
+}
+.forbidden-location-table th{
+  background:#f8fafc;
+  font-size:10px;
+  color:#4b5563;
+}
+.forbidden-master-check{
+  width:22px;
+  height:22px;
+  accent-color:#dc2626;
+}
+.loc-forbidden-row{
+  background:#fff1f2;
+}
+.loc-forbidden-badge{
+  display:inline-block;
+  margin-left:6px;
+  padding:3px 6px;
+  border-radius:999px;
+  background:#fee2e2;
+  color:#b91c1c;
+  font-size:8px;
+  font-weight:900;
+}
+@media(max-width:760px){
+  .forbidden-master-toolbar{grid-template-columns:1fr}
+}
+
 /* CLEAR ERP STOCK CONFIRM MODAL */
 .erp-clear-modal{
   position:fixed;
@@ -3869,6 +3938,7 @@ table.general th{background:#f9fafb;font-size:12px}
     <button class="side-item" data-side-page="upload"><span class="side-icon">⇧</span>UPLOAD ERP STOCK</button>
     <button class="side-item" data-side-page="upcmaster"><span class="side-icon">▥</span>UPC MASTER</button>
     <button class="side-item" data-side-page="looselocations"><span class="side-icon">◫</span>LOOSE LOCATION</button>
+    <button class="side-item" data-side-page="forbiddenlocations"><span class="side-icon">⊘</span>FORBIDDEN LOCATION</button>
     <button class="side-item" data-side-page="locationqr"><span class="side-icon">▦</span>LOCATION QR MASTER</button>
     <button class="side-item" data-side-page="stock"><span class="side-icon">▣</span>ERP STOCK</button>
     <button class="side-item" data-side-page="reservations"><span class="side-icon">◉</span>RESERVED STOCK</button>
@@ -4718,6 +4788,58 @@ table.general th{background:#f9fafb;font-size:12px}
   <div class="loose-location-table-wrap"><table class="loose-location-table"><thead><tr><th style="width:90px">งานเศษ</th><th>Customer</th><th>Warehouse</th><th>Location</th><th style="width:130px">Available</th></tr></thead><tbody id="looseMasterBody"><tr><td colspan="5">กำลังโหลด...</td></tr></tbody></table></div>
 </div></section>
 
+
+<section class="page" id="page-forbiddenlocations">
+<div class="page-box">
+  <div class="page-head">
+    <div class="head-left">
+      <button class="back-btn" data-page="home">←</button>
+      <div>
+        <h2 class="page-title">FORBIDDEN LOCATION</h2>
+        <p class="page-sub">Location ที่ห้ามใช้ในการ Picking</p>
+      </div>
+    </div>
+    <div class="badge">BLOCKED</div>
+  </div>
+
+  <div class="forbidden-master-toolbar">
+    <div class="field">
+      <label>CUSTOMER</label>
+      <select id="forbiddenMasterCustomer">
+        <option value="LOTUS">LOTUS</option>
+        <option value="BIG C">BIG C</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>ค้นหา Warehouse / Location</label>
+      <input id="forbiddenMasterSearch" placeholder="Warehouse / Location">
+    </div>
+
+    <button class="btn btn-secondary" id="forbiddenMasterReloadBtn">รีเฟรช</button>
+  </div>
+
+  <div id="forbiddenMasterStatus" class="forbidden-master-status"></div>
+
+  <div class="forbidden-location-table-wrap">
+    <table class="forbidden-location-table">
+      <thead>
+        <tr>
+          <th style="width:90px">ห้ามหยิบ</th>
+          <th>Customer</th>
+          <th>Warehouse</th>
+          <th>Location</th>
+          <th style="width:130px">Available</th>
+        </tr>
+      </thead>
+      <tbody id="forbiddenMasterBody">
+        <tr><td colspan="5">กำลังโหลด...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</section>
+
 <section class="page" id="page-locationqr">
 <div class="page-box">
   <div class="page-head">
@@ -4995,10 +5117,11 @@ const PICKING_JOB_TABLE = 'picking_job_locations'
 const RESERVATION_TABLE = 'picking_stock_reservations'
 const PBL_TEMPLATE_TABLE = 'pbl_template_items'
 const LOOSE_LOCATION_TABLE = 'picking_loose_locations'
+const FORBIDDEN_LOCATION_TABLE = 'picking_forbidden_locations'
 const BARCODE_MASTER_TABLE = 'barcode_master'
 const PACK_SIZE = 6
 
-const pages = ['home','create','pblmanual','orders','stock','reservations','active','activejob','detail','joborder','upload','upcmaster','looselocations','locationqr','completed']
+const pages = ['home','create','pblmanual','orders','stock','reservations','active','activejob','detail','joborder','upload','upcmaster','looselocations','forbiddenlocations','locationqr','completed']
 const jobRows = []
 let importState = {
   file:null,
@@ -5142,6 +5265,7 @@ function showPage(name, updateHash=true){
   if(name==='upcmaster') resetUpcUploadStatusOnly()
   if(name==='locationqr') loadLocationQrMaster()
   if(name==='looselocations') loadLooseLocationMaster()
+  if(name==='forbiddenlocations') loadForbiddenLocationMaster()
   if(name==='pblmanual'){
     const savedUser=localStorage.getItem('erp_picking_user')
     if(savedUser && el('manualPblCreatedBy')) el('manualPblCreatedBy').value=savedUser
@@ -9976,6 +10100,227 @@ let currentPickingLooseKeys=new Set()
 async function loadPickingLooseLocationKeys(customer){try{const rows=await fetchLooseLocationSettings(customer);currentPickingLooseKeys=new Set(rows.map(r=>looseLocationKey(r.warehouse,r.location)))}catch(error){console.warn('โหลดงานเศษไม่สำเร็จ',error);currentPickingLooseKeys=new Set()}}
 function isLooseLocationRow(row){return currentPickingLooseKeys.has(looseLocationKey(row?.warehouse,row?.location))}
 
+/* =========================================================
+   FORBIDDEN LOCATION MASTER
+   ========================================================= */
+let forbiddenLocationRows=[]
+let activeForbiddenLocationKeys=new Set()
+let currentPickingForbiddenKeys=new Set()
+
+function forbiddenLocationKey(warehouse,location){
+  return norm(warehouse)+'||'+norm(location)
+}
+
+function setForbiddenMasterStatus(message,type='ok'){
+  const box=el('forbiddenMasterStatus')
+  if(!box) return
+  box.className='forbidden-master-status show '+type
+  box.textContent=message
+}
+
+async function fetchForbiddenLocationSettings(customer){
+  const {data,error}=await db.from(FORBIDDEN_LOCATION_TABLE)
+    .select('id,customer,warehouse,location,is_active')
+    .eq('customer',customer)
+    .eq('is_active',true)
+    .limit(5000)
+
+  if(error) throw error
+  return data||[]
+}
+
+async function loadForbiddenLocationMaster(){
+  const customer=el('forbiddenMasterCustomer')?.value||'LOTUS'
+  const body=el('forbiddenMasterBody')
+  if(!body) return
+
+  body.innerHTML='<tr><td colspan="5">กำลังโหลด Location จาก ERP Stock...</td></tr>'
+
+  try{
+    const [erpRes,settingRows]=await Promise.all([
+      db.from(ERP_TABLE)
+        .select('warehouse,location,available_physical')
+        .limit(10000),
+      fetchForbiddenLocationSettings(customer)
+    ])
+
+    if(erpRes.error) throw erpRes.error
+
+    const grouped=new Map()
+
+    ;(erpRes.data||[]).forEach(r=>{
+      const warehouse=txt(r.warehouse)
+      const location=txt(r.location)
+
+      if(!warehouse || !location) return
+      if(!customerWarehouseAllowed(customer,warehouse)) return
+
+      const key=forbiddenLocationKey(warehouse,location)
+
+      if(!grouped.has(key)){
+        grouped.set(key,{
+          customer,
+          warehouse,
+          location,
+          available:0
+        })
+      }
+
+      grouped.get(key).available+=num(r.available_physical)
+    })
+
+    forbiddenLocationRows=[...grouped.values()]
+      .sort((a,b)=>
+        a.warehouse.localeCompare(b.warehouse) ||
+        a.location.localeCompare(b.location)
+      )
+
+    activeForbiddenLocationKeys=new Set(
+      (settingRows||[]).map(r=>
+        forbiddenLocationKey(r.warehouse,r.location)
+      )
+    )
+
+    renderForbiddenLocationMaster()
+
+    setForbiddenMasterStatus(
+      `${customer} · พบ ${forbiddenLocationRows.length.toLocaleString('th-TH')} Location · ห้ามหยิบ ${activeForbiddenLocationKeys.size.toLocaleString('th-TH')} Location`,
+      'ok'
+    )
+  }catch(error){
+    console.error(error)
+
+    body.innerHTML=
+      '<tr><td colspan="5" style="color:#b91c1c">โหลดไม่สำเร็จ</td></tr>'
+
+    setForbiddenMasterStatus(
+      'โหลด FORBIDDEN LOCATION ไม่สำเร็จ: '+(error?.message||error),
+      'error'
+    )
+  }
+}
+
+function renderForbiddenLocationMaster(){
+  const body=el('forbiddenMasterBody')
+  const q=norm(el('forbiddenMasterSearch')?.value)
+
+  if(!body) return
+
+  const rows=forbiddenLocationRows.filter(r=>
+    !q ||
+    norm(r.warehouse).includes(q) ||
+    norm(r.location).includes(q)
+  )
+
+  if(!rows.length){
+    body.innerHTML='<tr><td colspan="5">ไม่พบ Location</td></tr>'
+    return
+  }
+
+  body.innerHTML=rows.map(r=>{
+    const key=forbiddenLocationKey(r.warehouse,r.location)
+    const checked=activeForbiddenLocationKeys.has(key)
+
+    return `
+      <tr class="${checked?'loc-forbidden-row':''}">
+        <td>
+          <input
+            type="checkbox"
+            class="forbidden-master-check"
+            data-forbidden-wh="${esc(r.warehouse)}"
+            data-forbidden-loc="${esc(r.location)}"
+            ${checked?'checked':''}
+          >
+        </td>
+        <td><b>${esc(r.customer)}</b></td>
+        <td>${esc(r.warehouse)}</td>
+        <td>
+          <b>${esc(r.location)}</b>
+          ${checked?'<span class="loc-forbidden-badge">ห้ามหยิบ</span>':''}
+        </td>
+        <td>${fmt(r.available)}</td>
+      </tr>
+    `
+  }).join('')
+
+  body.querySelectorAll('.forbidden-master-check').forEach(check=>{
+    check.addEventListener('change',()=>saveForbiddenLocationSetting(
+      el('forbiddenMasterCustomer').value,
+      check.dataset.forbiddenWh,
+      check.dataset.forbiddenLoc,
+      check.checked
+    ))
+  })
+}
+
+async function saveForbiddenLocationSetting(customer,warehouse,location,isActive){
+  const key=forbiddenLocationKey(warehouse,location)
+
+  try{
+    if(isActive){
+      const {error}=await db.from(FORBIDDEN_LOCATION_TABLE)
+        .upsert({
+          customer,
+          warehouse,
+          location,
+          is_active:true,
+          updated_at:new Date().toISOString()
+        },{
+          onConflict:'customer,warehouse,location'
+        })
+
+      if(error) throw error
+      activeForbiddenLocationKeys.add(key)
+    }else{
+      const {error}=await db.from(FORBIDDEN_LOCATION_TABLE)
+        .delete()
+        .eq('customer',customer)
+        .eq('warehouse',warehouse)
+        .eq('location',location)
+
+      if(error) throw error
+      activeForbiddenLocationKeys.delete(key)
+    }
+
+    renderForbiddenLocationMaster()
+
+    setForbiddenMasterStatus(
+      `${customer} · ${warehouse} / ${location} ${isActive?'ถูกกำหนดเป็น Location ต้องห้าม':'อนุญาตให้หยิบแล้ว'}`,
+      'ok'
+    )
+  }catch(error){
+    console.error(error)
+    setForbiddenMasterStatus(
+      'บันทึกไม่สำเร็จ: '+(error?.message||error),
+      'error'
+    )
+    await loadForbiddenLocationMaster()
+  }
+}
+
+el('forbiddenMasterCustomer')?.addEventListener('change',loadForbiddenLocationMaster)
+el('forbiddenMasterReloadBtn')?.addEventListener('click',loadForbiddenLocationMaster)
+el('forbiddenMasterSearch')?.addEventListener('input',renderForbiddenLocationMaster)
+
+async function loadPickingForbiddenLocationKeys(customer){
+  try{
+    const rows=await fetchForbiddenLocationSettings(customer)
+    currentPickingForbiddenKeys=new Set(
+      rows.map(r=>forbiddenLocationKey(r.warehouse,r.location))
+    )
+  }catch(error){
+    console.warn('โหลด Location ต้องห้ามไม่สำเร็จ',error)
+    currentPickingForbiddenKeys=new Set()
+  }
+}
+
+function isForbiddenLocationRow(row){
+  return currentPickingForbiddenKeys.has(
+    forbiddenLocationKey(row?.warehouse,row?.location)
+  )
+}
+
+
 /* =========================
    STOCK RESERVATION
    ========================= */
@@ -11413,6 +11758,7 @@ function matchErp(item,erpRows,header=currentPickingHeader){
 
     if(wantedSize && norm(r.size)!==wantedSize) return false
     if(!customerWarehouseAllowed(customer,r.warehouse)) return false
+    if(isForbiddenLocationRow(r)) return false
     if(poType==='PBL' && isLooseLocationRow(r)) return false
 
     return true
@@ -12543,7 +12889,10 @@ async function openPickingDetail(poId,source='active'){
     }
 
     setDetailMessage('กำลังค้นหา Location จาก ERP Stock...','info')
-    await loadPickingLooseLocationKeys(h.customer)
+    await Promise.all([
+      loadPickingLooseLocationKeys(h.customer),
+      loadPickingForbiddenLocationKeys(h.customer)
+    ])
     const rawErpRows=await fetchErpRowsForItems(items.map(r=>r.item))
     await loadReservationMap(currentPickingPoId)
     const erpRows=applyReservationToErpRows(rawErpRows)
