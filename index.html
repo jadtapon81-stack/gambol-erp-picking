@@ -9,6 +9,7 @@
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 
 <style>
 :root{
@@ -1119,6 +1120,83 @@ table.general th{background:#f9fafb;font-size:12px}
 }
 @media(max-width:760px){
   .forbidden-master-toolbar{grid-template-columns:1fr}
+}
+
+
+/* LOCATION QR AUTO GENERATOR */
+.location-qr-auto-fields{
+  grid-template-columns:1fr 1fr;
+}
+.location-qr-auto-preview{
+  min-height:300px;
+}
+.location-qr-auto-preview img{
+  width:min(240px,78vw);
+  height:auto;
+  max-width:100%;
+  max-height:none;
+  image-rendering:pixelated;
+}
+.qr-auto-placeholder{
+  color:#94a3b8;
+  font-weight:800;
+  font-size:13px;
+}
+.location-qr-auto-actions{
+  grid-template-columns:1fr 1fr 1fr;
+}
+.location-qr-excel-box{
+  margin-top:10px;
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:8px;
+}
+.location-qr-excel-box input[type=file]{
+  width:100%;
+  min-width:0;
+  padding:9px;
+  border:1px solid #d1d5db;
+  border-radius:9px;
+  background:#fff;
+}
+.location-qr-bulk-progress{
+  display:none;
+  margin-top:10px;
+  padding:10px 11px;
+  border-radius:9px;
+  background:#eff6ff;
+  color:#1e40af;
+  border:1px solid #bfdbfe;
+  font-size:11px;
+  white-space:pre-line;
+}
+.location-qr-bulk-progress.show{display:block}
+
+@media(max-width:760px){
+  .location-qr-layout{
+    grid-template-columns:1fr;
+  }
+  .location-qr-auto-fields{
+    grid-template-columns:1fr;
+  }
+  .location-qr-auto-actions{
+    grid-template-columns:1fr 1fr;
+  }
+  .location-qr-auto-actions #saveLocationQrBtn{
+    grid-column:1/-1;
+    min-height:50px;
+    font-size:16px;
+  }
+  .location-qr-excel-box{
+    grid-template-columns:1fr;
+  }
+  .location-qr-excel-box .btn{
+    width:100%;
+    min-height:48px;
+  }
+  .location-qr-auto-preview{
+    min-height:270px;
+  }
 }
 
 /* CLEAR ERP STOCK CONFIRM MODAL */
@@ -4860,39 +4938,37 @@ table.general th{background:#f9fafb;font-size:12px}
 
       <input id="locationQrEditId" type="hidden">
 
-      <div class="location-qr-fields">
+      <div class="location-qr-fields location-qr-auto-fields">
         <div class="location-qr-field">
           <label>WAREHOUSE</label>
-          <input id="locationQrWarehouse" placeholder="เช่น WMT-LT-CTY">
+          <input id="locationQrWarehouse" placeholder="WMT-LT-CTY" autocomplete="off">
         </div>
 
         <div class="location-qr-field">
           <label>LOCATION</label>
-          <input id="locationQrLocation" placeholder="เช่น G-01-E-12">
-        </div>
-
-        <div class="location-qr-field">
-          <label>QR VALUE</label>
-          <input id="locationQrValue" placeholder="เช่น G-01-E-12">
-        </div>
-
-        <div class="location-qr-field">
-          <label>QR IMAGE</label>
-          <input id="locationQrImageFile" type="file" accept="image/png,image/jpeg,image/webp">
+          <input id="locationQrLocation" placeholder="G-01-E-12" autocomplete="off">
         </div>
       </div>
 
-      <div id="locationQrPreview" class="location-qr-preview">
+      <div id="locationQrPreview" class="location-qr-preview location-qr-auto-preview">
         <div>
-          <div>QR IMAGE</div>
+          <div class="qr-auto-placeholder">กรอก Warehouse และ Location</div>
           <div id="locationQrPreviewName" class="qr-preview-name"></div>
         </div>
       </div>
 
-      <div class="location-qr-form-actions">
-        <button class="btn btn-primary" id="saveLocationQrBtn">บันทึก Location QR</button>
-        <button class="btn btn-secondary" id="resetLocationQrBtn">ล้างฟอร์ม</button>
+      <div class="location-qr-form-actions location-qr-auto-actions">
+        <button class="btn btn-primary" id="saveLocationQrBtn">บันทึก</button>
+        <button class="btn btn-secondary" id="printLocationQrBtn">พิมพ์ QR</button>
+        <button class="btn btn-secondary" id="resetLocationQrBtn">ล้าง</button>
       </div>
+
+      <div class="location-qr-excel-box">
+        <input id="locationQrExcelFile" type="file" accept=".xlsx,.xls,.csv">
+        <button class="btn btn-blue" id="uploadLocationQrExcelBtn">UPLOAD EXCEL</button>
+      </div>
+
+      <div id="locationQrBulkProgress" class="location-qr-bulk-progress"></div>
 
       <div id="locationQrStatus" class="location-qr-status"></div>
     </div>
@@ -8503,30 +8579,50 @@ function sanitizeStorageName(value){
     .replace(/^_+|_+$/g,'') || 'QR'
 }
 
+function locationQrValueFromInputs(){
+  const warehouse=txt(el('locationQrWarehouse')?.value).toUpperCase()
+  const location=txt(el('locationQrLocation')?.value).toUpperCase()
+  if(!warehouse || !location) return ''
+  return `${warehouse}|${location}|l`
+}
+
+function setLocationQrBulkProgress(message=''){
+  const box=el('locationQrBulkProgress')
+  if(!box) return
+  if(!message){
+    box.className='location-qr-bulk-progress'
+    box.textContent=''
+    return
+  }
+  box.className='location-qr-bulk-progress show'
+  box.textContent=message
+}
+
 function resetLocationQrForm(){
   el('locationQrEditId').value=''
   el('locationQrWarehouse').value=''
   el('locationQrLocation').value=''
-  el('locationQrValue').value=''
-  el('locationQrImageFile').value=''
   locationQrExistingImagePath=''
   locationQrExistingImageUrl=''
   clearLocationQrStatus()
+  setLocationQrBulkProgress('')
 
   el('locationQrPreview').innerHTML=`
     <div>
-      <div>QR IMAGE</div>
+      <div class="qr-auto-placeholder">กรอก Warehouse และ Location</div>
       <div id="locationQrPreviewName" class="qr-preview-name"></div>
     </div>
   `
 }
 
-function showLocationQrPreview(url,warehouse='',location=''){
+function showLocationQrPreview(url,warehouse='',location='',qrValue=''){
   const preview=el('locationQrPreview')
+  if(!preview) return
+
   if(!url){
     preview.innerHTML=`
       <div>
-        <div>QR IMAGE</div>
+        <div class="qr-auto-placeholder">กรอก Warehouse และ Location</div>
         <div class="qr-preview-name">${esc(location||'')}</div>
       </div>
     `
@@ -8539,43 +8635,537 @@ function showLocationQrPreview(url,warehouse='',location=''){
       <div class="qr-preview-name">
         ${esc(warehouse||'')}<br>${esc(location||'')}
       </div>
+      <div style="margin-top:6px;font-size:10px;color:#64748b;word-break:break-all">
+        ${esc(qrValue||'')}
+      </div>
     </div>
   `
 }
 
-el('locationQrLocation')?.addEventListener('input',()=>{
-  const location=txt(el('locationQrLocation').value).toUpperCase()
-  el('locationQrLocation').value=location
-
-  // ถ้า QR VALUE ยังว่าง หรือค่าเดิมเท่ากับ Location ให้ sync อัตโนมัติ
-  const qrValue=txt(el('locationQrValue').value)
-  if(!qrValue || qrValue===location.slice(0,-1)){
-    el('locationQrValue').value=location
+async function generateLocationQrDataUrl(warehouse,location,size=600){
+  if(typeof window.QRCode!=='function'){
+    throw new Error('โหลด QR Generator ไม่สำเร็จ')
   }
-})
 
-el('locationQrWarehouse')?.addEventListener('input',()=>{
-  el('locationQrWarehouse').value=txt(el('locationQrWarehouse').value).toUpperCase()
-})
+  const qrValue=`${warehouse}|${location}|l`
 
-el('locationQrImageFile')?.addEventListener('change',()=>{
-  const file=el('locationQrImageFile').files?.[0]
-  if(!file){
-    showLocationQrPreview(
-      locationQrExistingImageUrl,
-      el('locationQrWarehouse').value,
-      el('locationQrLocation').value
-    )
+  const holder=document.createElement('div')
+  holder.style.position='fixed'
+  holder.style.left='-99999px'
+  holder.style.top='0'
+  holder.style.width=size+'px'
+  holder.style.height=size+'px'
+  document.body.appendChild(holder)
+
+  try{
+    new QRCode(holder,{
+      text:qrValue,
+      width:size,
+      height:size,
+      correctLevel:QRCode.CorrectLevel.M
+    })
+
+    // QRCodeJS สร้าง canvas หรือ img แล้วแต่ browser
+    await new Promise(resolve=>setTimeout(resolve,40))
+
+    const canvas=holder.querySelector('canvas')
+    if(canvas){
+      return canvas.toDataURL('image/png')
+    }
+
+    const img=holder.querySelector('img')
+    if(img){
+      if(!img.complete){
+        await new Promise((resolve,reject)=>{
+          img.onload=resolve
+          img.onerror=reject
+        })
+      }
+
+      const c=document.createElement('canvas')
+      c.width=size
+      c.height=size
+      const ctx=c.getContext('2d')
+      ctx.fillStyle='#ffffff'
+      ctx.fillRect(0,0,size,size)
+      ctx.drawImage(img,0,0,size,size)
+      return c.toDataURL('image/png')
+    }
+
+    throw new Error('ไม่สามารถสร้าง QR Code ได้')
+  }finally{
+    holder.remove()
+  }
+}
+
+
+async function refreshLocationQrAutoPreview(){
+  const warehouse=txt(el('locationQrWarehouse')?.value).toUpperCase()
+  const location=txt(el('locationQrLocation')?.value).toUpperCase()
+
+  if(el('locationQrWarehouse')) el('locationQrWarehouse').value=warehouse
+  if(el('locationQrLocation')) el('locationQrLocation').value=location
+
+  if(!warehouse || !location){
+    showLocationQrPreview('',warehouse,location,'')
     return
   }
 
-  const url=URL.createObjectURL(file)
-  showLocationQrPreview(
-    url,
-    el('locationQrWarehouse').value,
-    el('locationQrLocation').value
+  try{
+    const qrValue=`${warehouse}|${location}|l`
+    const url=await generateLocationQrDataUrl(warehouse,location,420)
+    showLocationQrPreview(url,warehouse,location,qrValue)
+  }catch(error){
+    console.error(error)
+    setLocationQrStatus(
+      'สร้างตัวอย่าง QR ไม่สำเร็จ: '+(error?.message||error),
+      'error'
+    )
+  }
+}
+
+let locationQrPreviewTimer=null
+function scheduleLocationQrAutoPreview(){
+  clearTimeout(locationQrPreviewTimer)
+  locationQrPreviewTimer=setTimeout(
+    ()=>refreshLocationQrAutoPreview(),
+    180
   )
-})
+}
+
+el('locationQrWarehouse')?.addEventListener('input',scheduleLocationQrAutoPreview)
+el('locationQrLocation')?.addEventListener('input',scheduleLocationQrAutoPreview)
+
+function dataUrlToBlob(dataUrl){
+  const [meta,data]=String(dataUrl).split(',')
+  const mime=(meta.match(/data:([^;]+)/)||[])[1]||'image/png'
+  const bytes=atob(data)
+  const arr=new Uint8Array(bytes.length)
+  for(let i=0;i<bytes.length;i++) arr[i]=bytes.charCodeAt(i)
+  return new Blob([arr],{type:mime})
+}
+
+async function uploadGeneratedLocationQr(dataUrl,warehouse,location){
+  const safeWarehouse=sanitizeStorageName(warehouse)
+  const safeLocation=sanitizeStorageName(location)
+  const path=`${safeWarehouse}/${safeLocation}.png`
+  const blob=dataUrlToBlob(dataUrl)
+
+  const {error:uploadError}=await db.storage
+    .from(LOCATION_QR_BUCKET)
+    .upload(path,blob,{
+      cacheControl:'3600',
+      upsert:true,
+      contentType:'image/png'
+    })
+
+  if(uploadError) throw uploadError
+
+  const {data:publicData}=db.storage
+    .from(LOCATION_QR_BUCKET)
+    .getPublicUrl(path)
+
+  return {
+    path,
+    url:publicData?.publicUrl||''
+  }
+}
+
+async function findExistingLocationQr(warehouse,location){
+  warehouse=txt(warehouse).toUpperCase()
+  location=txt(location).toUpperCase()
+
+  const {data,error}=await db.from(LOCATION_QR_TABLE)
+    .select('id,warehouse,location,qr_value,qr_image_path,qr_image_url,is_active')
+    .eq('warehouse',warehouse)
+    .eq('location',location)
+    .limit(2)
+
+  if(error) throw error
+  return data||[]
+}
+
+function duplicateLocationError(warehouse,location,row){
+  const error=new Error(
+    `Location ซ้ำ: ${warehouse} / ${location} มีอยู่ใน LOCATION QR MASTER แล้ว`
+  )
+  error.code='DUPLICATE_LOCATION'
+  error.duplicate=row||null
+  return error
+}
+
+async function saveGeneratedLocationQrRecord(
+  warehouse,
+  location,
+  createdBy='ADMIN',
+  options={}
+){
+  warehouse=txt(warehouse).toUpperCase()
+  location=txt(location).toUpperCase()
+
+  if(!warehouse || !location){
+    throw new Error('Warehouse / Location ไม่ครบ')
+  }
+
+  const editId=Number(options?.editId||0)
+  const existing=await findExistingLocationQr(warehouse,location)
+
+  // ถ้าไม่ได้อยู่โหมดแก้ไข และมี Warehouse+Location นี้อยู่แล้ว -> ห้ามบันทึกซ้ำ
+  if(existing.length && !editId){
+    throw duplicateLocationError(warehouse,location,existing[0])
+  }
+
+  // ถ้าแก้ไข record หนึ่ง แต่ Warehouse+Location ไปชนกับ record อื่น -> ห้ามบันทึก
+  if(editId){
+    const collision=existing.find(r=>Number(r.id)!==editId)
+    if(collision){
+      throw duplicateLocationError(warehouse,location,collision)
+    }
+  }
+
+  const qrValue=`${warehouse}|${location}|l`
+  const dataUrl=await generateLocationQrDataUrl(warehouse,location,600)
+  const uploaded=await uploadGeneratedLocationQr(dataUrl,warehouse,location)
+
+  const payload={
+    warehouse,
+    location,
+    qr_value:qrValue,
+    qr_image_path:uploaded.path,
+    qr_image_url:uploaded.url,
+    is_active:true,
+    updated_at:new Date().toISOString()
+  }
+
+  if(editId){
+    const {data,error}=await db.from(LOCATION_QR_TABLE)
+      .update(payload)
+      .eq('id',editId)
+      .select('*')
+      .single()
+
+    if(error) throw error
+    return data
+  }
+
+  const {data,error}=await db.from(LOCATION_QR_TABLE)
+    .insert({
+      ...payload,
+      created_by:createdBy
+    })
+    .select('*')
+    .single()
+
+  if(error){
+    // เผื่อ DB มี unique constraint แล้วชนจากการกดพร้อมกัน
+    if(String(error.code||'')==='23505'){
+      throw duplicateLocationError(warehouse,location,null)
+    }
+    throw error
+  }
+
+  return data
+}
+
+function printLocationQr(){
+  const warehouse=txt(el('locationQrWarehouse')?.value).toUpperCase()
+  const location=txt(el('locationQrLocation')?.value).toUpperCase()
+
+  if(!warehouse || !location){
+    setLocationQrStatus('กรุณากรอก Warehouse และ Location','warn')
+    return
+  }
+
+  const qrValue=`${warehouse}|${location}|l`
+
+  generateLocationQrDataUrl(warehouse,location,800)
+    .then(url=>{
+      const w=window.open('','_blank','width=650,height=850')
+      if(!w) throw new Error('Browser บล็อกหน้าต่างพิมพ์')
+
+      w.document.write(`
+        <!doctype html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <title>${warehouse} ${location}</title>
+          <style>
+            *{box-sizing:border-box}
+            body{font-family:Tahoma,Arial,sans-serif;margin:0;padding:26px;background:#fff;color:#111}
+            .sheet{width:100%;max-width:520px;margin:0 auto;text-align:center}
+            img{width:360px;max-width:88vw;height:auto;image-rendering:pixelated}
+            .warehouse{font-size:24px;font-weight:900;margin-top:14px}
+            .location{font-size:34px;font-weight:900;margin-top:5px}
+            .value{margin-top:10px;font-size:14px;color:#555;word-break:break-all}
+            @media print{
+              body{padding:0}
+              .sheet{max-width:none}
+            }
+          </style>
+        </head>
+        <body>
+          <div class="sheet">
+            <img src="${url}">
+            <div class="warehouse">${esc(warehouse)}</div>
+            <div class="location">${esc(location)}</div>
+            <div class="value">${esc(qrValue)}</div>
+          </div>
+          <script>
+            window.onload=()=>setTimeout(()=>window.print(),250)
+          <\/script>
+        </body>
+        </html>
+      `)
+      w.document.close()
+    })
+    .catch(error=>{
+      setLocationQrStatus('พิมพ์ไม่สำเร็จ: '+(error?.message||error),'error')
+    })
+}
+
+async function parseLocationQrUploadFile(file){
+  if(!file) throw new Error('กรุณาเลือกไฟล์ Excel')
+
+  const name=String(file.name||'')
+  let rows=[]
+
+  if(/\.(xlsx|xls)$/i.test(name)){
+    if(!window.XLSX) throw new Error('ไม่พบ XLSX library')
+    const buffer=await file.arrayBuffer()
+    const wb=XLSX.read(buffer,{type:'array'})
+    if(!wb.SheetNames?.length) throw new Error('ไม่พบ Sheet')
+    const ws=wb.Sheets[wb.SheetNames[0]]
+    rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:false,defval:''})
+  }else if(/\.csv$/i.test(name)){
+    if(!window.Papa) throw new Error('ไม่พบ CSV library')
+    const parsed=await new Promise((resolve,reject)=>{
+      Papa.parse(file,{
+        header:false,
+        skipEmptyLines:'greedy',
+        complete:resolve,
+        error:reject
+      })
+    })
+    rows=parsed.data||[]
+  }else{
+    throw new Error('รองรับ .xlsx / .xls / .csv')
+  }
+
+  if(!rows.length) throw new Error('ไฟล์ว่าง')
+
+  let headerIndex=-1
+  let whIndex=-1
+  let locIndex=-1
+
+  for(let i=0;i<Math.min(20,rows.length);i++){
+    const h=(rows[i]||[]).map(v=>norm(v))
+    const wi=h.findIndex(v=>v==='WAREHOUSE')
+    const li=h.findIndex(v=>v==='LOCATION')
+
+    if(wi>=0 && li>=0){
+      headerIndex=i
+      whIndex=wi
+      locIndex=li
+      break
+    }
+  }
+
+  if(headerIndex<0){
+    throw new Error('ไม่พบคอลัมน์ Warehouse และ Location')
+  }
+
+  const uniqueRows=[]
+  const seen=new Set()
+  const duplicateInFile=[]
+
+  for(let i=headerIndex+1;i<rows.length;i++){
+    const warehouse=txt(rows[i]?.[whIndex]).toUpperCase()
+    const location=txt(rows[i]?.[locIndex]).toUpperCase()
+
+    if(!warehouse || !location) continue
+
+    const key=norm(warehouse)+'||'+norm(location)
+
+    if(seen.has(key)){
+      duplicateInFile.push({
+        warehouse,
+        location,
+        row:i+1
+      })
+      continue
+    }
+
+    seen.add(key)
+    uniqueRows.push({warehouse,location})
+  }
+
+  if(!uniqueRows.length){
+    throw new Error('ไม่พบ Warehouse / Location ที่ใช้งานได้')
+  }
+
+  return {
+    rows:uniqueRows,
+    duplicateInFile
+  }
+}
+
+async function uploadLocationQrExcel(){
+  const file=el('locationQrExcelFile')?.files?.[0]
+
+  if(!file){
+    setLocationQrStatus('กรุณาเลือกไฟล์ Excel','warn')
+    return
+  }
+
+  const btn=el('uploadLocationQrExcelBtn')
+  btn.disabled=true
+  const oldText=btn.textContent
+
+  try{
+    const parsed=await parseLocationQrUploadFile(file)
+    const inputRows=parsed.rows
+
+    // โหลดรายการเดิม เพื่อเช็กซ้ำก่อนเริ่มสร้าง QR
+    const {data:existingRows,error:existingError}=await db
+      .from(LOCATION_QR_TABLE)
+      .select('id,warehouse,location')
+      .limit(10000)
+
+    if(existingError) throw existingError
+
+    const existingKeys=new Set(
+      (existingRows||[]).map(r=>
+        norm(r.warehouse)+'||'+norm(r.location)
+      )
+    )
+
+    const duplicateInDb=[]
+    const newRows=[]
+
+    inputRows.forEach(row=>{
+      const key=norm(row.warehouse)+'||'+norm(row.location)
+
+      if(existingKeys.has(key)){
+        duplicateInDb.push(row)
+      }else{
+        newRows.push(row)
+      }
+    })
+
+    const fileDupCount=parsed.duplicateInFile.length
+    const dbDupCount=duplicateInDb.length
+
+    let warning=
+      `พบรายการไม่ซ้ำที่อ่านได้ ${inputRows.length.toLocaleString('th-TH')} Location`
+
+    if(fileDupCount){
+      warning+=`\nซ้ำในไฟล์ ${fileDupCount.toLocaleString('th-TH')} รายการ`
+    }
+
+    if(dbDupCount){
+      warning+=`\nมีอยู่ใน LOCATION QR MASTER แล้ว ${dbDupCount.toLocaleString('th-TH')} รายการ`
+    }
+
+    warning+=`\nรายการใหม่ที่จะบันทึก ${newRows.length.toLocaleString('th-TH')} รายการ`
+
+    if(fileDupCount || dbDupCount){
+      warning+=`\n\nรายการซ้ำจะถูกข้าม ไม่สร้างซ้ำ`
+    }
+
+    if(!newRows.length){
+      alert(
+        'ไม่พบ Location ใหม่สำหรับบันทึก\n\n'+warning
+      )
+      setLocationQrStatus(
+        'ไม่พบ Location ใหม่ · รายการทั้งหมดเป็นรายการซ้ำ',
+        'warn'
+      )
+      setLocationQrBulkProgress(warning)
+      return
+    }
+
+    const ok=confirm(
+      warning+
+      '\n\nระบบจะสร้าง QR และบันทึกเฉพาะรายการใหม่\nดำเนินการต่อหรือไม่?'
+    )
+    if(!ok) return
+
+    const createdBy=txt(el('importCreatedBy')?.value)||'ADMIN'
+    let done=0
+    let failed=0
+    const errors=[]
+
+    for(const row of newRows){
+      try{
+        setLocationQrBulkProgress(
+          `กำลังสร้าง QR ${done+failed+1} / ${newRows.length}\n`+
+          `${row.warehouse} / ${row.location}\n`+
+          `ข้ามรายการซ้ำ ${fileDupCount+dbDupCount} รายการ`
+        )
+
+        await saveGeneratedLocationQrRecord(
+          row.warehouse,
+          row.location,
+          createdBy
+        )
+
+        done++
+      }catch(error){
+        // หากมีคนอื่นบันทึก Location เดียวกันระหว่าง Upload ให้ถือเป็นซ้ำ
+        if(error?.code==='DUPLICATE_LOCATION'){
+          duplicateInDb.push(row)
+          continue
+        }
+
+        failed++
+        if(errors.length<8){
+          errors.push(
+            `${row.warehouse} / ${row.location}: ${error?.message||error}`
+          )
+        }
+      }
+    }
+
+    const totalDup=fileDupCount+duplicateInDb.length
+
+    setLocationQrBulkProgress(
+      `เสร็จแล้ว\n`+
+      `บันทึกใหม่ ${done.toLocaleString('th-TH')} รายการ\n`+
+      `ข้ามรายการซ้ำ ${totalDup.toLocaleString('th-TH')} รายการ`+
+      (failed
+        ? `\nไม่สำเร็จ ${failed.toLocaleString('th-TH')} รายการ\n${errors.join('\n')}`
+        : '')
+    )
+
+    setLocationQrStatus(
+      failed
+        ? `บันทึก ${done} รายการ · ซ้ำ ${totalDup} · ไม่สำเร็จ ${failed}`
+        : `บันทึกสำเร็จ ${done} รายการ · ข้ามรายการซ้ำ ${totalDup}`,
+      failed?'warn':'ok'
+    )
+
+    if(totalDup){
+      alert(
+        `Upload เสร็จแล้ว\n\n`+
+        `บันทึกใหม่ ${done} รายการ\n`+
+        `พบ Location ซ้ำ ${totalDup} รายการ\n`+
+        `ระบบข้ามรายการซ้ำแล้ว`
+      )
+    }
+
+    await loadLocationQrMaster()
+
+  }catch(error){
+    console.error(error)
+    setLocationQrStatus(
+      'Upload Excel ไม่สำเร็จ: '+(error?.message||error),
+      'error'
+    )
+  }finally{
+    btn.disabled=false
+    btn.textContent=oldText
+  }
+}
 
 async function loadLocationQrMaster(search=''){
   const body=el('locationQrListBody')
@@ -8665,17 +9255,11 @@ function editLocationQr(id){
   el('locationQrEditId').value=row.id
   el('locationQrWarehouse').value=row.warehouse||''
   el('locationQrLocation').value=row.location||''
-  el('locationQrValue').value=row.qr_value||row.location||''
-  el('locationQrImageFile').value=''
 
   locationQrExistingImagePath=row.qr_image_path||''
   locationQrExistingImageUrl=row.qr_image_url||''
 
-  showLocationQrPreview(
-    row.qr_image_url||'',
-    row.warehouse||'',
-    row.location||''
-  )
+  refreshLocationQrAutoPreview()
 
   setLocationQrStatus(
     'กำลังแก้ไข '+(row.warehouse||'')+' / '+(row.location||''),
@@ -8685,60 +9269,20 @@ function editLocationQr(id){
   window.scrollTo({top:0,behavior:'smooth'})
 }
 
-async function uploadLocationQrImage(file,warehouse,location){
-  const ext=(file.name.split('.').pop()||'png').toLowerCase()
-  const safeWarehouse=sanitizeStorageName(warehouse)
-  const safeLocation=sanitizeStorageName(location)
-
-  const path=`${safeWarehouse}/${safeLocation}.${ext}`
-
-  const {error:uploadError}=await db.storage
-    .from(LOCATION_QR_BUCKET)
-    .upload(path,file,{
-      cacheControl:'3600',
-      upsert:true,
-      contentType:file.type||undefined
-    })
-
-  if(uploadError) throw uploadError
-
-  const {data:publicData}=db.storage
-    .from(LOCATION_QR_BUCKET)
-    .getPublicUrl(path)
-
-  return {
-    path,
-    url:publicData?.publicUrl||''
-  }
-}
-
 async function saveLocationQr(){
-  const id=Number(el('locationQrEditId').value||0)
-  const warehouse=txt(el('locationQrWarehouse').value).toUpperCase()
-  const location=txt(el('locationQrLocation').value).toUpperCase()
-  const qrValue=txt(el('locationQrValue').value)||location
-  const file=el('locationQrImageFile').files?.[0]
+  const warehouse=txt(el('locationQrWarehouse')?.value).toUpperCase()
+  const location=txt(el('locationQrLocation')?.value).toUpperCase()
+  const editId=Number(el('locationQrEditId')?.value||0)
 
   if(!warehouse){
     setLocationQrStatus('กรุณากรอก Warehouse','warn')
-    el('locationQrWarehouse').focus()
+    el('locationQrWarehouse')?.focus()
     return
   }
 
   if(!location){
     setLocationQrStatus('กรุณากรอก Location','warn')
-    el('locationQrLocation').focus()
-    return
-  }
-
-  if(!qrValue){
-    setLocationQrStatus('กรุณากรอก QR Value','warn')
-    el('locationQrValue').focus()
-    return
-  }
-
-  if(!file && !locationQrExistingImageUrl){
-    setLocationQrStatus('กรุณาอัปโหลดรูป QR Code','warn')
+    el('locationQrLocation')?.focus()
     return
   }
 
@@ -8748,63 +9292,41 @@ async function saveLocationQr(){
   btn.textContent='กำลังบันทึก...'
 
   try{
-    setLocationQrStatus('กำลังบันทึก Location QR...','info')
+    const createdBy=txt(el('importCreatedBy')?.value)||'ADMIN'
 
-    let imagePath=locationQrExistingImagePath||null
-    let imageUrl=locationQrExistingImageUrl||null
-
-    if(file){
-      const uploaded=await uploadLocationQrImage(file,warehouse,location)
-      imagePath=uploaded.path
-      imageUrl=uploaded.url
-    }
-
-    const payload={
+    await saveGeneratedLocationQrRecord(
       warehouse,
       location,
-      qr_value:qrValue,
-      qr_image_path:imagePath,
-      qr_image_url:imageUrl,
-      is_active:true,
-      updated_at:new Date().toISOString()
-    }
-
-    let result
-
-    if(id){
-      result=await db.from(LOCATION_QR_TABLE)
-        .update(payload)
-        .eq('id',id)
-        .select('*')
-        .single()
-    }else{
-      result=await db.from(LOCATION_QR_TABLE)
-        .insert({
-          ...payload,
-          created_by:txt(el('importCreatedBy')?.value)||'ADMIN'
-        })
-        .select('*')
-        .single()
-    }
-
-    if(result.error) throw result.error
+      createdBy,
+      {editId}
+    )
 
     setLocationQrStatus(
       'บันทึก '+warehouse+' / '+location+' สำเร็จ',
       'ok'
     )
 
-    resetLocationQrForm()
-    setLocationQrStatus(
-      'บันทึก '+warehouse+' / '+location+' สำเร็จ',
-      'ok'
-    )
-
-    await loadLocationQrMaster(txt(el('locationQrSearchInput').value))
+    await refreshLocationQrAutoPreview()
+    await loadLocationQrMaster(txt(el('locationQrSearchInput')?.value))
     showToast('บันทึก Location QR สำเร็จ')
 
   }catch(error){
     console.error(error)
+
+    if(error?.code==='DUPLICATE_LOCATION'){
+      const message=
+        `Location ซ้ำ\n\n`+
+        `${warehouse} / ${location}\n`+
+        `มีอยู่ใน LOCATION QR MASTER แล้ว\n`+
+        `ระบบจะไม่บันทึกซ้ำ`
+
+      alert(message)
+      setLocationQrStatus(
+        `Location ซ้ำ: ${warehouse} / ${location} มีอยู่แล้ว`,
+        'warn'
+      )
+      return
+    }
 
     let message=error?.message||String(error)
 
@@ -8856,6 +9378,8 @@ async function deleteLocationQr(id){
 }
 
 el('saveLocationQrBtn')?.addEventListener('click',saveLocationQr)
+el('printLocationQrBtn')?.addEventListener('click',printLocationQr)
+el('uploadLocationQrExcelBtn')?.addEventListener('click',uploadLocationQrExcel)
 el('resetLocationQrBtn')?.addEventListener('click',resetLocationQrForm)
 
 el('locationQrSearchBtn')?.addEventListener('click',()=>{
