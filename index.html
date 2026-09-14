@@ -3909,14 +3909,15 @@ table.general th{background:#f9fafb;font-size:12px}
 .pdf-detail-table.pdf-asn-table th:nth-child(8){width:15%}
 .pdf-detail-table.pdf-asn-table th:nth-child(9){width:10%}
 
-/* PBL เดิม */
-.pdf-detail-table.pdf-pbl-table th:nth-child(1){width:7%}
-.pdf-detail-table.pdf-pbl-table th:nth-child(2){width:28%}
-.pdf-detail-table.pdf-pbl-table th:nth-child(3){width:10%}
-.pdf-detail-table.pdf-pbl-table th:nth-child(4){width:14%}
-.pdf-detail-table.pdf-pbl-table th:nth-child(5){width:13%}
-.pdf-detail-table.pdf-pbl-table th:nth-child(6){width:17%}
-.pdf-detail-table.pdf-pbl-table th:nth-child(7){width:11%}
+/* PBL = TOTAL คู่ + คู่ที่หยิบ + กล่อง */
+.pdf-detail-table.pdf-pbl-table th:nth-child(1){width:6%}
+.pdf-detail-table.pdf-pbl-table th:nth-child(2){width:24%}
+.pdf-detail-table.pdf-pbl-table th:nth-child(3){width:8%}
+.pdf-detail-table.pdf-pbl-table th:nth-child(4){width:12%}
+.pdf-detail-table.pdf-pbl-table th:nth-child(5){width:11%}
+.pdf-detail-table.pdf-pbl-table th:nth-child(6){width:9%}
+.pdf-detail-table.pdf-pbl-table th:nth-child(7){width:19%}
+.pdf-detail-table.pdf-pbl-table th:nth-child(8){width:11%}
 
 
 /* RESERVED STOCK */
@@ -11925,6 +11926,13 @@ function asnMainLocationCartons(row){
 
 function isPblJobType(value){ return norm(value)==='PBL' }
 
+function pblPickCartons(row){
+  if(!row) return ''
+  const pairs=Math.max(0,num(row.pick ?? row.pairs ?? row.pick_qty))
+  if(pairs<=0) return ''
+  return Math.ceil(pairs / PACK_SIZE)
+}
+
 
 function buildFullCartonLocationSummaryHtml(rows,isPbl){
   if(isPbl) return ''
@@ -11987,7 +11995,7 @@ function buildActiveJobPdfSheet(){
 
   sheet.innerHTML=`
     <div class="pdf-job-title">ใบจัดงาน ${esc(customer)} - CARTON & LOOSE</div>
-    <div class="pdf-job-sub">TOTAL = จำนวนที่ต้องการทั้งหมด · หยิบ = จำนวนจาก Location · ASN: กล่อง = จำนวนคู่จากโลเคชั่นหลัก ÷ 6 และปัดขึ้น · งานเศษไม่คิดเป็นกล่อง · หากสินค้าไม่ครบจะแยกแถว “งานขาด”</div>
+    <div class="pdf-job-sub">${isPbl ? 'PBL: แสดงจำนวนคู่และจำนวนกล่องของแต่ละ Location · 1 กล่อง = 6 คู่' : 'ASN: กล่อง = จำนวนคู่จากโลเคชั่นหลัก ÷ 6 และปัดขึ้น · งานเศษไม่คิดเป็นกล่อง · หากสินค้าไม่ครบจะแยกแถว “งานขาด”'}</div>
 
     <table class="pdf-meta">
       <tr>
@@ -12025,9 +12033,8 @@ function buildActiveJobPdfSheet(){
           <th>ITEM CODE</th>
           <th>SIZE</th>
           <th>TOTAL(คู่)</th>
-          <th>หยิบ</th>
-          ${isPbl ? '' : '<th>เศษ</th>'}
-          ${isPbl ? '' : '<th>กล่อง</th>'}
+          <th>${isPbl ? 'คู่' : 'หยิบ'}</th>
+          ${isPbl ? '<th>กล่อง</th>' : '<th>เศษ</th><th>กล่อง</th>'}
           <th>Location</th>
           <th>warehouse</th>
         </tr>
@@ -12043,10 +12050,10 @@ function buildActiveJobPdfSheet(){
             <td>${esc(r.size)}</td>
             <td>${r.total==='' ? '' : `<span class="pdf-item-total">${fmt(r.total)}</span>`}</td>
             <td class="${r.shortage?'pdf-shortage-total':'pdf-pick-qty'}"><b>${fmt(r.pick)}</b></td>
-            ${isPbl ? '' : `<td>${esc(r.loose||'-')}</td>`}
-            ${isPbl ? '' : `<td class="pdf-main-cartons">${
-              asnMainLocationCartons(r)==='' ? '-' : fmt(asnMainLocationCartons(r))
-            }</td>`}
+            ${isPbl
+              ? `<td class="pdf-main-cartons">${pblPickCartons(r)==='' ? '-' : fmt(pblPickCartons(r))}</td>`
+              : `<td>${esc(r.loose||'-')}</td><td class="pdf-main-cartons">${asnMainLocationCartons(r)==='' ? '-' : fmt(asnMainLocationCartons(r))}</td>`
+            }
             <td class="loc"><b>${esc(r.location)}</b></td>
             <td>${esc(r.warehouse||'-')}</td>
           </tr>
@@ -13961,7 +13968,7 @@ function buildSelectedJobPdfSheet(){
 
   sheet.innerHTML=`
     <div class="pdf-job-title">ใบจัดงาน ${esc(customer)} - CARTON & LOOSE</div>
-    <div class="pdf-job-sub">TOTAL = จำนวนที่ต้องการทั้งหมด · หยิบ = จำนวนจาก Location · ASN: กล่อง = จำนวนคู่จากโลเคชั่นหลัก ÷ 6 และปัดขึ้น · งานเศษไม่คิดเป็นกล่อง · หากสินค้าไม่ครบจะแยกแถว “งานขาด”</div>
+    <div class="pdf-job-sub">${isPbl ? 'PBL: แสดงจำนวนคู่และจำนวนกล่องของแต่ละ Location · 1 กล่อง = 6 คู่' : 'ASN: กล่อง = จำนวนคู่จากโลเคชั่นหลัก ÷ 6 และปัดขึ้น · งานเศษไม่คิดเป็นกล่อง · หากสินค้าไม่ครบจะแยกแถว “งานขาด”'}</div>
 
     <table class="pdf-meta">
       <tr>
@@ -13993,9 +14000,8 @@ function buildSelectedJobPdfSheet(){
           <th>ITEM CODE</th>
           <th>SIZE</th>
           <th>TOTAL(คู่)</th>
-          <th>หยิบ</th>
-          ${isPbl ? '' : '<th>เศษ</th>'}
-          ${isPbl ? '' : '<th>กล่อง</th>'}
+          <th>${isPbl ? 'คู่' : 'หยิบ'}</th>
+          ${isPbl ? '<th>กล่อง</th>' : '<th>เศษ</th><th>กล่อง</th>'}
           <th>Location</th>
           <th>warehouse</th>
         </tr>
@@ -14011,10 +14017,10 @@ function buildSelectedJobPdfSheet(){
             <td>${esc(r.size)}</td>
             <td>${r.total==='' ? '' : `<span class="pdf-item-total">${fmt(r.total)}</span>`}</td>
             <td class="${r.shortage?'pdf-shortage-total':'pdf-pick-qty'}"><b>${fmt(r.pick)}</b></td>
-            ${isPbl ? '' : `<td>${esc(r.loose||'-')}</td>`}
-            ${isPbl ? '' : `<td class="pdf-main-cartons">${
-              asnMainLocationCartons(r)==='' ? '-' : fmt(asnMainLocationCartons(r))
-            }</td>`}
+            ${isPbl
+              ? `<td class="pdf-main-cartons">${pblPickCartons(r)==='' ? '-' : fmt(pblPickCartons(r))}</td>`
+              : `<td>${esc(r.loose||'-')}</td><td class="pdf-main-cartons">${asnMainLocationCartons(r)==='' ? '-' : fmt(asnMainLocationCartons(r))}</td>`
+            }
             <td class="loc"><b>${esc(r.location)}</b></td>
             <td>${esc(r.warehouse||'-')}</td>
           </tr>
