@@ -160,6 +160,30 @@ h1{margin:0;font-size:23px;font-weight:900}
 .btn-blue{background:var(--blue);color:#fff}
 .btn-green{background:var(--green);color:#fff}
 .btn-yellow{background:var(--yellow);color:#111;border:1px solid #d8ce00}
+.po-action-stack{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.po-action-btn{border-radius:12px;font-weight:900;transition:.18s ease}
+.po-action-btn.open{
+  min-height:42px;min-width:128px;padding:9px 16px;
+  background:var(--red);color:#fff;box-shadow:0 5px 12px rgba(220,38,38,.16)
+}
+.po-action-btn.open:hover{filter:brightness(.96);transform:translateY(-1px)}
+.po-action-btn.cancel{
+  min-height:32px;min-width:98px;padding:5px 10px;
+  font-size:13px;line-height:1.1;
+  background:#fff7f7;
+  color:#b42318;
+  border:1px solid #f1b9b9;
+  box-shadow:none;
+}
+.po-action-btn.cancel:hover{
+  background:#feefef;
+  color:#991b1b;
+  border-color:#e58f8f;
+  transform:translateY(-1px);
+  box-shadow:0 4px 10px rgba(180,35,24,.10);
+}
+.po-action-btn.cancel:active{transform:translateY(0)}
+.po-action-btn.cancel::before{content:'✕';display:inline-block;margin-right:5px;font-size:11px;opacity:.9}
 .import-status{
   display:none;margin-top:12px;padding:12px 13px;border-radius:10px;white-space:pre-line;
   font-size:12px;line-height:1.55
@@ -3999,6 +4023,594 @@ table.general th{background:#f9fafb;font-size:12px}
   font-size:13px;
   white-space:nowrap;
 }
+
+
+/* PICKING ORDER PO SEARCH */
+.po-search-bar{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto auto;
+  gap:8px;
+  margin:0 0 10px;
+}
+.po-search-bar input{
+  width:100%;
+  min-width:0;
+  min-height:43px;
+  padding:10px 12px;
+  border:1px solid #d1d5db;
+  border-radius:10px;
+  background:#fff;
+  font-weight:800;
+}
+.po-search-info{
+  display:none;
+  margin:0 0 10px;
+  padding:9px 11px;
+  border-radius:9px;
+  background:#eff6ff;
+  border:1px solid #bfdbfe;
+  color:#1e40af;
+  font-size:11px;
+  font-weight:800;
+}
+.po-search-info.show{display:block}
+
+@media(max-width:760px){
+  .po-search-bar{
+    grid-template-columns:1fr 1fr;
+  }
+  .po-search-bar input{
+    grid-column:1/-1;
+    min-height:48px;
+    font-size:16px;
+  }
+  .po-search-bar .btn{
+    width:100%;
+    min-height:46px;
+  }
+}
+
+
+
+/* PBL ASSORTMENT QUICK BUILDER */
+.pbl-assort-card{
+  margin:12px 0;
+  padding:14px;
+  border:1px solid #dbeafe;
+  border-radius:14px;
+  background:#f8fbff;
+}
+.pbl-assort-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
+}
+.pbl-assort-head h3{
+  margin:0;
+  font-size:15px;
+}
+.pbl-assort-head small{
+  display:block;
+  margin-top:3px;
+  color:#64748b;
+}
+.pbl-assort-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr auto;
+  gap:8px;
+  align-items:end;
+}
+.pbl-assort-summary{
+  margin-top:10px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+}
+.pbl-assort-stat{
+  padding:9px 10px;
+  border:1px solid #e2e8f0;
+  border-radius:10px;
+  background:#fff;
+}
+.pbl-assort-stat small{
+  display:block;
+  color:#64748b;
+  font-size:9px;
+}
+.pbl-assort-stat b{
+  display:block;
+  margin-top:3px;
+  font-size:16px;
+}
+.pbl-assort-preview{
+  margin-top:10px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:6px;
+}
+.pbl-assort-chip{
+  padding:8px;
+  border:1px solid #e2e8f0;
+  border-radius:9px;
+  background:#fff;
+  font-size:10px;
+}
+.pbl-assort-chip b{display:block}
+.pbl-assort-status{
+  display:none;
+  margin-top:10px;
+  padding:9px 10px;
+  border-radius:9px;
+  font-size:10px;
+  white-space:pre-line;
+}
+.pbl-assort-status.show{display:block}
+.pbl-assort-status.ok{background:#ecfdf5;border:1px solid #86efac;color:#166534}
+.pbl-assort-status.warn{background:#fff7ed;border:1px solid #fdba74;color:#9a3412}
+.pbl-assort-status.error{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
+
+@media(max-width:760px){
+  .pbl-assort-grid{grid-template-columns:1fr}
+  .pbl-assort-grid .btn{width:100%;min-height:48px}
+  .pbl-assort-summary{grid-template-columns:1fr 1fr 1fr}
+  .pbl-assort-preview{grid-template-columns:1fr 1fr}
+}
+
+
+
+/* ===== PBL MIXED COLOR BOX PATTERN ===== */
+#legacyManualPblPatternEntry{display:none!important}
+
+.pbl-mix-card{
+  margin:14px 0;
+  padding:14px;
+  border:1px solid #e2e8f0;
+  border-radius:16px;
+  background:#fff;
+}
+.pbl-mix-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:12px;
+}
+.pbl-mix-head h3{
+  margin:0;
+  font-size:16px;
+}
+.pbl-mix-head small{
+  display:block;
+  margin-top:3px;
+  color:#64748b;
+}
+.pbl-mix-top{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+  margin-bottom:12px;
+}
+.pbl-mix-top .field input,
+.pbl-mix-top .field select{
+  min-height:45px;
+}
+.pbl-mix-table-wrap{
+  overflow:auto;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+}
+.pbl-mix-table{
+  width:100%;
+  min-width:640px;
+  border-collapse:collapse;
+}
+.pbl-mix-table th,
+.pbl-mix-table td{
+  padding:8px;
+  border-bottom:1px solid #e5e7eb;
+  text-align:left;
+  font-size:11px;
+}
+.pbl-mix-table th{
+  background:#f8fafc;
+  color:#475569;
+  font-size:9px;
+}
+.pbl-mix-table input{
+  width:100%;
+  min-height:38px;
+  padding:7px 8px;
+  border:1px solid #d1d5db;
+  border-radius:8px;
+  font-weight:800;
+}
+.pbl-mix-remove{
+  border:0;
+  border-radius:8px;
+  background:#fef2f2;
+  color:#dc2626;
+  font-weight:900;
+  min-width:42px;
+  min-height:36px;
+  cursor:pointer;
+}
+.pbl-mix-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:10px;
+}
+.pbl-mix-total{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+  margin-top:10px;
+}
+.pbl-mix-stat{
+  padding:10px;
+  border:1px solid #e2e8f0;
+  border-radius:10px;
+  background:#f8fafc;
+}
+.pbl-mix-stat small{
+  display:block;
+  color:#64748b;
+  font-size:9px;
+}
+.pbl-mix-stat b{
+  display:block;
+  margin-top:3px;
+  font-size:17px;
+}
+.pbl-mix-total.ok .pbl-mix-stat:first-child{
+  background:#ecfdf5;
+  border-color:#86efac;
+  color:#166534;
+}
+.pbl-mix-total.warn .pbl-mix-stat:first-child{
+  background:#fff7ed;
+  border-color:#fdba74;
+  color:#9a3412;
+}
+.pbl-mix-status{
+  display:none;
+  margin-top:10px;
+  padding:10px 11px;
+  border-radius:10px;
+  font-size:10px;
+  white-space:pre-line;
+}
+.pbl-mix-status.show{display:block}
+.pbl-mix-status.ok{background:#ecfdf5;border:1px solid #86efac;color:#166534}
+.pbl-mix-status.warn{background:#fff7ed;border:1px solid #fdba74;color:#9a3412}
+.pbl-mix-status.error{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
+.pbl-mix-result{
+  margin-top:10px;
+  display:none;
+}
+.pbl-mix-result.show{display:block}
+.pbl-mix-result-row{
+  display:grid;
+  grid-template-columns:1.25fr .7fr .65fr .8fr 1fr;
+  gap:6px;
+  padding:8px 0;
+  border-bottom:1px solid #e5e7eb;
+  align-items:center;
+  font-size:10px;
+}
+.pbl-mix-result-row.head{
+  font-weight:900;
+  color:#64748b;
+  font-size:9px;
+}
+@media(max-width:760px){
+  .pbl-mix-card{padding:11px}
+  .pbl-mix-top{grid-template-columns:1fr}
+  .pbl-mix-actions .btn{
+    width:100%;
+    min-height:48px;
+  }
+  .pbl-mix-total{
+    grid-template-columns:1fr 1fr;
+  }
+}
+
+
+
+/* ===== PBL 3 MODE: MIX / SINGLE / HYBRID ===== */
+.pbl-mode-switch{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:7px;
+  margin:10px 0 14px;
+}
+.pbl-mode-btn{
+  border:1px solid #dbe2ea;
+  background:#f8fafc;
+  color:#334155;
+  border-radius:11px;
+  min-height:44px;
+  padding:8px 10px;
+  font-weight:900;
+  cursor:pointer;
+}
+.pbl-mode-btn.active{
+  background:#dc2f24;
+  border-color:#dc2f24;
+  color:#fff;
+}
+.pbl-single-card{
+  margin:14px 0;
+  padding:14px;
+  border:1px solid #e2e8f0;
+  border-radius:16px;
+  background:#fff;
+}
+.pbl-single-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
+}
+.pbl-single-head h3{margin:0;font-size:16px}
+.pbl-single-head small{display:block;margin-top:3px;color:#64748b}
+.pbl-single-table-wrap{
+  overflow:auto;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+}
+.pbl-single-table{
+  width:100%;
+  min-width:760px;
+  border-collapse:collapse;
+}
+.pbl-single-table th,
+.pbl-single-table td{
+  padding:8px;
+  border-bottom:1px solid #e5e7eb;
+  text-align:left;
+  font-size:11px;
+}
+.pbl-single-table th{
+  background:#f8fafc;
+  color:#475569;
+  font-size:9px;
+}
+.pbl-single-table input{
+  width:100%;
+  min-height:38px;
+  padding:7px 8px;
+  border:1px solid #d1d5db;
+  border-radius:8px;
+  font-weight:800;
+}
+.pbl-single-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:10px;
+}
+.pbl-single-summary{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  margin-top:10px;
+}
+.pbl-single-stat{
+  padding:10px;
+  border:1px solid #e2e8f0;
+  border-radius:10px;
+  background:#f8fafc;
+}
+.pbl-single-stat small{display:block;color:#64748b;font-size:9px}
+.pbl-single-stat b{display:block;margin-top:3px;font-size:17px}
+.pbl-single-status{
+  display:none;
+  margin-top:10px;
+  padding:10px 11px;
+  border-radius:10px;
+  font-size:10px;
+  white-space:pre-line;
+}
+.pbl-single-status.show{display:block}
+.pbl-single-status.ok{background:#ecfdf5;border:1px solid #86efac;color:#166534}
+.pbl-single-status.warn{background:#fff7ed;border:1px solid #fdba74;color:#9a3412}
+.pbl-single-status.error{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
+.pbl-mode-hidden{display:none!important}
+@media(max-width:760px){
+  .pbl-mode-switch{grid-template-columns:1fr}
+  .pbl-single-card{padding:11px}
+  .pbl-single-actions .btn{width:100%;min-height:48px}
+}
+
+
+
+/* ===== W-CENTER ===== */
+.wc-toolbar{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) repeat(3,minmax(130px,.35fr)) auto;
+  gap:8px;
+  margin-bottom:12px;
+}
+.wc-toolbar input,.wc-toolbar select{
+  width:100%;min-height:43px;padding:9px 11px;border:1px solid #d1d5db;border-radius:9px;background:#fff
+}
+.wc-live{
+  display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;
+  background:#ecfdf5;color:#166534;border:1px solid #86efac;font-size:10px;font-weight:900
+}
+.wc-live-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.12)}
+.wc-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 0 12px}
+.wc-card{padding:11px 12px;border:1px solid #e5e7eb;border-radius:12px;background:#fff}
+.wc-card small{display:block;color:#6b7280;font-size:9px;font-weight:900;margin-bottom:4px}
+.wc-card b{font-size:18px}
+.wc-status{display:none;margin-bottom:12px;padding:10px 12px;border-radius:10px;font-size:11px}
+.wc-status.show{display:block}
+.wc-status.ok{background:#ecfdf5;border:1px solid #86efac;color:#166534}
+.wc-status.warn{background:#fff7ed;border:1px solid #fdba74;color:#9a3412}
+.wc-table-wrap{overflow:auto;border:1px solid #e5e7eb;border-radius:12px}
+.wc-table{width:100%;min-width:720px;border-collapse:collapse}
+.wc-table th,.wc-table td{padding:10px 11px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:11px}
+.wc-table th{position:sticky;top:0;background:#f8fafc;color:#4b5563;font-size:9px;z-index:1}
+.wc-badge{
+  display:inline-block;margin-left:6px;padding:3px 7px;border-radius:999px;
+  background:#ede9fe;color:#6d28d9;font-size:8px;font-weight:900
+}
+.wc-pick-note{
+  margin-top:4px;color:#6d28d9;font-size:9px;font-weight:900
+}
+.line-pick-status .wc-inline{
+  display:inline-block;margin-left:6px;padding:3px 7px;border-radius:999px;
+  background:#ede9fe;color:#6d28d9;font-size:9px;font-weight:900
+}
+.pdf-wcenter-sheet{
+  width:794px;min-height:1123px;box-sizing:border-box;padding:24px 26px;background:#fff;color:#111;
+  font-family:Tahoma,Arial,sans-serif
+}
+.pdf-wcenter-title{
+  border:2px solid #111;background:#6d28d9;color:#fff;text-align:center;font-size:22px;font-weight:900;padding:10px
+}
+.pdf-wcenter-sub{
+  border:1px solid #111;border-top:0;padding:7px 9px;text-align:center;font-size:11px;font-weight:800
+}
+.pdf-wcenter-table{width:100%;border-collapse:collapse;table-layout:fixed;margin-top:10px}
+.pdf-wcenter-table th,.pdf-wcenter-table td{border:1px solid #111;padding:7px 5px;text-align:center;font-size:10px;overflow-wrap:anywhere}
+.pdf-wcenter-table th{background:#ede9fe;font-weight:900}
+.pdf-wcenter-table td.left{text-align:left}
+.pdf-wcenter-total{margin-top:10px;text-align:right;font-size:11px;font-weight:900}
+@media(max-width:760px){
+  .wc-toolbar{grid-template-columns:1fr 1fr}
+  .wc-toolbar>input{grid-column:1/-1}
+  .wc-toolbar .btn{width:100%}
+  .wc-summary{grid-template-columns:1fr 1fr}
+}
+
+
+
+/* ===== SHORTAGE REPORT ===== */
+.shortage-tools{
+  display:grid;
+  grid-template-columns:minmax(180px,1fr) minmax(180px,1fr) minmax(150px,.8fr) minmax(170px,.8fr) auto auto;
+  gap:8px;
+  margin-bottom:12px;
+}
+.shortage-tools input,
+.shortage-tools select{
+  width:100%;
+  min-height:44px;
+  padding:9px 11px;
+  border:1px solid #d1d5db;
+  border-radius:10px;
+  background:#fff;
+}
+.shortage-summary{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+  margin-bottom:12px;
+}
+.shortage-summary-card{
+  padding:11px 12px;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+  background:#fff;
+}
+.shortage-summary-card small{
+  display:block;
+  margin-bottom:4px;
+  color:#6b7280;
+  font-size:9px;
+  font-weight:900;
+}
+.shortage-summary-card b{
+  display:block;
+  font-size:19px;
+}
+.shortage-summary-card.danger{
+  background:#fff7f7;
+  border-color:#fecaca;
+  color:#b91c1c;
+}
+.shortage-status{
+  display:none;
+  margin-bottom:12px;
+  padding:10px 12px;
+  border-radius:10px;
+  font-size:11px;
+}
+.shortage-status.show{display:block}
+.shortage-status.ok{
+  background:#ecfdf5;
+  border:1px solid #86efac;
+  color:#166534;
+}
+.shortage-status.warn{
+  background:#fff7ed;
+  border:1px solid #fdba74;
+  color:#9a3412;
+}
+.shortage-table-wrap{
+  overflow:auto;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+}
+.shortage-table{
+  width:100%;
+  min-width:980px;
+  border-collapse:collapse;
+}
+.shortage-table th,
+.shortage-table td{
+  padding:9px 10px;
+  border-bottom:1px solid #e5e7eb;
+  text-align:left;
+  font-size:11px;
+  white-space:nowrap;
+}
+.shortage-table th{
+  position:sticky;
+  top:0;
+  z-index:1;
+  background:#f8fafc;
+  color:#4b5563;
+  font-size:9px;
+  font-weight:900;
+}
+.shortage-qty{
+  color:#b91c1c;
+  font-weight:900;
+}
+.shortage-wc{
+  display:inline-block;
+  padding:3px 7px;
+  border-radius:999px;
+  background:#ede9fe;
+  color:#6d28d9;
+  font-size:9px;
+  font-weight:900;
+}
+.shortage-no-wc{
+  color:#9ca3af;
+  font-size:9px;
+}
+@media(max-width:760px){
+  .shortage-tools{
+    grid-template-columns:1fr 1fr;
+  }
+  .shortage-tools input{
+    grid-column:1/-1;
+  }
+  .shortage-tools .btn{
+    width:100%;
+  }
+  .shortage-summary{
+    grid-template-columns:1fr 1fr;
+  }
+}
+
 </style>
 </head>
 
@@ -4020,6 +4632,8 @@ table.general th{background:#f9fafb;font-size:12px}
     <button class="side-item" data-side-page="forbiddenlocations"><span class="side-icon">⊘</span>FORBIDDEN LOCATION</button>
     <button class="side-item" data-side-page="locationqr"><span class="side-icon">▦</span>LOCATION QR MASTER</button>
     <button class="side-item" data-side-page="stock"><span class="side-icon">▣</span>ERP STOCK</button>
+    <button class="side-item" data-side-page="wcenter"><span class="side-icon">W</span>W-CENTER STOCK</button>
+    <button class="side-item" data-side-page="shortages"><span class="side-icon">!</span>SHORTAGE REPORT</button>
     <button class="side-item" data-side-page="reservations"><span class="side-icon">◉</span>RESERVED STOCK</button>
     <div class="side-section">HISTORY</div>
     <button class="side-item" data-side-page="completed"><span class="side-icon">✓</span>COMPLETED JOBS</button>
@@ -4265,6 +4879,59 @@ table.general th{background:#f9fafb;font-size:12px}
       <label>CREATED BY</label>
       <input id="manualPblCreatedBy" value="ADMIN">
     </div>
+
+    <div class="field">
+      <label>PAIRS / CARTON</label>
+      <select id="manualPblPackSize">
+        <option value="6">6 คู่ / กล่อง</option>
+        <option value="12">12 คู่ / กล่อง</option>
+      </select>
+    </div>
+  </div>
+
+
+  <div class="pbl-assort-card" id="pblAssortmentCard" style="display:none">
+    <div class="pbl-assort-head">
+      <div>
+        <h3>PBL ASSORTMENT</h3>
+        <small id="pblAssortmentName">โหลด Pattern...</small>
+      </div>
+      <span class="badge">AUTO SPLIT</span>
+    </div>
+
+    <div class="pbl-assort-grid">
+      <div class="field">
+        <label>SIZE</label>
+        <input id="pblAssortmentSize" inputmode="decimal" placeholder="เช่น 9">
+      </div>
+
+      <div class="field">
+        <label>TOTAL PAIRS</label>
+        <input id="pblAssortmentTotalPairs" type="number" min="1" step="1" inputmode="numeric" placeholder="เช่น 360">
+      </div>
+
+      <button class="btn btn-primary" type="button" id="buildPblAssortmentBtn">
+        สร้างรายการ
+      </button>
+    </div>
+
+    <div class="pbl-assort-summary">
+      <div class="pbl-assort-stat">
+        <small>คู่ / กล่อง</small>
+        <b id="pblAssortmentPairsPerBox">-</b>
+      </div>
+      <div class="pbl-assort-stat">
+        <small>จำนวนกล่อง</small>
+        <b id="pblAssortmentBoxes">-</b>
+      </div>
+      <div class="pbl-assort-stat">
+        <small>จำนวน SKU</small>
+        <b id="pblAssortmentSkuCount">-</b>
+      </div>
+    </div>
+
+    <div id="pblAssortmentPreview" class="pbl-assort-preview"></div>
+    <div id="pblAssortmentStatus" class="pbl-assort-status"></div>
   </div>
 
   <div class="pbl-template-card">
@@ -4281,7 +4948,7 @@ table.general th{background:#f9fafb;font-size:12px}
     </div>
 
     <div class="pbl-template-info">
-      1 Template = 1 รูปแบบกล่อง · ในกล่องเดียวสามารถมีหลาย Size ได้ · รวมคู่ต่อกล่องต้องเท่ากับ 6
+      1 Template = 1 รูปแบบกล่อง · ในกล่องเดียวสามารถมีหลาย Size ได้ · ใช้ได้ทั้ง 6 หรือ 12 คู่/กล่อง
     </div>
 
     <div id="pblTemplatePatternList">
@@ -4297,7 +4964,129 @@ table.general th{background:#f9fafb;font-size:12px}
     <div id="pblTemplateStatus" class="location-qr-status"></div>
   </div>
 
-  <div class="pbl-pattern-entry">
+  
+  
+  <div class="pbl-mode-switch" id="pblModeSwitch">
+    <button type="button" class="pbl-mode-btn active" data-pbl-mode="MIX">MIX COLOR</button>
+    <button type="button" class="pbl-mode-btn" data-pbl-mode="SINGLE">สีเดียว</button>
+    <button type="button" class="pbl-mode-btn" data-pbl-mode="HYBRID">MIX + สีเดียว</button>
+  </div>
+
+<div class="pbl-mix-card" id="pblMixedPatternCard">
+    <div class="pbl-mix-head">
+      <div>
+        <h3>BOX PATTERN</h3>
+        <small>1 กล่องสามารถรวมหลาย Item / หลายสีได้</small>
+      </div>
+      <span class="badge">MIX COLOR</span>
+    </div>
+
+    <div class="pbl-mix-top">
+      <div class="field">
+        <label>SIZE</label>
+        <input id="pblMixSize" inputmode="decimal" placeholder="เช่น 9">
+      </div>
+      <div class="field">
+        <label>TOTAL BOX</label>
+        <input id="pblMixBoxes" type="number" min="1" step="1" inputmode="numeric" placeholder="เช่น 4">
+      </div>
+    </div>
+
+    <div class="pbl-mix-table-wrap">
+      <table class="pbl-mix-table">
+        <thead>
+          <tr>
+            <th style="width:34%">ITEM</th>
+            <th style="width:24%">COLOR</th>
+            <th style="width:24%">PAIRS / BOX</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="pblMixBody"></tbody>
+      </table>
+    </div>
+
+    <div class="pbl-mix-actions">
+      <button class="btn btn-secondary" type="button" id="pblMixAddRowBtn">+ ADD ITEM / COLOR</button>
+      <button class="btn btn-primary" type="button" id="pblMixBuildBtn">สร้างรายการ + หา Location</button>
+      <button class="btn btn-secondary" type="button" id="pblMixClearBtn">ล้าง</button>
+    </div>
+
+    <div id="pblMixTotals" class="pbl-mix-total warn">
+      <div class="pbl-mix-stat">
+        <small>PAIRS / BOX</small>
+        <b id="pblMixPairsPerBox">0</b>
+      </div>
+      <div class="pbl-mix-stat">
+        <small>TOTAL BOX</small>
+        <b id="pblMixBoxCount">0</b>
+      </div>
+      <div class="pbl-mix-stat">
+        <small>TOTAL PAIRS</small>
+        <b id="pblMixTotalPairs">0</b>
+      </div>
+      <div class="pbl-mix-stat">
+        <small>SKU</small>
+        <b id="pblMixSkuCount">0</b>
+      </div>
+    </div>
+
+    <div id="pblMixStatus" class="pbl-mix-status"></div>
+    <div id="pblMixResult" class="pbl-mix-result"></div>
+  </div>
+
+  
+  <div class="pbl-single-card pbl-mode-hidden" id="pblSinglePatternCard">
+    <div class="pbl-single-head">
+      <div>
+        <h3>SINGLE COLOR BOX</h3>
+        <small>1 กล่อง = Item / Color เดียว ใช้ Pack Size 6 หรือ 12 คู่ตามที่เลือก</small>
+      </div>
+      <span class="badge">SINGLE</span>
+    </div>
+
+    <div class="pbl-single-table-wrap">
+      <table class="pbl-single-table">
+        <thead>
+          <tr>
+            <th>ITEM</th>
+            <th>COLOR</th>
+            <th>SIZE</th>
+            <th>TOTAL BOX</th>
+            <th>PAIRS / BOX</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="pblSingleBody"></tbody>
+      </table>
+    </div>
+
+    <div class="pbl-single-actions">
+      <button class="btn btn-secondary" type="button" id="pblSingleAddRowBtn">+ ADD SINGLE COLOR</button>
+      <button class="btn btn-primary" type="button" id="pblSingleBuildBtn">สร้างรายการ + หา Location</button>
+      <button class="btn btn-secondary" type="button" id="pblSingleClearBtn">ล้าง</button>
+    </div>
+
+    <div class="pbl-single-summary">
+      <div class="pbl-single-stat">
+        <small>TOTAL BOX</small>
+        <b id="pblSingleTotalBoxes">0</b>
+      </div>
+      <div class="pbl-single-stat">
+        <small>TOTAL PAIRS</small>
+        <b id="pblSingleTotalPairs">0</b>
+      </div>
+      <div class="pbl-single-stat">
+        <small>SKU</small>
+        <b id="pblSingleSkuCount">0</b>
+      </div>
+    </div>
+
+    <div id="pblSingleStatus" class="pbl-single-status"></div>
+  </div>
+
+<div class="pbl-pattern-entry" id="legacyManualPblPatternEntry">
+
     <div class="pbl-pattern-top">
       <div class="field">
         <label>ITEM</label>
@@ -4393,10 +5182,25 @@ table.general th{background:#f9fafb;font-size:12px}
     <div class="head-left"><button class="back-btn" data-page="home">←</button><div><h2 class="page-title">PICKING ORDER</h2><p class="page-sub">ข้อมูลจาก po_headers</p></div></div>
     <button class="btn btn-secondary" id="reloadOrdersBtn">รีเฟรช</button>
   </div>
+
+  <div class="po-search-bar">
+    <input
+      id="orderPoSearchInput"
+      type="text"
+      inputmode="numeric"
+      autocomplete="off"
+      placeholder="ค้นหาเลข PO เช่น 0056992455"
+    >
+    <button class="btn btn-primary" id="orderPoSearchBtn">ค้นหา</button>
+    <button class="btn btn-secondary" id="orderPoClearBtn">ล้าง</button>
+  </div>
+
+  <div id="orderPoSearchInfo" class="po-search-info"></div>
+
   <div class="table-wrap">
     <table class="general">
-      <thead><tr><th>ID</th><th>PO</th><th>Customer</th><th>Type</th><th>Pairs</th><th>Cartons</th><th>Status</th><th>Action</th></tr></thead>
-      <tbody id="ordersBody"><tr><td colspan="8">กำลังโหลด...</td></tr></tbody>
+      <thead><tr><th>ID</th><th>PO</th><th>Customer</th><th>Type</th><th>Delivery Date</th><th>Pairs</th><th>Cartons</th><th>Status</th><th>Action</th></tr></thead>
+      <tbody id="ordersBody"><tr><td colspan="9">กำลังโหลด...</td></tr></tbody>
     </table>
   </div>
 </div>
@@ -4480,6 +5284,135 @@ table.general th{background:#f9fafb;font-size:12px}
       </thead>
       <tbody id="stockBody">
         <tr><td colspan="7">ค้นหา Item เพื่อดู Stock</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</section>
+
+
+<section class="page" id="page-wcenter">
+<div class="page-box">
+  <div class="page-head">
+    <div class="head-left">
+      <button class="back-btn" data-page="home">←</button>
+      <div>
+        <h2 class="page-title">W-CENTER STOCK</h2>
+        <p class="page-sub">คลังสำรองสำหรับตรวจงานขาดจาก ERP</p>
+      </div>
+    </div>
+    <div class="wc-live"><span class="wc-live-dot"></span>REALTIME</div>
+  </div>
+
+  <div id="wCenterStatus" class="wc-status"></div>
+
+  <div class="wc-toolbar">
+    <input id="wCenterSearch" placeholder="ค้นหา Item / รุ่น / สี / Size / Location">
+    <select id="wCenterFilterLocation"><option value="">Location ทั้งหมด</option></select>
+    <select id="wCenterFilterColor"><option value="">สีทั้งหมด</option></select>
+    <select id="wCenterFilterSize"><option value="">Size ทั้งหมด</option></select>
+    <button class="btn btn-primary" id="wCenterRefreshBtn">รีเฟรช</button>
+  </div>
+
+  <div class="wc-summary">
+    <div class="wc-card"><small>SKU</small><b id="wCenterSkuCount">0</b></div>
+    <div class="wc-card"><small>TOTAL AVAILABLE</small><b id="wCenterAvailable">0</b></div>
+    <div class="wc-card"><small>LOCATION</small><b id="wCenterLocationCount">0</b></div>
+    <div class="wc-card"><small>UPDATED</small><b id="wCenterUpdated" style="font-size:12px">-</b></div>
+  </div>
+
+  <div class="wc-table-wrap">
+    <table class="wc-table">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Code</th>
+          <th>Color</th>
+          <th>Size</th>
+          <th>Location</th>
+          <th>Available</th>
+          <th>Synced</th>
+        </tr>
+      </thead>
+      <tbody id="wCenterBody">
+        <tr><td colspan="7">กำลังโหลด...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</section>
+
+
+<section class="page" id="page-shortages">
+<div class="page-box">
+  <div class="page-head">
+    <div class="head-left">
+      <button class="back-btn" data-page="home">←</button>
+      <div>
+        <h2 class="page-title">SHORTAGE REPORT</h2>
+        <p class="page-sub">รายการงานขาดจากใบจัดงาน</p>
+      </div>
+    </div>
+    <span class="badge">SHORTAGE</span>
+  </div>
+
+  <div id="shortageReportStatus" class="shortage-status"></div>
+
+  <div class="shortage-tools">
+    <select id="shortagePoFilter">
+      <option value="">PO ทั้งหมด</option>
+    </select>
+    <select id="shortageCodeFilter">
+      <option value="">รหัสทั้งหมด</option>
+    </select>
+    <select id="shortageCustomerFilter">
+      <option value="">Customer ทั้งหมด</option>
+    </select>
+    <select id="shortageSort">
+      <option value="DESC">จำนวนขาด มาก → น้อย</option>
+      <option value="ASC">จำนวนขาด น้อย → มาก</option>
+    </select>
+    <button class="btn btn-primary" id="shortageSearchBtn">ค้นหา</button>
+    <button class="btn btn-green" id="shortageExportBtn">Export Excel</button>
+  </div>
+
+  <div class="shortage-summary">
+    <div class="shortage-summary-card">
+      <small>PO ที่มีงานขาด</small>
+      <b id="shortagePoCount">0</b>
+    </div>
+    <div class="shortage-summary-card">
+      <small>รายการที่ขาด</small>
+      <b id="shortageLineCount">0</b>
+    </div>
+    <div class="shortage-summary-card danger">
+      <small>จำนวนขาดรวม</small>
+      <b id="shortageTotalQty">0</b>
+    </div>
+    <div class="shortage-summary-card">
+      <small>มีของใน W-CENTER</small>
+      <b id="shortageWCenterCount">0</b>
+    </div>
+  </div>
+
+  <div class="shortage-table-wrap">
+    <table class="shortage-table">
+      <thead>
+        <tr>
+          <th>PO</th>
+          <th>Customer</th>
+          <th>Type</th>
+          <th>Item</th>
+          <th>Color</th>
+          <th>Size</th>
+          <th>จำนวนขาด</th>
+          <th>W-CENTER</th>
+          <th>W-CENTER Location</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="shortageReportBody">
+        <tr><td colspan="10">กำลังโหลด...</td></tr>
       </tbody>
     </table>
   </div>
@@ -5193,13 +6126,23 @@ const LOCATION_QR_BUCKET = 'location-qr'
 const PICKING_JOB_TABLE = 'picking_job_locations'
 const RESERVATION_TABLE = 'picking_stock_reservations'
 const PBL_TEMPLATE_TABLE = 'pbl_template_items'
+const PBL_ASSORTMENT_TEMPLATE_TABLE = 'pbl_assortment_template_items'
 const LOOSE_LOCATION_TABLE = 'picking_loose_locations'
 const FORBIDDEN_LOCATION_TABLE = 'picking_forbidden_locations'
 const BARCODE_MASTER_TABLE = 'barcode_master'
+const W_CENTER_VIEW = 'w_center_stock'
+const W_CENTER_SOURCE_TABLE = 'summary_stock_zone'
 const PACK_SIZE = 6
 
-const pages = ['home','create','pblmanual','orders','stock','reservations','active','activejob','detail','joborder','upload','upcmaster','looselocations','forbiddenlocations','locationqr','completed']
+const pages = ['home','create','pblmanual','orders','stock','wcenter','shortages','reservations','active','activejob','detail','joborder','upload','upcmaster','looselocations','forbiddenlocations','locationqr','completed']
 const jobRows = []
+let shortageReportRows=[]
+let shortageReportFiltered=[]
+let wCenterRowsState=[]
+let wCenterStockMap=new Map()
+let wCenterRealtimeChannel=null
+let wCenterRealtimeTimer=null
+
 let importState = {
   file:null,
   parsed:null,
@@ -5323,6 +6266,645 @@ async function loadHomePickingSummary(){
   }
 }
 
+
+function wCenterKey(item,code,size){
+  return [norm(item),norm(code),norm(size)].join('|')
+}
+
+function wCenterSetStatus(message,type='ok'){
+  const box=el('wCenterStatus')
+  if(!box) return
+  if(!message){
+    box.className='wc-status'
+    box.textContent=''
+    return
+  }
+  box.className='wc-status show '+type
+  box.textContent=message
+}
+
+function wCenterMatchKey(item,code,size){
+  return wCenterKey(item,code,size)
+}
+
+function rebuildWCenterMap(rows){
+  const map=new Map()
+
+  ;(rows||[]).forEach(r=>{
+    const qty=Math.max(0,num(r.available))
+    if(qty<=0) return
+
+    const key=wCenterKey(r.item,r.code,r.size)
+    if(!map.has(key)){
+      map.set(key,{
+        item:txt(r.item),
+        code:txt(r.code),
+        colorName:txt(r.color_name),
+        size:txt(r.size),
+        total:0,
+        locations:[]
+      })
+    }
+
+    const g=map.get(key)
+    g.total+=qty
+    g.locations.push({
+      location:txt(r.location)||'-',
+      available:qty,
+      synced_at:r.synced_at||null
+    })
+  })
+
+  map.forEach(g=>{
+    g.locations.sort((a,b)=>num(b.available)-num(a.available))
+  })
+
+  wCenterStockMap=map
+}
+
+function getWCenterSupport(item,code,size,needQty=0){
+  const exact=wCenterStockMap.get(wCenterKey(item,code,size))
+
+  // fallback: ถ้า Code ในต้นทางมีรูปแบบ BL/BK ต่างกัน ให้ลอง normalize แบบ LOTUS
+  let group=exact
+  if(!group){
+    const wantedItem=norm(item)
+    const wantedSize=norm(size)
+    const wantedColor=normalizeLotusColor(code)
+
+    group=[...wCenterStockMap.values()].find(g=>
+      norm(g.item)===wantedItem &&
+      norm(g.size)===wantedSize &&
+      normalizeLotusColor(g.code)===wantedColor
+    )
+  }
+
+  if(!group){
+    return {
+      hasStock:false,total:0,pickQty:0,locations:[],locationText:'',sources:[]
+    }
+  }
+
+  let remain=Math.max(0,num(needQty))
+  const sources=[]
+
+  group.locations.forEach(loc=>{
+    if(remain<=0) return
+    const pick=Math.min(remain,Math.max(0,num(loc.available)))
+    if(pick>0){
+      sources.push({
+        location:loc.location,
+        available:Math.max(0,num(loc.available)),
+        pickQty:pick
+      })
+      remain-=pick
+    }
+  })
+
+  return {
+    hasStock:group.total>0,
+    total:group.total,
+    pickQty:Math.max(0,num(needQty))-remain,
+    locations:group.locations,
+    locationText:sources.map(x=>`${x.location} (${fmt(x.pickQty)})`).join(', '),
+    sources
+  }
+}
+
+async function fetchWCenterRowsForPicking(items){
+  const wanted=[...new Set((items||[]).map(x=>txt(x).toUpperCase()).filter(Boolean))]
+  let all=[]
+
+  if(!wanted.length){
+    rebuildWCenterMap([])
+    return []
+  }
+
+  for(let i=0;i<wanted.length;i+=40){
+    const batch=wanted.slice(i,i+40)
+    const {data,error}=await db.from(W_CENTER_VIEW)
+      .select('item,code,color_name,size,location,available,synced_at')
+      .in('item',batch)
+      .gt('available',0)
+      .limit(5000)
+
+    if(error) throw error
+    all=all.concat(data||[])
+  }
+
+  rebuildWCenterMap(all)
+  return all
+}
+
+function fillWCenterFilters(rows){
+  const sets={
+    location:new Set(),color:new Set(),size:new Set()
+  }
+
+  ;(rows||[]).forEach(r=>{
+    if(txt(r.location)) sets.location.add(txt(r.location))
+    if(txt(r.code)) sets.color.add(txt(r.code))
+    if(txt(r.size)) sets.size.add(txt(r.size))
+  })
+
+  const fill=(id,values,label)=>{
+    const select=el(id)
+    if(!select) return
+    const current=select.value
+    select.innerHTML=`<option value="">${label}</option>`+
+      [...values].sort((a,b)=>String(a).localeCompare(String(b),'th',{numeric:true}))
+        .map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('')
+    if([...values].includes(current)) select.value=current
+  }
+
+  fill('wCenterFilterLocation',sets.location,'Location ทั้งหมด')
+  fill('wCenterFilterColor',sets.color,'สีทั้งหมด')
+  fill('wCenterFilterSize',sets.size,'Size ทั้งหมด')
+}
+
+function renderWCenterPage(){
+  const body=el('wCenterBody')
+  if(!body) return
+
+  const q=norm(el('wCenterSearch')?.value)
+  const location=txt(el('wCenterFilterLocation')?.value)
+  const color=txt(el('wCenterFilterColor')?.value)
+  const size=txt(el('wCenterFilterSize')?.value)
+
+  const rows=(wCenterRowsState||[]).filter(r=>{
+    if(location && txt(r.location)!==location) return false
+    if(color && txt(r.code)!==color) return false
+    if(size && txt(r.size)!==size) return false
+    if(q){
+      const hay=norm([
+        r.item,r.code,r.color_name,r.size,r.location
+      ].join(' '))
+      if(!hay.includes(q)) return false
+    }
+    return true
+  })
+
+  const totalAvailable=rows.reduce((s,r)=>s+Math.max(0,num(r.available)),0)
+  const skuCount=new Set(rows.map(r=>wCenterKey(r.item,r.code,r.size))).size
+  const locationCount=new Set(rows.map(r=>txt(r.location)).filter(Boolean)).size
+
+  if(el('wCenterSkuCount')) el('wCenterSkuCount').textContent=fmt(skuCount)
+  if(el('wCenterAvailable')) el('wCenterAvailable').textContent=fmt(totalAvailable)
+  if(el('wCenterLocationCount')) el('wCenterLocationCount').textContent=fmt(locationCount)
+
+  const latest=rows
+    .map(r=>r.synced_at ? new Date(r.synced_at) : null)
+    .filter(Boolean)
+    .sort((a,b)=>b-a)[0]
+
+  if(el('wCenterUpdated')){
+    el('wCenterUpdated').textContent=latest
+      ? latest.toLocaleString('th-TH')
+      : '-'
+  }
+
+  body.innerHTML=rows.length
+    ? rows.map(r=>`
+      <tr>
+        <td><b>${esc(r.item||'-')}</b></td>
+        <td>${esc(r.code||'-')}</td>
+        <td>${esc(r.color_name||'-')}</td>
+        <td><b>${esc(r.size||'-')}</b></td>
+        <td><b>${esc(r.location||'-')}</b></td>
+        <td><b style="color:${num(r.available)>0?'#166534':'#b91c1c'}">${fmt(r.available)}</b></td>
+        <td>${r.synced_at ? esc(new Date(r.synced_at).toLocaleString('th-TH')) : '-'}</td>
+      </tr>
+    `).join('')
+    : '<tr><td colspan="7" style="text-align:center;color:#9ca3af;padding:24px">ไม่พบข้อมูล</td></tr>'
+}
+
+async function loadWCenterPage(){
+  const body=el('wCenterBody')
+  if(body) body.innerHTML='<tr><td colspan="7">กำลังโหลด...</td></tr>'
+
+  try{
+    const {data,error}=await db.from(W_CENTER_VIEW)
+      .select('item,code,color_name,size,location,available,synced_at')
+      .order('synced_at',{ascending:false})
+      .limit(10000)
+
+    if(error) throw error
+
+    wCenterRowsState=data||[]
+    rebuildWCenterMap(wCenterRowsState)
+    fillWCenterFilters(wCenterRowsState)
+    renderWCenterPage()
+    wCenterSetStatus(
+      'เชื่อมต่อ W-CENTER สำเร็จ · พบ '+wCenterRowsState.length.toLocaleString('th-TH')+' แถว',
+      'ok'
+    )
+  }catch(error){
+    console.error('loadWCenterPage',error)
+    wCenterSetStatus('โหลด W-CENTER ไม่สำเร็จ: '+(error?.message||error),'warn')
+    if(body){
+      body.innerHTML=`<tr><td colspan="7" style="color:#b91c1c">โหลดไม่สำเร็จ: ${esc(error?.message||error)}</td></tr>`
+    }
+  }
+}
+
+function scheduleWCenterRealtimeRefresh(){
+  clearTimeout(wCenterRealtimeTimer)
+  wCenterRealtimeTimer=setTimeout(async()=>{
+    try{
+      if(el('page-wcenter')?.classList.contains('active')){
+        await loadWCenterPage()
+      }
+
+      if(currentPickingPoId && el('page-detail')?.classList.contains('active')){
+        await fetchWCenterRowsForPicking(
+          [...pickingLineData.values()].map(x=>x?.item?.item)
+        )
+        pickingLineData.forEach((_,itemId)=>updateLineLocationSelection(itemId))
+      }
+    }catch(error){
+      console.warn('W-CENTER realtime refresh',error)
+    }
+  },350)
+}
+
+function startWCenterRealtime(){
+  if(wCenterRealtimeChannel) return
+
+  try{
+    wCenterRealtimeChannel=db
+      .channel('w-center-stock-realtime')
+      .on(
+        'postgres_changes',
+        {event:'*',schema:'public',table:W_CENTER_SOURCE_TABLE},
+        ()=>scheduleWCenterRealtimeRefresh()
+      )
+      .subscribe()
+  }catch(error){
+    console.warn('เปิด W-CENTER Realtime ไม่สำเร็จ',error)
+  }
+}
+
+
+
+function setShortageReportStatus(message,type='ok'){
+  const box=el('shortageReportStatus')
+  if(!box) return
+
+  if(!message){
+    box.className='shortage-status'
+    box.textContent=''
+    return
+  }
+
+  box.className='shortage-status show '+type
+  box.textContent=message
+}
+
+function shortageHeaderStatusText(status){
+  const s=txt(status).toUpperCase()
+
+  if(s==='JOB_CREATED') return 'ทำใบจัดแล้ว'
+  if(s==='COMPLETED') return 'ปิดงานแล้ว'
+  if(s==='READY_FOR_PICKING') return 'READY FOR PICKING'
+  if(s==='PICKING') return 'PICKING'
+
+  return txt(status)||'-'
+}
+
+async function loadShortageReport(){
+  const body=el('shortageReportBody')
+
+  if(body){
+    body.innerHTML='<tr><td colspan="10">กำลังโหลด...</td></tr>'
+  }
+
+  setShortageReportStatus('กำลังโหลดรายการงานขาด...','ok')
+
+  try{
+    const shortageRes=await db.from(PICKING_JOB_TABLE)
+      .select(
+        'id,po_id,po_item_id,line_no,item_code,model,color,size,pick_qty,'+
+        'is_shortage,w_center_has_stock,w_center_available,w_center_pick_qty,'+
+        'w_center_locations,created_at'
+      )
+      .eq('is_shortage',true)
+      .order('created_at',{ascending:false})
+      .limit(10000)
+
+    if(shortageRes.error) throw shortageRes.error
+
+    const shortageRows=shortageRes.data||[]
+    const poIds=[...new Set(
+      shortageRows
+        .map(r=>Number(r.po_id))
+        .filter(Number.isFinite)
+    )]
+
+    const headerMap=new Map()
+
+    for(let i=0;i<poIds.length;i+=100){
+      const ids=poIds.slice(i,i+100)
+
+      const headerRes=await db.from(HEADER_TABLE)
+        .select('id,po_no,customer,po_type,status,delivery_date')
+        .in('id',ids)
+
+      if(headerRes.error) throw headerRes.error
+
+      ;(headerRes.data||[]).forEach(h=>{
+        headerMap.set(Number(h.id),h)
+      })
+    }
+
+    shortageReportRows=shortageRows.map(r=>{
+      const h=headerMap.get(Number(r.po_id))||{}
+
+      return {
+        id:r.id,
+        poId:r.po_id,
+        poNo:txt(h.po_no)||String(r.po_id||''),
+        customer:txt(h.customer),
+        poType:txt(h.po_type).toUpperCase(),
+        headerStatus:txt(h.status),
+        deliveryDate:h.delivery_date||'',
+        item:txt(r.model)||txt(r.item_code),
+        itemCode:txt(r.item_code),
+        color:txt(r.color),
+        size:txt(r.size),
+        shortageQty:Math.max(0,num(r.pick_qty)),
+        wCenterHasStock:Boolean(r.w_center_has_stock),
+        wCenterAvailable:Math.max(0,num(r.w_center_available)),
+        wCenterPickQty:Math.max(0,num(r.w_center_pick_qty)),
+        wCenterLocations:txt(r.w_center_locations),
+        createdAt:r.created_at||null
+      }
+    })
+
+    fillShortageCustomerFilter()
+    fillShortagePoFilter()
+    fillShortageCodeFilter()
+    applyShortageReportFilters()
+
+    setShortageReportStatus(
+      'โหลดงานขาดสำเร็จ '+shortageReportRows.length.toLocaleString('th-TH')+' รายการ',
+      'ok'
+    )
+  }catch(error){
+    console.error('loadShortageReport',error)
+
+    shortageReportRows=[]
+    shortageReportFiltered=[]
+
+    if(body){
+      body.innerHTML=
+        '<tr><td colspan="10" style="color:#b91c1c">'+
+        'โหลดไม่สำเร็จ: '+esc(error?.message||error)+
+        '</td></tr>'
+    }
+
+    setShortageReportStatus(
+      'โหลดรายการงานขาดไม่สำเร็จ: '+(error?.message||error),
+      'warn'
+    )
+  }
+}
+
+function fillShortageCustomerFilter(){
+  const select=el('shortageCustomerFilter')
+  if(!select) return
+
+  const current=select.value
+  const customers=[...new Set(
+    shortageReportRows
+      .map(r=>txt(r.customer))
+      .filter(Boolean)
+  )].sort((a,b)=>a.localeCompare(b,'th'))
+
+  select.innerHTML=
+    '<option value="">Customer ทั้งหมด</option>'+
+    customers.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('')
+
+  if(customers.includes(current)){
+    select.value=current
+  }
+}
+
+
+function shortageCodeKey(row){
+  const model=txt(row?.item)
+  const color=txt(row?.color)
+  return (model+color).replace(/\s+/g,'').toUpperCase()
+}
+
+function fillShortagePoFilter(){
+  const select=el('shortagePoFilter')
+  if(!select) return
+
+  const current=select.value
+  const poList=[...new Set(
+    shortageReportRows
+      .map(r=>txt(r.poNo))
+      .filter(Boolean)
+  )].sort((a,b)=>String(a).localeCompare(String(b),'th',{numeric:true}))
+
+  select.innerHTML=
+    '<option value="">PO ทั้งหมด</option>'+
+    poList.map(po=>`<option value="${esc(po)}">${esc(po)}</option>`).join('')
+
+  if(poList.includes(current)){
+    select.value=current
+  }
+}
+
+
+function fillShortageCodeFilter(){
+  const select=el('shortageCodeFilter')
+  if(!select) return
+
+  const current=select.value
+  const selectedPo=txt(el('shortagePoFilter')?.value)
+
+  const source=shortageReportRows.filter(r=>
+    !selectedPo || r.poNo===selectedPo
+  )
+
+  const codes=[...new Set(
+    source
+      .map(r=>shortageCodeKey(r))
+      .filter(Boolean)
+  )].sort((a,b)=>String(a).localeCompare(String(b),'th',{numeric:true}))
+
+  select.innerHTML=
+    '<option value="">รหัสทั้งหมด</option>'+
+    codes.map(code=>`<option value="${esc(code)}">${esc(code)}</option>`).join('')
+
+  if(codes.includes(current)){
+    select.value=current
+  }
+}
+
+function applyShortageReportFilters(){
+  const poNo=txt(el('shortagePoFilter')?.value)
+  const code=txt(el('shortageCodeFilter')?.value)
+  const customer=txt(el('shortageCustomerFilter')?.value)
+  const sortMode=txt(el('shortageSort')?.value)||'DESC'
+
+  shortageReportFiltered=shortageReportRows.filter(r=>{
+    if(poNo && r.poNo!==poNo) return false
+    if(code && shortageCodeKey(r)!==code) return false
+    if(customer && r.customer!==customer) return false
+    return true
+  })
+
+  shortageReportFiltered.sort((a,b)=>{
+    const qtyDiff=num(a.shortageQty)-num(b.shortageQty)
+
+    // ให้ตัวเลือก มาก→น้อย / น้อย→มาก มีผลจริงเป็นลำดับแรก
+    if(qtyDiff!==0){
+      return sortMode==='ASC' ? qtyDiff : -qtyDiff
+    }
+
+    // ถ้าจำนวนขาดเท่ากัน ค่อยจัดกลุ่ม PO / รหัส / Size
+    const poDiff=String(a.poNo).localeCompare(
+      String(b.poNo),
+      'th',
+      {numeric:true}
+    )
+    if(poDiff!==0) return poDiff
+
+    const codeDiff=shortageCodeKey(a).localeCompare(
+      shortageCodeKey(b),
+      'th',
+      {numeric:true}
+    )
+    if(codeDiff!==0) return codeDiff
+
+    return String(a.size).localeCompare(
+      String(b.size),
+      'th',
+      {numeric:true}
+    )
+  })
+
+  renderShortageReport()
+}
+
+function renderShortageReport(){
+  const body=el('shortageReportBody')
+  if(!body) return
+
+  const rows=shortageReportFiltered||[]
+
+  const poCount=new Set(rows.map(r=>r.poId)).size
+  const totalQty=rows.reduce((s,r)=>s+Math.max(0,num(r.shortageQty)),0)
+  const wCenterCount=rows.filter(r=>r.wCenterHasStock && r.wCenterPickQty>0).length
+
+  if(el('shortagePoCount')) el('shortagePoCount').textContent=fmt(poCount)
+  if(el('shortageLineCount')) el('shortageLineCount').textContent=fmt(rows.length)
+  if(el('shortageTotalQty')) el('shortageTotalQty').textContent=fmt(totalQty)
+  if(el('shortageWCenterCount')) el('shortageWCenterCount').textContent=fmt(wCenterCount)
+
+  if(!rows.length){
+    body.innerHTML=
+      '<tr><td colspan="10" style="text-align:center;color:#9ca3af;padding:24px">'+
+      'ไม่พบรายการงานขาดตามเงื่อนไข'+
+      '</td></tr>'
+    return
+  }
+
+  body.innerHTML=rows.map(r=>`
+    <tr>
+      <td><b>${esc(r.poNo||'-')}</b></td>
+      <td>${esc(r.customer||'-')}</td>
+      <td>${esc(r.poType||'-')}</td>
+      <td>
+        <b>${esc(r.item||'-')}</b>
+        ${r.itemCode && r.itemCode!==r.item ? `<div style="font-size:9px;color:#6b7280">${esc(r.itemCode)}</div>` : ''}
+      </td>
+      <td>${esc(r.color||'-')}</td>
+      <td><b>${esc(r.size||'-')}</b></td>
+      <td><span class="shortage-qty">${fmt(r.shortageQty)}</span></td>
+      <td>
+        ${
+          r.wCenterHasStock && r.wCenterPickQty>0
+            ? `<span class="shortage-wc">มี ${fmt(r.wCenterPickQty)} คู่</span>`
+            : '<span class="shortage-no-wc">ไม่มี</span>'
+        }
+      </td>
+      <td>${esc(r.wCenterLocations||'-')}</td>
+      <td>${esc(shortageHeaderStatusText(r.headerStatus))}</td>
+    </tr>
+  `).join('')
+}
+
+function exportShortageReportExcel(){
+  const rows=shortageReportFiltered||[]
+
+  if(!rows.length){
+    showToast('ไม่มีรายการงานขาดสำหรับ Export')
+    return
+  }
+
+  if(typeof XLSX==='undefined'){
+    showToast('ไม่พบ XLSX Library')
+    return
+  }
+
+  const exportRows=rows.map((r,index)=>({
+    'No.':index+1,
+    'PO':r.poNo,
+    'Customer':r.customer,
+    'Type':r.poType,
+    'Item':r.item,
+    'Item Code':r.itemCode,
+    'Color':r.color,
+    'Size':r.size,
+    'Shortage Qty':r.shortageQty,
+    'W-CENTER Has Stock':r.wCenterHasStock ? 'YES' : 'NO',
+    'W-CENTER Available':r.wCenterAvailable,
+    'W-CENTER Pick Qty':r.wCenterPickQty,
+    'W-CENTER Location':r.wCenterLocations,
+    'Status':shortageHeaderStatusText(r.headerStatus),
+    'Delivery Date':r.deliveryDate ? formatDeliveryDate(r.deliveryDate) : ''
+  }))
+
+  const ws=XLSX.utils.json_to_sheet(exportRows)
+
+  ws['!cols']=[
+    {wch:7},
+    {wch:16},
+    {wch:16},
+    {wch:10},
+    {wch:18},
+    {wch:20},
+    {wch:10},
+    {wch:10},
+    {wch:14},
+    {wch:20},
+    {wch:20},
+    {wch:18},
+    {wch:28},
+    {wch:18},
+    {wch:16}
+  ]
+
+  const wb=XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb,ws,'Shortage')
+
+  const now=new Date()
+  const stamp=[
+    now.getFullYear(),
+    String(now.getMonth()+1).padStart(2,'0'),
+    String(now.getDate()).padStart(2,'0')
+  ].join('')
+
+  XLSX.writeFile(
+    wb,
+    `Shortage_Report_${stamp}.xlsx`
+  )
+}
+
+
 function showPage(name, updateHash=true){
   if(!pages.includes(name)) name='home'
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'))
@@ -5338,6 +6920,8 @@ function showPage(name, updateHash=true){
   if(name==='active') loadActivePicking()
   if(name==='completed') loadCompletedJobs()
   if(name==='stock') refreshErpDbStatus()
+  if(name==='wcenter') loadWCenterPage()
+  if(name==='shortages') loadShortageReport()
   if(name==='reservations') loadReservationsPage()
   if(name==='upcmaster') resetUpcUploadStatusOnly()
   if(name==='locationqr') loadLocationQrMaster()
@@ -6648,7 +8232,14 @@ async function saveParsedToSupabase(parsedArg=null,rowsArg=null,sourceFileName=n
   let headerId=null
   try{
     const {data:header,error:headerError}=await insertHeaderWithDelivery(headerPayload,parsed.deliveryDate)
-    if(headerError) throw headerError
+    if(headerError){
+      if(isMissingPblPairsPerCartonColumn(headerError)){
+        throw new Error(
+          'Supabase ยังไม่มีคอลัมน์ po_headers.pbl_pairs_per_carton กรุณารันไฟล์ fix_pbl_3mode_database.sql ก่อนสร้าง PBL แบบ 6/12 คู่ต่อกล่อง'
+        )
+      }
+      throw headerError
+    }
     headerId=header.id
 
     const payload=rows.map(r=>({
@@ -8440,19 +10031,163 @@ async function saveOrderProductionCartons(poId,input,button){
   }
 }
 
-async function loadOrders(){
-  const body=el('ordersBody')
-  body.innerHTML='<tr><td colspan="8">กำลังโหลด...</td></tr>'
+
+function orderLocalDateKey(date=new Date()){
+  const y=date.getFullYear()
+  const m=String(date.getMonth()+1).padStart(2,'0')
+  const d=String(date.getDate()).padStart(2,'0')
+  return `${y}-${m}-${d}`
+}
+
+function orderDeliveryDateKey(value){
+  const text=txt(value)
+  if(!text) return ''
+
+  // Supabase date ปกติ = YYYY-MM-DD
+  const match=text.match(/^(\d{4})-(\d{2})-(\d{2})/)
+  if(match) return `${match[1]}-${match[2]}-${match[3]}`
+
+  const dt=new Date(text)
+  if(Number.isNaN(dt.getTime())) return ''
+  return orderLocalDateKey(dt)
+}
+
+function isPastOrderDeliveryDate(value){
+  const key=orderDeliveryDateKey(value)
+  if(!key) return false
+  return key < orderLocalDateKey()
+}
+
+async function cancelAndDeletePickingOrder(poId,poNo,status){
+  poId=Number(poId)
+  if(!poId) return
+
+  const poLabel=txt(poNo)||String(poId)
+  const confirmed=confirm(
+    `ยืนยันยกเลิกใบจัด PO ${poLabel} ?\n\n`+
+    `ระบบจะคืน Stock Reservation และลบข้อมูลที่เกี่ยวข้องกับ PO นี้ทั้งหมด:\n`+
+    `• ใบจัดงาน\n`+
+    `• Reservation\n`+
+    `• รายการสินค้าใน PO\n`+
+    `• PO Header\n\n`+
+    `เมื่อลบแล้ว PO นี้จะหายออกจากระบบ`
+  )
+
+  if(!confirmed) return
+
+  const second=confirm(
+    `ยืนยันอีกครั้ง\n\nลบ PO ${poLabel} ออกจากระบบทั้งหมด ?`
+  )
+  if(!second) return
 
   try{
-    const {data,error}=await db.from(HEADER_TABLE)
-      .select('id,po_no,customer,po_type,total_pairs,total_cartons,production_cartons,status')
-      .order('id',{ascending:false})
-      .limit(100)
+    // คืน Stock ที่จองก่อนลบข้อมูล
+    try{
+      const releaseRes=await db.rpc(
+        'release_picking_reservation',
+        {
+          p_po_id:poId,
+          p_reason:'DELETE_PO'
+        }
+      )
+      if(releaseRes.error) throw releaseRes.error
+    }catch(error){
+      // ถ้า PO ยังไม่เคย Reserve หรือ RPC ไม่มีรายการ active ให้เดินหน้าลบต่อ
+      console.warn('release reservation before delete',error)
+    }
+
+    // ลบประวัติ Reservation ของ PO
+    const reservationDelete=await db.from(RESERVATION_TABLE)
+      .delete()
+      .eq('po_id',poId)
+
+    if(reservationDelete.error) throw reservationDelete.error
+
+    // ลบใบจัด / Active Sheet
+    const jobDelete=await db.from(PICKING_JOB_TABLE)
+      .delete()
+      .eq('po_id',poId)
+
+    if(jobDelete.error) throw jobDelete.error
+
+    // ลบรายการสินค้าใน PO
+    const itemDelete=await db.from(ITEM_TABLE)
+      .delete()
+      .eq('po_id',poId)
+
+    if(itemDelete.error) throw itemDelete.error
+
+    // ลบ Header เป็นขั้นตอนสุดท้าย
+    const headerDelete=await db.from(HEADER_TABLE)
+      .delete()
+      .eq('id',poId)
+
+    if(headerDelete.error) throw headerDelete.error
+
+    try{
+      localStorage.removeItem(pickingNoStockStorageKey(poId))
+    }catch(e){}
+
+    showToast(`ยกเลิกและลบ PO ${poLabel} เรียบร้อยแล้ว`)
+
+    await Promise.allSettled([
+      loadOrders(),
+      loadActivePicking(),
+      loadReservationsPage()
+    ])
+  }catch(error){
+    console.error(error)
+    alert(
+      `ยกเลิก PO ${poLabel} ไม่สำเร็จ\n\n`+
+      (error?.message||error)
+    )
+  }
+}
+
+async function loadOrders(searchValue=null){
+  const body=el('ordersBody')
+  const info=el('orderPoSearchInfo')
+
+  if(!body) return
+
+  body.innerHTML='<tr><td colspan="9">กำลังโหลด...</td></tr>'
+
+  const searchText=
+    searchValue===null
+      ? txt(el('orderPoSearchInput')?.value)
+      : txt(searchValue)
+
+  try{
+    const fields='id,po_no,customer,po_type,delivery_date,total_pairs,total_cartons,production_cartons,pbl_pairs_per_carton,status'
+
+    const {data,error}=await headerQueryCompat(fields,q=>{
+      q=q.order('id',{ascending:false})
+      if(searchText){
+        q=q.ilike('po_no',`%${searchText.replace(/[%_]/g,'')}%`).limit(100)
+      }else{
+        q=q.limit(100)
+      }
+      return q
+    })
 
     if(error) throw error
 
-    body.innerHTML=(data||[]).length ? data.map(r=>{
+    // ไม่แสดง PO ที่ Delivery Date เป็นอดีต
+    // PO ที่ยังไม่มี Delivery Date ยังแสดง เพื่อให้ผู้ใช้เข้าไปกำหนดวันที่ได้
+    const visibleOrders=(data||[]).filter(r=>!isPastOrderDeliveryDate(r.delivery_date))
+
+    if(info){
+      if(searchText){
+        info.className='po-search-info show'
+        info.textContent=
+          `ผลค้นหา PO "${searchText}" · พบ ${visibleOrders.length.toLocaleString('th-TH')} รายการ`
+      }else{
+        info.className='po-search-info'
+        info.textContent=''
+      }
+    }
+
+    body.innerHTML=visibleOrders.length ? visibleOrders.map(r=>{
       const hasSavedProduction=
         r.production_cartons!==null &&
         r.production_cartons!==undefined &&
@@ -8462,7 +10197,7 @@ async function loadOrders(){
         ? Number(r.production_cartons)
         : (
             norm(r.po_type)==='PBL'
-              ? Math.max(0,num(r.total_pairs))/PACK_SIZE
+              ? Math.max(0,num(r.total_pairs))/pblPackSizeFromHeader(r)
               : ''
           )
 
@@ -8472,6 +10207,7 @@ async function loadOrders(){
           <td><b>${esc(r.po_no||'-')}</b></td>
           <td>${esc(r.customer||'-')}</td>
           <td>${esc(r.po_type||'-')}</td>
+          <td><b>${r.delivery_date ? esc(formatDeliveryDate(r.delivery_date)) : '-'}</b></td>
           <td>${fmt(r.total_pairs)}</td>
 
           <td>
@@ -8510,18 +10246,40 @@ async function loadOrders(){
           </td>
 
           <td>
-            <button
-              class="btn btn-primary"
-              style="padding:7px 10px;min-height:34px"
-              data-open-po="${esc(r.id)}"
-            >เปิด</button>
+            <div class="po-action-stack">
+              <button
+                class="btn po-action-btn open"
+                type="button"
+                data-open-po="${esc(r.id)}"
+              >เปิด</button>
+
+              <button
+                class="btn po-action-btn cancel"
+                type="button"
+                data-delete-order="${esc(r.id)}"
+                data-delete-po="${esc(r.po_no||'')}"
+                data-delete-status="${esc(r.status||'')}"
+              >ยกเลิกใบจัด</button>
+            </div>
           </td>
         </tr>
       `
-    }).join('') : '<tr><td colspan="8">ยังไม่มี PO</td></tr>'
+    }).join('') : (
+      searchText
+        ? `<tr><td colspan="9">ไม่พบ PO "${esc(searchText)}"</td></tr>`
+        : '<tr><td colspan="9">ยังไม่มี PO</td></tr>'
+    )
 
     body.querySelectorAll('[data-open-po]').forEach(btn=>{
       btn.onclick=()=>openPickingDetail(Number(btn.dataset.openPo),'orders')
+    })
+
+    body.querySelectorAll('[data-delete-order]').forEach(btn=>{
+      btn.onclick=()=>cancelAndDeletePickingOrder(
+        Number(btn.dataset.deleteOrder),
+        btn.dataset.deletePo,
+        btn.dataset.deleteStatus
+      )
     })
 
     body.querySelectorAll('[data-save-production-cartons]').forEach(btn=>{
@@ -8544,10 +10302,33 @@ async function loadOrders(){
     })
 
   }catch(error){
-    body.innerHTML=`<tr><td colspan="8" style="color:#b91c1c">โหลดไม่สำเร็จ: ${esc(error?.message||error)}</td></tr>`
+    if(info){
+      info.className='po-search-info show'
+      info.textContent='ค้นหา PO ไม่สำเร็จ'
+    }
+
+    body.innerHTML=
+      `<tr><td colspan="9" style="color:#b91c1c">โหลดไม่สำเร็จ: ${esc(error?.message||error)}</td></tr>`
   }
 }
-el('reloadOrdersBtn').onclick=loadOrders
+
+el('reloadOrdersBtn').onclick=()=>loadOrders()
+
+el('orderPoSearchBtn')?.addEventListener('click',()=>{
+  loadOrders()
+})
+
+el('orderPoClearBtn')?.addEventListener('click',()=>{
+  const input=el('orderPoSearchInput')
+  if(input) input.value=''
+  loadOrders('')
+})
+
+el('orderPoSearchInput')?.addEventListener('keydown',e=>{
+  if(e.key!=='Enter') return
+  e.preventDefault()
+  loadOrders()
+})
 
 
 
@@ -9405,6 +11186,12 @@ let manualPblSearchResult=null
 let manualPblSizeRows=[]
 let pblTemplateRows=[]
 let pblTemplateGroups=[]
+let pblEntryMode='MIX'
+let pblSingleRows=[]
+let pblMixedRows=[]
+let pblMixedLastResult=[]
+let pblAssortmentRows=[]
+let pblAssortmentPattern=null
 
 function newPblPatternCode(item,color){
   return [
@@ -9440,6 +11227,52 @@ function clearManualPblStatus(){
   if(!box) return
   box.className='location-qr-status'
   box.textContent=''
+}
+
+
+function selectedManualPblPackSize(){
+  const value=Math.floor(num(el('manualPblPackSize')?.value))
+  return value===12 ? 12 : 6
+}
+
+
+function isMissingPblPairsPerCartonColumn(error){
+  const message=String(error?.message||error||'')
+  return /pbl_pairs_per_carton/i.test(message) &&
+         /(does not exist|column|schema cache)/i.test(message)
+}
+
+function stripPblPairsPerCartonField(fields){
+  return String(fields)
+    .replace(/,pbl_pairs_per_carton/g,'')
+    .replace(/pbl_pairs_per_carton,/g,'')
+}
+
+async function headerQueryCompat(fields,applyQuery){
+  let result=await applyQuery(
+    db.from(HEADER_TABLE).select(fields)
+  )
+
+  if(result?.error && isMissingPblPairsPerCartonColumn(result.error)){
+    result=await applyQuery(
+      db.from(HEADER_TABLE).select(stripPblPairsPerCartonField(fields))
+    )
+  }
+
+  return result
+}
+
+function pblPackSizeFromHeader(header){
+  const value=Math.floor(num(header?.pbl_pairs_per_carton))
+  return value===12 ? 12 : 6
+}
+
+function setManualPblPackSize(value){
+  const select=el('manualPblPackSize')
+  if(!select) return
+  select.value=String(Number(value)===12 ? 12 : 6)
+  renderManualPblSizeSummary()
+  updatePblAssortmentCalculation()
 }
 
 function manualPblAutoPo(){
@@ -9554,12 +11387,13 @@ function renderManualPblSizeSummary(){
   if(!box) return
 
   const total=manualPblPairsPerBoxTotal()
-  const complete=total===PACK_SIZE
+  const target=selectedManualPblPackSize()
+  const complete=total===target
 
   box.className='pbl-size-summary '+(complete?'ok':'warn')
   box.textContent=
-    `รวม ${fmt(total)} / ${fmt(PACK_SIZE)} คู่ต่อกล่อง`+
-    (complete?' · พร้อมใช้งาน':' · ต้องรวมให้ครบ 6 คู่')
+    `รวม ${fmt(total)} / ${fmt(target)} คู่ต่อกล่อง`+
+    (complete?' · พร้อมใช้งาน':` · ต้องรวมให้ครบ ${fmt(target)} คู่`)
 }
 
 function clearManualPblInput(){
@@ -9572,6 +11406,821 @@ function clearManualPblInput(){
   resetManualPblSizeRows()
   el('manualPblItem').focus()
 }
+
+
+
+
+/* ---------- PBL ENTRY MODE ---------- */
+function setPblEntryMode(mode){
+  mode=['MIX','SINGLE','HYBRID'].includes(mode) ? mode : 'MIX'
+  pblEntryMode=mode
+
+  document.querySelectorAll('[data-pbl-mode]').forEach(btn=>{
+    btn.classList.toggle('active',btn.dataset.pblMode===mode)
+  })
+
+  const mix=el('pblMixedPatternCard')
+  const single=el('pblSinglePatternCard')
+
+  if(mix) mix.classList.toggle('pbl-mode-hidden',mode==='SINGLE')
+  if(single) single.classList.toggle('pbl-mode-hidden',mode==='MIX')
+
+  if((mode==='SINGLE' || mode==='HYBRID') && !pblSingleRows.length){
+    resetPblSingleRows()
+  }
+}
+
+function newPblSingleRow(item='',color='',size='',boxes=0){
+  return {
+    id:Date.now()+Math.random(),
+    item:txt(item).toUpperCase(),
+    color:txt(color).toUpperCase(),
+    size:txt(size).toUpperCase(),
+    boxes:Math.max(0,Math.floor(num(boxes)))
+  }
+}
+
+function setPblSingleStatus(message,type='ok'){
+  const box=el('pblSingleStatus')
+  if(!box) return
+  if(!message){
+    box.className='pbl-single-status'
+    box.textContent=''
+    return
+  }
+  box.className='pbl-single-status show '+type
+  box.textContent=message
+}
+
+function resetPblSingleRows(){
+  pblSingleRows=[newPblSingleRow(),newPblSingleRow()]
+  renderPblSingleRows()
+  setPblSingleStatus('')
+}
+
+function cleanPblSingleRows(){
+  return pblSingleRows
+    .map(r=>({
+      item:txt(r.item).toUpperCase(),
+      color:txt(r.color).toUpperCase(),
+      size:txt(r.size).toUpperCase(),
+      boxes:Math.max(0,Math.floor(num(r.boxes)))
+    }))
+    .filter(r=>r.item || r.color || r.size || r.boxes>0)
+}
+
+function updatePblSingleSummary(){
+  const packSize=selectedManualPblPackSize()
+  const rows=cleanPblSingleRows()
+  const totalBoxes=rows.reduce((s,r)=>s+r.boxes,0)
+  const totalPairs=totalBoxes*packSize
+
+  if(el('pblSingleTotalBoxes')) el('pblSingleTotalBoxes').textContent=fmt(totalBoxes)
+  if(el('pblSingleTotalPairs')) el('pblSingleTotalPairs').textContent=fmt(totalPairs)
+  if(el('pblSingleSkuCount')) el('pblSingleSkuCount').textContent=fmt(rows.length)
+}
+
+function renderPblSingleRows(){
+  const body=el('pblSingleBody')
+  if(!body) return
+
+  const packSize=selectedManualPblPackSize()
+
+  body.innerHTML=pblSingleRows.map(row=>`
+    <tr>
+      <td><input data-pbl-single-item="${row.id}" value="${esc(row.item||'')}" placeholder="GM71400"></td>
+      <td><input data-pbl-single-color="${row.id}" value="${esc(row.color||'')}" placeholder="BK"></td>
+      <td><input data-pbl-single-size="${row.id}" value="${esc(row.size||'')}" placeholder="9"></td>
+      <td><input data-pbl-single-box="${row.id}" type="number" min="0" step="1" inputmode="numeric" value="${row.boxes||''}" placeholder="4"></td>
+      <td><b>${fmt(packSize)}</b></td>
+      <td><button class="pbl-mix-remove" type="button" data-pbl-single-remove="${row.id}">ลบ</button></td>
+    </tr>
+  `).join('')
+
+  body.querySelectorAll('[data-pbl-single-item]').forEach(input=>{
+    input.addEventListener('input',()=>{
+      const row=pblSingleRows.find(r=>String(r.id)===String(input.dataset.pblSingleItem))
+      if(row) row.item=txt(input.value).toUpperCase()
+      input.value=txt(input.value).toUpperCase()
+      updatePblSingleSummary()
+    })
+  })
+  body.querySelectorAll('[data-pbl-single-color]').forEach(input=>{
+    input.addEventListener('input',()=>{
+      const row=pblSingleRows.find(r=>String(r.id)===String(input.dataset.pblSingleColor))
+      if(row) row.color=txt(input.value).toUpperCase()
+      input.value=txt(input.value).toUpperCase()
+      updatePblSingleSummary()
+    })
+  })
+  body.querySelectorAll('[data-pbl-single-size]').forEach(input=>{
+    input.addEventListener('input',()=>{
+      const row=pblSingleRows.find(r=>String(r.id)===String(input.dataset.pblSingleSize))
+      if(row) row.size=txt(input.value).toUpperCase()
+      updatePblSingleSummary()
+    })
+  })
+  body.querySelectorAll('[data-pbl-single-box]').forEach(input=>{
+    input.addEventListener('input',()=>{
+      const row=pblSingleRows.find(r=>String(r.id)===String(input.dataset.pblSingleBox))
+      if(row) row.boxes=Math.max(0,Math.floor(num(input.value)))
+      updatePblSingleSummary()
+    })
+  })
+  body.querySelectorAll('[data-pbl-single-remove]').forEach(btn=>{
+    btn.onclick=()=>{
+      pblSingleRows=pblSingleRows.filter(r=>String(r.id)!==String(btn.dataset.pblSingleRemove))
+      if(!pblSingleRows.length) pblSingleRows=[newPblSingleRow()]
+      renderPblSingleRows()
+    }
+  })
+
+  updatePblSingleSummary()
+}
+
+async function buildPblSingleColorBoxes(){
+  const rows=cleanPblSingleRows()
+  const packSize=selectedManualPblPackSize()
+
+  if(!rows.length){
+    setPblSingleStatus('กรุณาเพิ่มรายการอย่างน้อย 1 รายการ','warn')
+    return
+  }
+
+  const invalid=rows.find(r=>!r.item || !r.color || !r.size || r.boxes<=0)
+  if(invalid){
+    setPblSingleStatus('กรุณากรอก Item / Color / Size / Total Box ให้ครบ','warn')
+    return
+  }
+
+  const btn=el('pblSingleBuildBtn')
+  btn.disabled=true
+  const oldText=btn.textContent
+  btn.textContent='กำลังหา Location...'
+
+  try{
+    const drafts=[]
+    let totalShortage=0
+
+    for(let i=0;i<rows.length;i++){
+      const r=rows[i]
+      const requiredPairs=r.boxes*packSize
+
+      setPblSingleStatus(
+        `กำลังค้นหา ${i+1}/${rows.length}\n${r.item} ${r.color} Size ${r.size} = ${fmt(requiredPairs)} คู่`,
+        'ok'
+      )
+
+      const stockRows=await fetchManualPblExactStock(r.item,r.color,r.size)
+
+      let allocations
+      if(stockRows.length){
+        allocations=autoAllocateManualPblLocations(stockRows,requiredPairs).allocations
+      }else{
+        allocations=[{
+          warehouse:'-',
+          location:'งานขาด',
+          available:0,
+          pickQty:requiredPairs,
+          shortage:true
+        }]
+      }
+
+      const shortage=allocations
+        .filter(a=>a.shortage)
+        .reduce((s,a)=>s+num(a.pickQty),0)
+
+      totalShortage+=shortage
+
+      drafts.push({
+        id:Date.now()+Math.random()+i,
+        patternCode:'SINGLE-'+Date.now()+'-'+i,
+        item:r.item,
+        color:r.color,
+        boxes:r.boxes,
+        headerBoxes:r.boxes,
+        packSize,
+        totalPairs:requiredPairs,
+        sizeRows:[{
+          size:r.size,
+          pairsPerBox:packSize,
+          requiredPairs,
+          allocations
+        }]
+      })
+    }
+
+    manualPblDraft=[...manualPblDraft,...drafts]
+    renderManualPblDraft()
+
+    const totalBoxes=rows.reduce((s,r)=>s+r.boxes,0)
+    setPblSingleStatus(
+      `สร้างสำเร็จ ${fmt(rows.length)} SKU\n`+
+      `รวม ${fmt(totalBoxes)} กล่อง · ${fmt(totalBoxes*packSize)} คู่`+
+      (totalShortage>0?`\nงานขาดรวม ${fmt(totalShortage)} คู่`:''),
+      totalShortage>0?'warn':'ok'
+    )
+  }catch(error){
+    console.error(error)
+    setPblSingleStatus('สร้างรายการไม่สำเร็จ: '+(error?.message||error),'error')
+  }finally{
+    btn.disabled=false
+    btn.textContent=oldText
+  }
+}
+
+
+/* ---------- PBL MIXED COLOR BOX PATTERN ---------- */
+function newPblMixedRow(item='',color='',pairsPerBox=0){
+  return {
+    id:Date.now()+Math.random(),
+    item:txt(item).toUpperCase(),
+    color:txt(color).toUpperCase(),
+    pairsPerBox:Math.max(0,Math.floor(num(pairsPerBox)))
+  }
+}
+
+function setPblMixStatus(message,type='ok'){
+  const box=el('pblMixStatus')
+  if(!box) return
+  if(!message){
+    box.className='pbl-mix-status'
+    box.textContent=''
+    return
+  }
+  box.className='pbl-mix-status show '+type
+  box.textContent=message
+}
+
+function resetPblMixedRows(){
+  pblMixedRows=[
+    newPblMixedRow(),
+    newPblMixedRow(),
+    newPblMixedRow()
+  ]
+  pblMixedLastResult=[]
+  renderPblMixedRows()
+  renderPblMixedResult([])
+  setPblMixStatus('')
+}
+
+function pblMixedPairsPerBox(){
+  return pblMixedRows.reduce(
+    (sum,row)=>sum+Math.max(0,num(row.pairsPerBox)),
+    0
+  )
+}
+
+function cleanPblMixedRows(){
+  return pblMixedRows
+    .map(r=>({
+      item:txt(r.item).toUpperCase(),
+      color:txt(r.color).toUpperCase(),
+      pairsPerBox:Math.max(0,Math.floor(num(r.pairsPerBox)))
+    }))
+    .filter(r=>r.item || r.color || r.pairsPerBox>0)
+}
+
+function updatePblMixedTotals(){
+  const pairBox=pblMixedPairsPerBox()
+  const target=selectedManualPblPackSize()
+  const boxes=Math.max(0,Math.floor(num(el('pblMixBoxes')?.value)))
+  const totalPairs=boxes*pairBox
+  const skuCount=cleanPblMixedRows().length
+  const totals=el('pblMixTotals')
+
+  if(el('pblMixPairsPerBox')) el('pblMixPairsPerBox').textContent=fmt(pairBox)
+  if(el('pblMixBoxCount')) el('pblMixBoxCount').textContent=fmt(boxes)
+  if(el('pblMixTotalPairs')) el('pblMixTotalPairs').textContent=fmt(totalPairs)
+  if(el('pblMixSkuCount')) el('pblMixSkuCount').textContent=fmt(skuCount)
+
+  if(totals){
+    totals.className='pbl-mix-total '+(pairBox===target?'ok':'warn')
+  }
+}
+
+function renderPblMixedRows(){
+  const body=el('pblMixBody')
+  if(!body) return
+
+  body.innerHTML=pblMixedRows.map((row,index)=>`
+    <tr>
+      <td>
+        <input
+          data-pbl-mix-item="${row.id}"
+          value="${esc(row.item||'')}"
+          placeholder="GM71400"
+        >
+      </td>
+      <td>
+        <input
+          data-pbl-mix-color="${row.id}"
+          value="${esc(row.color||'')}"
+          placeholder="BK"
+        >
+      </td>
+      <td>
+        <input
+          data-pbl-mix-pairs="${row.id}"
+          type="number"
+          min="0"
+          step="1"
+          inputmode="numeric"
+          value="${row.pairsPerBox||''}"
+          placeholder="4"
+        >
+      </td>
+      <td>
+        <button
+          class="pbl-mix-remove"
+          type="button"
+          data-pbl-mix-remove="${row.id}"
+        >ลบ</button>
+      </td>
+    </tr>
+  `).join('')
+
+  body.querySelectorAll('[data-pbl-mix-item]').forEach(input=>{
+    input.addEventListener('input',()=>{
+      const row=pblMixedRows.find(r=>String(r.id)===String(input.dataset.pblMixItem))
+      if(row) row.item=txt(input.value).toUpperCase()
+      input.value=txt(input.value).toUpperCase()
+      updatePblMixedTotals()
+    })
+  })
+
+  body.querySelectorAll('[data-pbl-mix-color]').forEach(input=>{
+    input.addEventListener('input',()=>{
+      const row=pblMixedRows.find(r=>String(r.id)===String(input.dataset.pblMixColor))
+      if(row) row.color=txt(input.value).toUpperCase()
+      input.value=txt(input.value).toUpperCase()
+      updatePblMixedTotals()
+    })
+  })
+
+  body.querySelectorAll('[data-pbl-mix-pairs]').forEach(input=>{
+    input.addEventListener('input',()=>{
+      const row=pblMixedRows.find(r=>String(r.id)===String(input.dataset.pblMixPairs))
+      if(row) row.pairsPerBox=Math.max(0,Math.floor(num(input.value)))
+      updatePblMixedTotals()
+    })
+  })
+
+  body.querySelectorAll('[data-pbl-mix-remove]').forEach(btn=>{
+    btn.onclick=()=>{
+      pblMixedRows=pblMixedRows.filter(r=>String(r.id)!==String(btn.dataset.pblMixRemove))
+      if(!pblMixedRows.length) pblMixedRows=[newPblMixedRow()]
+      renderPblMixedRows()
+    }
+  })
+
+  updatePblMixedTotals()
+}
+
+function renderPblMixedResult(rows){
+  const box=el('pblMixResult')
+  if(!box) return
+
+  if(!rows?.length){
+    box.className='pbl-mix-result'
+    box.innerHTML=''
+    return
+  }
+
+  box.className='pbl-mix-result show'
+  box.innerHTML=`
+    <div class="pbl-mix-result-row head">
+      <div>SKU</div>
+      <div>คู่</div>
+      <div>กล่อง</div>
+      <div>Location</div>
+      <div>สถานะ</div>
+    </div>
+    ${rows.map(r=>`
+      <div class="pbl-mix-result-row">
+        <div><b>${esc(r.item)} ${esc(r.color)} ${esc(r.size)}</b></div>
+        <div><b>${fmt(r.requiredPairs)}</b></div>
+        <div>${fmt(r.boxes)}</div>
+        <div>${esc(r.locations||'-')}</div>
+        <div>${r.shortage>0?`<span style="color:#dc2626;font-weight:900">ขาด ${fmt(r.shortage)}</span>`:'<span style="color:#16803a;font-weight:900">ครบ</span>'}</div>
+      </div>
+    `).join('')}
+  `
+}
+
+async function buildPblMixedPattern(){
+  const size=txt(el('pblMixSize')?.value).toUpperCase()
+  const boxes=Math.max(0,Math.floor(num(el('pblMixBoxes')?.value)))
+  const target=selectedManualPblPackSize()
+  const rows=cleanPblMixedRows()
+  const pairBox=rows.reduce((s,r)=>s+r.pairsPerBox,0)
+
+  if(!size){
+    setPblMixStatus('กรุณากรอก Size','warn')
+    el('pblMixSize')?.focus()
+    return
+  }
+
+  if(boxes<=0){
+    setPblMixStatus('กรุณากรอก Total Box','warn')
+    el('pblMixBoxes')?.focus()
+    return
+  }
+
+  if(!rows.length){
+    setPblMixStatus('กรุณาเพิ่ม Item / Color อย่างน้อย 1 รายการ','warn')
+    return
+  }
+
+  const invalid=rows.find(r=>!r.item || !r.color || r.pairsPerBox<=0)
+  if(invalid){
+    setPblMixStatus('กรุณากรอก Item / Color / Pairs per Box ให้ครบทุกแถว','warn')
+    return
+  }
+
+  if(pairBox!==target){
+    setPblMixStatus(
+      `Pattern รวม ${fmt(pairBox)} คู่/กล่อง แต่ Pack Size ที่เลือกคือ ${fmt(target)} คู่/กล่อง`,
+      'warn'
+    )
+    return
+  }
+
+  const duplicate=new Set()
+  for(const r of rows){
+    const key=norm(r.item)+'||'+norm(r.color)
+    if(duplicate.has(key)){
+      setPblMixStatus(`${r.item} / ${r.color} ซ้ำ กรุณารวมเป็นแถวเดียว`,'warn')
+      return
+    }
+    duplicate.add(key)
+  }
+
+  const btn=el('pblMixBuildBtn')
+  btn.disabled=true
+  const oldText=btn.textContent
+  btn.textContent='กำลังหา Location...'
+
+  try{
+    const drafts=[]
+    const summary=[]
+    let totalShortage=0
+    const groupCode='MIX-'+Date.now()
+
+    for(let i=0;i<rows.length;i++){
+      const r=rows[i]
+      const requiredPairs=boxes*r.pairsPerBox
+
+      setPblMixStatus(
+        `กำลังค้นหา ${i+1}/${rows.length}\n${r.item} ${r.color} Size ${size} = ${fmt(requiredPairs)} คู่`,
+        'ok'
+      )
+
+      const stockRows=await fetchManualPblExactStock(
+        r.item,
+        r.color,
+        size
+      )
+
+      let allocations
+      if(stockRows.length){
+        allocations=autoAllocateManualPblLocations(
+          stockRows,
+          requiredPairs
+        ).allocations
+      }else{
+        allocations=[{
+          warehouse:'-',
+          location:'งานขาด',
+          available:0,
+          pickQty:requiredPairs,
+          shortage:true
+        }]
+      }
+
+      const shortage=allocations
+        .filter(a=>a.shortage)
+        .reduce((s,a)=>s+num(a.pickQty),0)
+
+      totalShortage+=shortage
+
+      drafts.push({
+        id:Date.now()+Math.random()+i,
+        patternCode:groupCode,
+        assortmentPattern:groupCode,
+        item:r.item,
+        color:r.color,
+        boxes,
+        headerBoxes:i===0 ? boxes : 0,
+        packSize:target,
+        totalPairs:requiredPairs,
+        sizeRows:[{
+          size,
+          pairsPerBox:r.pairsPerBox,
+          requiredPairs,
+          allocations
+        }]
+      })
+
+      summary.push({
+        item:r.item,
+        color:r.color,
+        size,
+        boxes,
+        requiredPairs,
+        shortage,
+        locations:allocations
+          .filter(a=>!a.shortage)
+          .map(a=>a.location)
+          .join(', ')
+      })
+    }
+
+    manualPblDraft=[
+      ...manualPblDraft,
+      ...drafts
+    ]
+
+    pblMixedLastResult=summary
+    renderPblMixedResult(summary)
+    renderManualPblDraft()
+
+    setPblMixStatus(
+      `สร้าง Pattern สำเร็จ\n`+
+      `${fmt(boxes)} กล่อง × ${fmt(target)} คู่ = ${fmt(boxes*target)} คู่\n`+
+      rows.map(r=>`${r.item} ${r.color} = ${fmt(boxes*r.pairsPerBox)} คู่`).join('\n')+
+      (totalShortage>0?`\nงานขาดรวม ${fmt(totalShortage)} คู่`:''),
+      totalShortage>0?'warn':'ok'
+    )
+  }catch(error){
+    console.error(error)
+    setPblMixStatus(
+      'สร้างรายการไม่สำเร็จ: '+(error?.message||error),
+      'error'
+    )
+  }finally{
+    btn.disabled=false
+    btn.textContent=oldText
+  }
+}
+
+function clearPblMixedPattern(){
+  if(el('pblMixSize')) el('pblMixSize').value=''
+  if(el('pblMixBoxes')) el('pblMixBoxes').value=''
+  resetPblMixedRows()
+}
+
+
+/* ---------- PBL ASSORTMENT ---------- */
+function setPblAssortmentStatus(message,type='ok'){
+  const box=el('pblAssortmentStatus')
+  if(!box) return
+  if(!message){
+    box.className='pbl-assort-status'
+    box.textContent=''
+    return
+  }
+  box.className='pbl-assort-status show '+type
+  box.textContent=message
+}
+
+function currentPblAssortmentTotalPairsPerBox(){
+  return (pblAssortmentRows||[]).reduce(
+    (sum,row)=>sum+Math.max(0,num(row.pairs_per_box)),
+    0
+  )
+}
+
+function updatePblAssortmentCalculation(){
+  const totalPairs=Math.max(0,Math.floor(num(el('pblAssortmentTotalPairs')?.value)))
+  const pairsPerBox=currentPblAssortmentTotalPairsPerBox()
+  const boxes=pairsPerBox>0 && totalPairs>0
+    ? totalPairs/pairsPerBox
+    : 0
+
+  if(el('pblAssortmentPairsPerBox')){
+    el('pblAssortmentPairsPerBox').textContent=pairsPerBox?fmt(pairsPerBox):'-'
+  }
+  if(el('pblAssortmentSkuCount')){
+    el('pblAssortmentSkuCount').textContent=pblAssortmentRows.length?fmt(pblAssortmentRows.length):'-'
+  }
+  if(el('pblAssortmentBoxes')){
+    el('pblAssortmentBoxes').textContent=
+      boxes>0 && Number.isInteger(boxes) ? fmt(boxes) : (boxes>0?boxes.toFixed(2):'-')
+  }
+}
+
+function renderPblAssortmentTemplate(){
+  const preview=el('pblAssortmentPreview')
+  const name=el('pblAssortmentName')
+  if(!preview || !name) return
+
+  if(!pblAssortmentRows.length){
+    name.textContent='ยังไม่มี Assortment Pattern'
+    preview.innerHTML=''
+    updatePblAssortmentCalculation()
+    return
+  }
+
+  const first=pblAssortmentRows[0]
+  name.textContent=
+    `${first.pattern_name||first.pattern_code||'ASSORTMENT'} · ${fmt(currentPblAssortmentTotalPairsPerBox())} คู่/กล่อง`
+
+  preview.innerHTML=pblAssortmentRows.map(r=>`
+    <div class="pbl-assort-chip">
+      <b>${esc(r.item)} ${esc(r.color)}</b>
+      <span>${fmt(r.pairs_per_box)} คู่/กล่อง</span>
+    </div>
+  `).join('')
+
+  updatePblAssortmentCalculation()
+}
+
+async function loadPblAssortmentTemplate(){
+  const customer=txt(el('manualPblCustomer')?.value)
+  const card=el('pblAssortmentCard')
+  if(!card) return
+
+  // ตอนนี้เปิด Quick Builder สำหรับ 7-11
+  if(norm(customer)!=='7-11'){
+    card.style.display='none'
+    pblAssortmentRows=[]
+    pblAssortmentPattern=null
+    return
+  }
+
+  card.style.display='block'
+  setPblAssortmentStatus('กำลังโหลด Pattern...','ok')
+
+  try{
+    const {data,error}=await db.from(PBL_ASSORTMENT_TEMPLATE_TABLE)
+      .select('id,customer,pattern_code,pattern_name,sort_order,item,color,pairs_per_box,is_active')
+      .eq('customer',customer)
+      .eq('is_active',true)
+      .order('pattern_code',{ascending:true})
+      .order('sort_order',{ascending:true})
+      .limit(500)
+
+    if(error) throw error
+
+    const rows=data||[]
+    if(!rows.length){
+      pblAssortmentRows=[]
+      pblAssortmentPattern=null
+      renderPblAssortmentTemplate()
+      setPblAssortmentStatus('ยังไม่มี Assortment Pattern ของ 7-11','warn')
+      return
+    }
+
+    // ใช้ Pattern แรกที่ active
+    const patternCode=rows[0].pattern_code
+    pblAssortmentPattern=patternCode
+    pblAssortmentRows=rows.filter(r=>r.pattern_code===patternCode)
+
+    renderPblAssortmentTemplate()
+    setPblAssortmentStatus('','ok')
+  }catch(error){
+    console.error(error)
+    pblAssortmentRows=[]
+    pblAssortmentPattern=null
+    renderPblAssortmentTemplate()
+    setPblAssortmentStatus(
+      'โหลด Assortment Pattern ไม่สำเร็จ: '+(error?.message||error),
+      'error'
+    )
+  }
+}
+
+async function buildPblAssortment(){
+  const size=txt(el('pblAssortmentSize')?.value).toUpperCase()
+  const totalPairs=Math.max(0,Math.floor(num(el('pblAssortmentTotalPairs')?.value)))
+  const pairsPerBox=currentPblAssortmentTotalPairsPerBox()
+
+  if(!size){
+    setPblAssortmentStatus('กรุณากรอก Size','warn')
+    el('pblAssortmentSize')?.focus()
+    return
+  }
+
+  if(totalPairs<=0){
+    setPblAssortmentStatus('กรุณากรอก Total Pairs','warn')
+    el('pblAssortmentTotalPairs')?.focus()
+    return
+  }
+
+  if(!pblAssortmentRows.length || pairsPerBox<=0){
+    setPblAssortmentStatus('ไม่พบ Assortment Pattern','warn')
+    return
+  }
+
+  const selectedPackSize=selectedManualPblPackSize()
+
+  if(pairsPerBox!==selectedPackSize){
+    setPblAssortmentStatus(
+      `Pattern นี้เป็น ${fmt(pairsPerBox)} คู่/กล่อง แต่ตอนนี้เลือก ${fmt(selectedPackSize)} คู่/กล่อง`,
+      'warn'
+    )
+    return
+  }
+
+  if(totalPairs%pairsPerBox!==0){
+    setPblAssortmentStatus(
+      `จำนวน ${fmt(totalPairs)} คู่ หารด้วย ${fmt(pairsPerBox)} คู่/กล่องไม่ลงตัว`,
+      'warn'
+    )
+    return
+  }
+
+  const boxes=totalPairs/pairsPerBox
+  const btn=el('buildPblAssortmentBtn')
+  btn.disabled=true
+  const oldText=btn.textContent
+  btn.textContent='กำลังหา Location...'
+
+  try{
+    const drafts=[]
+    let shortage=0
+
+    for(let i=0;i<pblAssortmentRows.length;i++){
+      const row=pblAssortmentRows[i]
+      const ratio=Math.max(0,num(row.pairs_per_box))
+      const requiredPairs=boxes*ratio
+
+      setPblAssortmentStatus(
+        `กำลังหา Location ${i+1}/${pblAssortmentRows.length}\n${row.item} ${row.color} Size ${size} = ${fmt(requiredPairs)} คู่`,
+        'ok'
+      )
+
+      const stockRows=await fetchManualPblExactStock(
+        txt(row.item).toUpperCase(),
+        txt(row.color).toUpperCase(),
+        size
+      )
+
+      let allocations
+      if(stockRows.length){
+        allocations=autoAllocateManualPblLocations(stockRows,requiredPairs).allocations
+      }else{
+        allocations=[{
+          warehouse:'-',
+          location:'งานขาด',
+          available:0,
+          pickQty:requiredPairs,
+          shortage:true
+        }]
+      }
+
+      shortage+=allocations
+        .filter(a=>a.shortage)
+        .reduce((s,a)=>s+num(a.pickQty),0)
+
+      drafts.push({
+        id:Date.now()+Math.random()+i,
+        patternCode:pblAssortmentPattern,
+        assortmentPattern:pblAssortmentPattern,
+        item:txt(row.item).toUpperCase(),
+        color:txt(row.color).toUpperCase(),
+        boxes,
+        packSize:pairsPerBox,
+        // นับ Carton ที่ Header เพียง SKU แรก เพื่อไม่ให้ 30 กล่องกลายเป็น 240
+        headerBoxes:i===0 ? boxes : 0,
+        totalPairs:requiredPairs,
+        sizeRows:[{
+          size,
+          pairsPerBox:ratio,
+          requiredPairs,
+          allocations
+        }]
+      })
+    }
+
+    manualPblDraft=[
+      ...manualPblDraft,
+      ...drafts
+    ]
+    renderManualPblDraft()
+
+    setPblAssortmentStatus(
+      `สร้าง Size ${size} สำเร็จ\n`+
+      `${fmt(totalPairs)} คู่ = ${fmt(boxes)} กล่อง\n`+
+      pblAssortmentRows.map(r=>
+        `${r.item} ${r.color} = ${fmt(boxes*num(r.pairs_per_box))} คู่`
+      ).join('\n')+
+      (shortage>0?`\nงานขาดรวม ${fmt(shortage)} คู่`:''),
+      shortage>0?'warn':'ok'
+    )
+  }catch(error){
+    console.error(error)
+    setPblAssortmentStatus(
+      'สร้างรายการไม่สำเร็จ: '+(error?.message||error),
+      'error'
+    )
+  }finally{
+    btn.disabled=false
+    btn.textContent=oldText
+  }
+}
+
 
 /* ---------- TEMPLATE ---------- */
 async function saveRowsToPblTemplate(customer,rows,createdBy='ADMIN'){
@@ -10019,6 +12668,7 @@ async function buildPblPatternDraft({item,color,boxes,sizeRows}){
     item,
     color,
     boxes,
+    packSize:sizeRows.reduce((s,r)=>s+num(r.pairsPerBox),0),
     totalPairs:boxes*sizeRows.reduce((s,r)=>s+num(r.pairsPerBox),0),
     sizeRows:patternSizes,
     notFound
@@ -10049,9 +12699,11 @@ async function findManualPblLocation(){
   }
 
   const totalPairsPerBox=sizeRows.reduce((s,r)=>s+num(r.pairsPerBox),0)
-  if(totalPairsPerBox!==PACK_SIZE){
+  const packSize=selectedManualPblPackSize()
+
+  if(totalPairsPerBox!==packSize){
     setManualPblStatus(
-      `จำนวนคู่ต่อกล่องต้องรวม ${PACK_SIZE} คู่ · ตอนนี้ ${fmt(totalPairsPerBox)} คู่`,
+      `จำนวนคู่ต่อกล่องต้องรวม ${fmt(packSize)} คู่ · ตอนนี้ ${fmt(totalPairsPerBox)} คู่`,
       'warn'
     )
     return
@@ -10193,7 +12845,15 @@ function renderManualPblDraft(){
           <td>${esc(pattern.color)}</td>
           <td><b>${esc(s.size)}</b></td>
           <td>${fmt(s.pairsPerBox)}</td>
-          <td>${sizeIndex===0?fmt(pattern.boxes):''}</td>
+          <td>${
+            sizeIndex===0
+              ? (
+                  pattern.headerBoxes!==undefined
+                    ? (num(pattern.headerBoxes)>0?fmt(pattern.headerBoxes):'')
+                    : fmt(pattern.boxes)
+                )
+              : ''
+          }</td>
           <td>${fmt(s.requiredPairs)}</td>
           <td class="manual-location-cell">
             <div class="manual-pbl-location-stack">
@@ -10248,9 +12908,11 @@ async function buildManualPblFromTemplate(){
 
       const totalPairsPerBox=sizeRows.reduce((s,r)=>s+num(r.pairsPerBox),0)
 
-      if(totalPairsPerBox!==PACK_SIZE){
+      const selectedPackSize=selectedManualPblPackSize()
+
+      if(totalPairsPerBox!==selectedPackSize){
         warnings.push(
-          `${g.item}/${g.color}: Pattern รวม ${fmt(totalPairsPerBox)} คู่/กล่อง`
+          `${g.item}/${g.color}: Pattern ${fmt(totalPairsPerBox)} คู่/กล่อง ไม่ตรงกับที่เลือก ${fmt(selectedPackSize)} คู่/กล่อง`
         )
         continue
       }
@@ -10324,7 +12986,11 @@ function manualPblJobLocationRows(){
           // Box แสดงครั้งเดียวต่อ Pattern เพื่อไม่ให้รวมซ้ำ
           box:
             sizeIndex===0 && allocationIndex===0
-              ? num(pattern.boxes)
+              ? (
+                  pattern.headerBoxes!==undefined
+                    ? num(pattern.headerBoxes)
+                    : num(pattern.boxes)
+                )
               : 0,
 
           pairs:num(a.pickQty),
@@ -10400,8 +13066,26 @@ async function createManualPblJob(){
       throw new Error(`PO / REF ${po} มีอยู่แล้ว`)
     }
 
+    const selectedPackSize=selectedManualPblPackSize()
+    const incompatible=manualPblDraft.filter(
+      p=>Math.floor(num(p.packSize || selectedPackSize))!==selectedPackSize
+    )
+
+    if(incompatible.length){
+      throw new Error(
+        `มีรายการที่เป็น ${incompatible[0].packSize} คู่/กล่อง แต่ PO นี้เลือก ${selectedPackSize} คู่/กล่อง กรุณาใช้ Pack Size เดียวกันทั้ง PO`
+      )
+    }
+
     const totalPairs=manualPblDraft.reduce((s,p)=>s+num(p.totalPairs),0)
-    const totalCartons=manualPblDraft.reduce((s,p)=>s+num(p.boxes),0)
+    const totalCartons=manualPblDraft.reduce(
+      (s,p)=>s+(
+        p.headerBoxes!==undefined
+          ? num(p.headerBoxes)
+          : num(p.boxes)
+      ),
+      0
+    )
 
     const headerPayload={
       po_no:po,
@@ -10411,6 +13095,8 @@ async function createManualPblJob(){
       status:'JOB_CREATED',
       total_pairs:totalPairs,
       total_cartons:totalCartons,
+      pbl_pairs_per_carton:selectedPackSize,
+      pbl_box_mode:pblEntryMode,
       total_loose_used:0,
       total_loose_pull:0,
       created_by:createdBy,
@@ -10442,7 +13128,14 @@ async function createManualPblJob(){
           code:pattern.color,
           assort:s.size,
           order_pairs:num(s.requiredPairs),
-          carton_qty:sizeIndex===0 ? num(pattern.boxes) : 0,
+          carton_qty:
+            sizeIndex===0
+              ? (
+                  pattern.headerBoxes!==undefined
+                    ? num(pattern.headerBoxes)
+                    : num(pattern.boxes)
+                )
+              : 0,
           loose_before:0,
           loose_used:0,
           loose_pull:0,
@@ -10499,7 +13192,11 @@ async function createManualPblJob(){
           // Box แสดงครั้งเดียวต่อ Pattern เท่านั้น
           box_qty:
             meta.sizeIndex===0 && allocationIndex===0
-              ? num(meta.pattern.boxes)
+              ? (
+                  meta.pattern.headerBoxes!==undefined
+                    ? num(meta.pattern.headerBoxes)
+                    : num(meta.pattern.boxes)
+                )
               : 0,
 
           loose_text:null,
@@ -10574,10 +13271,58 @@ el('manualPblCreatedBy')?.addEventListener('change',()=>{
 })
 
 el('reloadPblTemplateBtn')?.addEventListener('click',loadPblTemplate)
+
+el('buildPblAssortmentBtn')?.addEventListener('click',buildPblAssortment)
+
+
+document.querySelectorAll('[data-pbl-mode]').forEach(btn=>{
+  btn.addEventListener('click',()=>setPblEntryMode(btn.dataset.pblMode))
+})
+
+el('pblSingleAddRowBtn')?.addEventListener('click',()=>{
+  pblSingleRows.push(newPblSingleRow())
+  renderPblSingleRows()
+})
+el('pblSingleBuildBtn')?.addEventListener('click',buildPblSingleColorBoxes)
+el('pblSingleClearBtn')?.addEventListener('click',resetPblSingleRows)
+
+el('pblMixAddRowBtn')?.addEventListener('click',()=>{
+  pblMixedRows.push(newPblMixedRow())
+  renderPblMixedRows()
+})
+
+el('pblMixBuildBtn')?.addEventListener('click',buildPblMixedPattern)
+el('pblMixClearBtn')?.addEventListener('click',clearPblMixedPattern)
+el('pblMixBoxes')?.addEventListener('input',updatePblMixedTotals)
+el('pblMixSize')?.addEventListener('keydown',e=>{
+  if(e.key==='Enter') buildPblMixedPattern()
+})
+el('pblMixBoxes')?.addEventListener('keydown',e=>{
+  if(e.key==='Enter') buildPblMixedPattern()
+})
+
+el('manualPblPackSize')?.addEventListener('change',()=>{
+  renderManualPblSizeSummary()
+  updatePblAssortmentCalculation()
+  updatePblMixedTotals()
+  renderPblSingleRows()
+})
+
+el('pblAssortmentTotalPairs')?.addEventListener('input',updatePblAssortmentCalculation)
+el('pblAssortmentSize')?.addEventListener('keydown',e=>{
+  if(e.key==='Enter') buildPblAssortment()
+})
+el('pblAssortmentTotalPairs')?.addEventListener('keydown',e=>{
+  if(e.key==='Enter') buildPblAssortment()
+})
+
 el('clearPblTemplateQtyBtn')?.addEventListener('click',clearPblTemplateQty)
 el('buildFromPblTemplateBtn')?.addEventListener('click',buildManualPblFromTemplate)
 
 el('manualPblCustomer')?.addEventListener('change',()=>{
+  const customer=norm(el('manualPblCustomer')?.value)
+  setManualPblPackSize(customer==='7-11' ? 12 : 6)
+
   loadPblTemplate()
   clearManualPblStatus()
 })
@@ -11158,11 +13903,13 @@ async function loadActivePicking(){
   summary.textContent='กำลังโหลด...'
 
   try{
-    const {data,error}=await db.from(HEADER_TABLE)
-      .select('id,po_no,customer,po_type,total_pairs,total_cartons,production_cartons,status,created_by')
-      .eq('status','JOB_CREATED')
-      .order('id',{ascending:false})
-      .limit(200)
+    const {data,error}=await headerQueryCompat(
+      'id,po_no,customer,po_type,total_pairs,total_cartons,production_cartons,pbl_pairs_per_carton,status,created_by',
+      q=>q
+        .eq('status','JOB_CREATED')
+        .order('id',{ascending:false})
+        .limit(200)
+    )
 
     if(error) throw error
     const rows=data||[]
@@ -11482,13 +14229,13 @@ async function openActiveJobSheet(poId,options={}){
 
   try{
     const [headerRes,rowsRes]=await Promise.all([
-      db.from(HEADER_TABLE)
-        .select('id,po_no,customer,po_type,total_pairs,total_cartons,production_cartons,status,created_by,delivery_date,completed_at,completed_by')
-        .eq('id',activeJobPoId)
-        .single(),
+      headerQueryCompat(
+        'id,po_no,customer,po_type,total_pairs,total_cartons,production_cartons,pbl_pairs_per_carton,status,created_by,delivery_date,completed_at,completed_by',
+        q=>q.eq('id',activeJobPoId).single()
+      ),
 
       db.from(PICKING_JOB_TABLE)
-        .select('id,po_id,po_item_id,line_no,item_code,model,color,size,warehouse,location,pick_qty,box_qty,loose_text,is_shortage,scanned,scanned_at,scanned_by,created_by,created_at')
+        .select('id,po_id,po_item_id,line_no,item_code,model,color,size,warehouse,location,pick_qty,box_qty,loose_text,is_shortage,scanned,scanned_at,scanned_by,created_by,created_at,w_center_has_stock,w_center_available,w_center_pick_qty,w_center_locations,w_center_sources')
         .eq('po_id',activeJobPoId)
         .order('line_no',{ascending:true})
         .order('id',{ascending:true})
@@ -11672,7 +14419,7 @@ async function loadCompletedJobs(){
 
   try{
     const {data,error}=await db.from(HEADER_TABLE)
-      .select('id,po_no,customer,po_type,total_pairs,total_cartons,production_cartons,status,delivery_date,completed_at,completed_by')
+      .select('id,po_no,customer,po_type,total_pairs,total_cartons,production_cartons,pbl_pairs_per_carton,status,delivery_date,completed_at,completed_by')
       .eq('status','COMPLETED')
       .order('completed_at',{ascending:false})
       .order('id',{ascending:false})
@@ -11798,7 +14545,12 @@ function activeJobRowsForPdf(){
       loose:r.loose_text||'',
       warehouse:r.warehouse||'-',
       location:r.location||'-',
-      shortage:Boolean(r.is_shortage)
+      shortage:Boolean(r.is_shortage),
+      wCenterHasStock:Boolean(r.w_center_has_stock),
+      wCenterAvailable:num(r.w_center_available),
+      wCenterPickQty:num(r.w_center_pick_qty),
+      wCenterLocations:r.w_center_locations||'',
+      wCenterSources:Array.isArray(r.w_center_sources)?r.w_center_sources:[]
     }
   })
 }
@@ -11881,8 +14633,14 @@ function compactJobSheetRows(rows){
         pick:shortage,
         loose:'-',
         warehouse:'-',
-        location:'งานขาด',
+        location:group.rows.some(r=>Boolean(r.wCenterHasStock||r.w_center_has_stock))
+          ? 'งานขาด (มี W-CENTER)'
+          : 'งานขาด',
         shortage:true,
+        wCenterHasStock:group.rows.some(r=>Boolean(r.wCenterHasStock||r.w_center_has_stock)),
+        wCenterAvailable:Math.max(...group.rows.map(r=>num(r.wCenterAvailable??r.w_center_available)),0),
+        wCenterPickQty:group.rows.reduce((s,r)=>s+Math.max(0,num(r.wCenterPickQty??r.w_center_pick_qty)),0),
+        wCenterLocations:group.rows.map(r=>txt(r.wCenterLocations??r.w_center_locations)).filter(Boolean).join(', '),
         groupStart:first
       })
       first=false
@@ -11926,11 +14684,12 @@ function asnMainLocationCartons(row){
 
 function isPblJobType(value){ return norm(value)==='PBL' }
 
-function pblPickCartons(row){
+function pblPickCartons(row,header=null){
   if(!row) return ''
   const pairs=Math.max(0,num(row.pick ?? row.pairs ?? row.pick_qty))
   if(pairs<=0) return ''
-  return Math.ceil(pairs / PACK_SIZE)
+  const packSize=pblPackSizeFromHeader(header || activeJobHeader || currentPickingHeader)
+  return Math.ceil(pairs / packSize)
 }
 
 
@@ -11995,7 +14754,7 @@ function buildActiveJobPdfSheet(){
 
   sheet.innerHTML=`
     <div class="pdf-job-title">ใบจัดงาน ${esc(customer)} - CARTON & LOOSE</div>
-    <div class="pdf-job-sub">${isPbl ? 'PBL: แสดงจำนวนคู่และจำนวนกล่องของแต่ละ Location · 1 กล่อง = 6 คู่' : 'ASN: กล่อง = จำนวนคู่จากโลเคชั่นหลัก ÷ 6 และปัดขึ้น · งานเศษไม่คิดเป็นกล่อง · หากสินค้าไม่ครบจะแยกแถว “งานขาด”'}</div>
+    <div class="pdf-job-sub">${isPbl ? `PBL: แสดงจำนวนคู่และจำนวนกล่องของแต่ละ Location · 1 กล่อง = ${pblPackSizeFromHeader(h)} คู่` : 'ASN: กล่อง = จำนวนคู่จากโลเคชั่นหลัก ÷ 6 และปัดขึ้น · งานเศษไม่คิดเป็นกล่อง · หากสินค้าไม่ครบจะแยกแถว “งานขาด”'}</div>
 
     <table class="pdf-meta">
       <tr>
@@ -12051,7 +14810,7 @@ function buildActiveJobPdfSheet(){
             <td>${r.total==='' ? '' : `<span class="pdf-item-total">${fmt(r.total)}</span>`}</td>
             <td class="${r.shortage?'pdf-shortage-total':'pdf-pick-qty'}"><b>${fmt(r.pick)}</b></td>
             ${isPbl
-              ? `<td class="pdf-main-cartons">${pblPickCartons(r)==='' ? '-' : fmt(pblPickCartons(r))}</td>`
+              ? `<td class="pdf-main-cartons">${pblPickCartons(r)==='' ? '-' : fmt(pblPickCartons(r,h))}</td>`
               : `<td>${esc(r.loose||'-')}</td><td class="pdf-main-cartons">${asnMainLocationCartons(r)==='' ? '-' : fmt(asnMainLocationCartons(r))}</td>`
             }
             <td class="loc"><b>${esc(r.location)}</b></td>
@@ -12071,6 +14830,120 @@ function buildActiveJobPdfSheet(){
   return {sheet,po,customer,rows}
 }
 
+
+function normalizedWCenterSourcesFromRow(r){
+  if(Array.isArray(r?.wCenterSources) && r.wCenterSources.length) return r.wCenterSources
+  if(Array.isArray(r?.w_center_sources) && r.w_center_sources.length) return r.w_center_sources
+
+  const text=txt(r?.wCenterLocations ?? r?.w_center_locations)
+  const qty=Math.max(0,num(r?.wCenterPickQty ?? r?.w_center_pick_qty))
+  if(!text || qty<=0) return []
+
+  return [{location:text,pickQty:qty,available:num(r?.wCenterAvailable ?? r?.w_center_available)}]
+}
+
+function buildWCenterPdfSheet(rows,header){
+  const lines=[]
+
+  ;(rows||[]).forEach(r=>{
+    if(!(r.shortage || r.is_shortage)) return
+
+    const has=Boolean(r.wCenterHasStock ?? r.w_center_has_stock)
+    const pick=Math.max(0,num(r.wCenterPickQty ?? r.w_center_pick_qty))
+    if(!has || pick<=0) return
+
+    const sources=normalizedWCenterSourcesFromRow(r)
+
+    if(sources.length){
+      sources.forEach(src=>{
+        lines.push({
+          itemCode:r.itemCode||r.item_code||((r.model||'')+(r.color||'')),
+          model:r.model||'-',
+          color:r.color||'-',
+          size:r.size||'-',
+          shortage:Math.max(0,num(r.pairs ?? r.pick_qty)),
+          location:txt(src.location)||'-',
+          pickQty:Math.max(0,num(src.pickQty)),
+          available:Math.max(0,num(src.available))
+        })
+      })
+    }else{
+      lines.push({
+        itemCode:r.itemCode||r.item_code||((r.model||'')+(r.color||'')),
+        model:r.model||'-',
+        color:r.color||'-',
+        size:r.size||'-',
+        shortage:Math.max(0,num(r.pairs ?? r.pick_qty)),
+        location:txt(r.wCenterLocations ?? r.w_center_locations)||'-',
+        pickQty:pick,
+        available:Math.max(0,num(r.wCenterAvailable ?? r.w_center_available))
+      })
+    }
+  })
+
+  if(!lines.length) return null
+
+  const h=header||{}
+  const sheet=document.createElement('div')
+  sheet.className='pdf-wcenter-sheet'
+
+  const totalPick=lines.reduce((s,r)=>s+r.pickQty,0)
+
+  sheet.innerHTML=`
+    <div class="pdf-wcenter-title">W-CENTER PICKING SHEET</div>
+    <div class="pdf-wcenter-sub">
+      PO ${esc(h.po_no||'-')} · ${esc(h.customer||'-')} · ${esc(h.po_type||'-')}
+      · รายการสำรองสำหรับงานที่ ERP ขาด
+    </div>
+
+    <table class="pdf-meta">
+      <tr>
+        <td class="label">PO NUMBER</td>
+        <td class="value">${esc(h.po_no||'-')}</td>
+        <td class="label">DELIVERY DATE</td>
+        <td class="value">${esc(formatDeliveryDate(h.delivery_date||''))}</td>
+      </tr>
+      <tr>
+        <td class="label">CUSTOMER</td>
+        <td class="value">${esc(h.customer||'-')}</td>
+        <td class="label">TOTAL W-CENTER</td>
+        <td class="value">${fmt(totalPick)} คู่</td>
+      </tr>
+    </table>
+
+    <table class="pdf-wcenter-table">
+      <thead>
+        <tr>
+          <th>NO.</th>
+          <th>ITEM</th>
+          <th>COLOR</th>
+          <th>SIZE</th>
+          <th>ERP ขาด</th>
+          <th>W-CENTER LOCATION</th>
+          <th>หยิบ</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${lines.map((r,i)=>`
+          <tr>
+            <td>${i+1}</td>
+            <td class="left"><b>${esc(r.model)}</b></td>
+            <td>${esc(r.color)}</td>
+            <td>${esc(r.size)}</td>
+            <td>${fmt(r.shortage)}</td>
+            <td class="left"><b>${esc(r.location)}</b></td>
+            <td><b>${fmt(r.pickQty)}</b></td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+
+    <div class="pdf-wcenter-total">รวมที่ต้องหยิบจาก W-CENTER ${fmt(totalPick)} คู่</div>
+  `
+
+  return sheet
+}
+
 async function printActiveJob(){
   const built=buildActiveJobPdfSheet()
   if(!built) return
@@ -12080,6 +14953,7 @@ async function printActiveJob(){
 
   try{
     const qrPages=await buildLocationQrPdfSheets(built.rows,built.po)
+    const wCenterPage=buildWCenterPdfSheet(built.rows,activeJobHeader)
 
     const printArea=el('printArea')
     printArea.innerHTML=''
@@ -12087,6 +14961,12 @@ async function printActiveJob(){
     const jobClone=built.sheet.cloneNode(true)
     jobClone.removeAttribute('id')
     printArea.appendChild(jobClone)
+
+    if(wCenterPage){
+      const wcClone=wCenterPage.cloneNode(true)
+      wcClone.classList.add('print-page-break')
+      printArea.appendChild(wcClone)
+    }
 
     qrPages.forEach(page=>{
       const clone=page.cloneNode(true)
@@ -12124,6 +15004,12 @@ async function saveActiveJobPdf(){
     }
 
     const qrPages=await buildLocationQrPdfSheets(built.rows,built.po)
+    const wCenterPage=buildWCenterPdfSheet(built.rows,activeJobHeader)
+    if(wCenterPage){
+      stage.appendChild(wCenterPage)
+      addedQrPages.push(wCenterPage)
+    }
+
     qrPages.forEach(page=>{
       stage.appendChild(page)
       addedQrPages.push(page)
@@ -12139,6 +15025,11 @@ async function saveActiveJobPdf(){
 
     const jobCanvas=await canvasForPdfElement(built.sheet)
     addCanvasAcrossPdfPages(pdf,jobCanvas,{startOnNewPage:false,alias:'ACTIVEJOB'})
+
+    if(wCenterPage){
+      const wcCanvas=await canvasForPdfElement(wCenterPage)
+      addCanvasAcrossPdfPages(pdf,wcCanvas,{startOnNewPage:true,alias:'WCENTER'})
+    }
 
     for(let i=0;i<qrPages.length;i++){
       const qrCanvas=await canvasForPdfElement(qrPages[i])
@@ -12391,6 +15282,45 @@ function selectedAllocationForLine(itemId){
   let normalRemain=normalRequired
   const selected=getSelectedLocationSet(itemId)
 
+  // ทุกประเภทงาน:
+  // ถ้ามี Location หลักที่มองเห็นและมี Available > 0 เพียง 1 Location
+  // และผู้ใช้ยังไม่ได้เลือก Location ใด ให้เลือกให้อัตโนมัติ
+  if(selected.size===0){
+    const singleCandidates=data.locations
+      .map((loc,index)=>({loc,index}))
+      .filter(({loc})=>
+        !isHiddenPickingLocation(loc) &&
+        !loc._isLoose &&
+        Math.max(0,num(loc.available_physical))>0
+      )
+
+    if(singleCandidates.length===1){
+      selected.add(singleCandidates[0].index)
+    }
+  }
+
+  // ASN: ถ้ามี Location งานเศษ แต่ยอดงานเศษไม่พอ
+  // และมี Location หลักที่มีของอยู่เพียง 1 Location
+  // ให้เลือก Location หลักนั้นให้อัตโนมัติ
+  if(isAsn && selected.size===0 && loosePicked<required){
+    const hasLooseLocation=data.locations.some(loc=>
+      !isHiddenPickingLocation(loc) &&
+      loc._isLoose
+    )
+
+    const normalCandidates=data.locations
+      .map((loc,index)=>({loc,index}))
+      .filter(({loc})=>
+        !isHiddenPickingLocation(loc) &&
+        !loc._isLoose &&
+        Math.max(0,num(loc.available_physical))>0
+      )
+
+    if(hasLooseLocation && normalCandidates.length===1){
+      selected.add(normalCandidates[0].index)
+    }
+  }
+
   selected.forEach(index=>{
     const i=Number(index)
     const loc=data.locations[i]
@@ -12465,11 +15395,38 @@ function selectedAllocationForLine(itemId){
   }
 }
 
+
+function wCenterShortageSupportForLine(data,result){
+  const shortage=result?.forcedNoStock
+    ? Math.max(0,num(result.required))
+    : Math.max(0,num(result?.shortage))
+
+  if(shortage<=0) return getWCenterSupport(
+    data?.item?.item,
+    data?.item?.code,
+    data?.item?.assort,
+    0
+  )
+
+  return getWCenterSupport(
+    data?.item?.item,
+    data?.item?.code,
+    data?.item?.assort,
+    shortage
+  )
+}
+
+function wCenterInlineText(support){
+  if(!support?.hasStock || num(support.pickQty)<=0) return ''
+  return ` · W-CENTER มี ${fmt(support.pickQty)} คู่${support.locationText ? ' @ '+support.locationText : ''}`
+}
+
 function updateLineLocationSelection(itemId){
   const data=pickingLineData.get(String(itemId))
   if(!data) return
 
   const result=selectedAllocationForLine(itemId)
+  const wCenterSupport=wCenterShortageSupportForLine(data,result)
 
   const forcedNoStock=isForcedNoStock(itemId)
   const lineCard=el(`pickLine_${itemId}`)
@@ -12584,7 +15541,7 @@ function updateLineLocationSelection(itemId){
       status.className='line-pick-status shortage'
       status.textContent=
         'ของจริงไม่มี · จำนวนรวม '+fmt(result.required)+
-        ' คู่ · ทำเป็นงานขาด · พร้อมทำใบจัด'
+        ' คู่ · ทำเป็นงานขาด'+wCenterInlineText(wCenterSupport)+' · พร้อมทำใบจัด'
 
     }else if(selectionComplete){
       status.className='line-pick-status ready'
@@ -12602,22 +15559,30 @@ function updateLineLocationSelection(itemId){
           'งานเศษอัตโนมัติ '+fmt(result.loosePicked)+' คู่'+
           ' · จำนวนรวม '+fmt(result.required)+' คู่'+
           ' · งานขาด '+fmt(result.shortage)+' คู่'+
-          ' · พร้อมทำใบจัด · เลือก Location อื่นเพิ่มได้'+
-          ' · หรือเลือก Location อื่นเพิ่มได้'
+          wCenterInlineText(wCenterSupport)+
+          ' · พร้อมทำใบจัด · เลือก Location อื่นเพิ่มได้'
       }else{
         status.textContent=
           'เลือกของที่มีครบแล้ว · จำนวนรวม '+fmt(result.required)+
           ' คู่ · หยิบได้ '+fmt(result.picked)+
           ' คู่ · งานขาด '+fmt(result.shortage)+
-          ' คู่ · พร้อมทำใบจัด'
+          ' คู่'+wCenterInlineText(wCenterSupport)+' · พร้อมทำใบจัด'
       }
 
     }else{
       status.className='line-pick-status default'
 
       if(result.targetFromStock<=0){
+        const wc=getWCenterSupport(
+          data?.item?.item,
+          data?.item?.code,
+          data?.item?.assort,
+          result.required
+        )
         status.textContent=
-          'ยังไม่ได้ยืนยันงานขาด · ไม่พบสินค้าใน ERP · กรุณาติ๊ก "ไม่มีสินค้าจริง / ให้เป็นงานขาด"'
+          'ยังไม่ได้ยืนยันงานขาด · ไม่พบสินค้าใน ERP'+
+          (wc.hasStock ? ' · W-CENTER มี '+fmt(wc.total)+' คู่ @ '+(wc.locationText||'-') : '')+
+          ' · กรุณาติ๊ก "ไม่มีสินค้าจริง / ให้เป็นงานขาด"'
       }else{
         status.textContent=
           'ยังเลือกไม่ครบ · เลือกแล้ว '+fmt(result.picked)+
@@ -13424,7 +16389,10 @@ async function openPickingDetail(poId,source='active'){
       loadPickingLooseLocationKeys(h.customer),
       loadPickingForbiddenLocationKeys(h.customer)
     ])
-    const rawErpRows=await fetchErpRowsForItems(items.map(r=>r.item))
+    const [rawErpRows]=await Promise.all([
+      fetchErpRowsForItems(items.map(r=>r.item)),
+      fetchWCenterRowsForPicking(items.map(r=>r.item))
+    ])
     await loadReservationMap(currentPickingPoId)
     const erpRows=applyReservationToErpRows(rawErpRows)
     let missing=0, shortage=0
@@ -13446,7 +16414,14 @@ async function openPickingDetail(poId,source='active'){
       else if(total<required) shortage++
 
       pickingLineData.set(String(item.id),{
-        item,required,availableTotal:total,locations:locs,jobType:txt(h.po_type),looseRequired,cartonRequired
+        item,
+        required,
+        availableTotal:total,
+        locations:locs,
+        jobType:txt(h.po_type),
+        looseRequired,
+        cartonRequired,
+        wCenter:getWCenterSupport(item.item,item.code,item.assort,required)
       })
 
       // ถ้าเพิ่งเปิดหน้าใหม่ / Refresh Browser ให้คืน Location ที่เคยเลือก
@@ -13579,6 +16554,13 @@ function cartonQtyForPickingLocation(qty,loc,customer,jobType,{shortage=false}={
     return fullLocationCartons(qty)
   }
 
+  if(norm(jobType)==='PBL'){
+    return Math.floor(
+      Math.max(0,num(qty)) /
+      pblPackSizeFromHeader(currentPickingHeader || activeJobHeader)
+    )
+  }
+
   // งานประเภทอื่นคง logic เดิม
   return Math.floor(Math.max(0,num(qty))/PACK_SIZE)
 }
@@ -13620,9 +16602,9 @@ function displayedProductionCartons(header,fallback=0){
     return Math.max(0,num(value))
   }
 
-  // PBL: ค่า Default = จำนวนคู่ / 6
+  // PBL: ค่า Default = จำนวนคู่ / จำนวนคู่ต่อกล่อง
   if(type==='PBL'){
-    return Math.max(0,num(header?.total_pairs))/PACK_SIZE
+    return Math.max(0,num(header?.total_pairs))/pblPackSizeFromHeader(header)
   }
 
   // ASN: ไม่ทำ Default ต้องให้ผู้ใช้กรอกเอง
@@ -13729,7 +16711,17 @@ function selectedPickingRowsForPdf(){
         loose:'',
         warehouse:'-',
         location:'งานขาด',
-        shortage:true
+        shortage:true,
+        ...(()=>{
+          const wc=getWCenterSupport(item.item,item.code,item.assort,shortage)
+          return {
+            wCenterAvailable:wc.total,
+            wCenterPickQty:wc.pickQty,
+            wCenterLocations:wc.locationText,
+            wCenterSources:wc.sources,
+            wCenterHasStock:wc.hasStock && wc.pickQty>0
+          }
+        })()
       })
     }
   })
@@ -13933,6 +16925,7 @@ function buildSelectedJobPdfSheet(){
 
   const rows=selectedPickingRowsForPdf()
   const compactRows=compactJobSheetRows(rows)
+  const h=currentPickingHeader||{}
   const isPbl=isPblJobType(currentPickingHeader?.po_type)
   if(!rows.length){
     showToast('ไม่พบรายการสำหรับสร้างใบจัดงาน')
@@ -13968,7 +16961,7 @@ function buildSelectedJobPdfSheet(){
 
   sheet.innerHTML=`
     <div class="pdf-job-title">ใบจัดงาน ${esc(customer)} - CARTON & LOOSE</div>
-    <div class="pdf-job-sub">${isPbl ? 'PBL: แสดงจำนวนคู่และจำนวนกล่องของแต่ละ Location · 1 กล่อง = 6 คู่' : 'ASN: กล่อง = จำนวนคู่จากโลเคชั่นหลัก ÷ 6 และปัดขึ้น · งานเศษไม่คิดเป็นกล่อง · หากสินค้าไม่ครบจะแยกแถว “งานขาด”'}</div>
+    <div class="pdf-job-sub">${isPbl ? `PBL: แสดงจำนวนคู่และจำนวนกล่องของแต่ละ Location · 1 กล่อง = ${pblPackSizeFromHeader(h)} คู่` : 'ASN: กล่อง = จำนวนคู่จากโลเคชั่นหลัก ÷ 6 และปัดขึ้น · งานเศษไม่คิดเป็นกล่อง · หากสินค้าไม่ครบจะแยกแถว “งานขาด”'}</div>
 
     <table class="pdf-meta">
       <tr>
@@ -14018,7 +17011,7 @@ function buildSelectedJobPdfSheet(){
             <td>${r.total==='' ? '' : `<span class="pdf-item-total">${fmt(r.total)}</span>`}</td>
             <td class="${r.shortage?'pdf-shortage-total':'pdf-pick-qty'}"><b>${fmt(r.pick)}</b></td>
             ${isPbl
-              ? `<td class="pdf-main-cartons">${pblPickCartons(r)==='' ? '-' : fmt(pblPickCartons(r))}</td>`
+              ? `<td class="pdf-main-cartons">${pblPickCartons(r)==='' ? '-' : fmt(pblPickCartons(r,h))}</td>`
               : `<td>${esc(r.loose||'-')}</td><td class="pdf-main-cartons">${asnMainLocationCartons(r)==='' ? '-' : fmt(asnMainLocationCartons(r))}</td>`
             }
             <td class="loc"><b>${esc(r.location)}</b></td>
@@ -14116,7 +17109,7 @@ async function persistCurrentJobOrder(){
 
   // เก็บสถานะ scanned เดิมไว้ หากมีการสร้างใบจัดซ้ำ
   const existingRes=await db.from(PICKING_JOB_TABLE)
-    .select('id,po_item_id,warehouse,location,is_shortage,scanned,scanned_at,scanned_by')
+    .select('id,po_item_id,warehouse,location,is_shortage,scanned,scanned_at,scanned_by,w_center_has_stock,w_center_available,w_center_pick_qty,w_center_locations,w_center_sources')
     .eq('po_id',currentPickingPoId)
 
   if(existingRes.error) throw existingRes.error
@@ -14166,6 +17159,11 @@ async function persistCurrentJobOrder(){
       box_qty:num(r.box),
       loose_text:r.loose||null,
       is_shortage:shortage,
+      w_center_has_stock:Boolean(r.wCenterHasStock),
+      w_center_available:Math.max(0,num(r.wCenterAvailable)),
+      w_center_pick_qty:Math.max(0,num(r.wCenterPickQty)),
+      w_center_locations:r.wCenterLocations||null,
+      w_center_sources:Array.isArray(r.wCenterSources)?r.wCenterSources:[],
 
       // งานขาดไม่ต้องสแกน
       scanned:shortage ? true : Boolean(old?.scanned),
@@ -14380,6 +17378,11 @@ async function saveSelectedJobPdf(){
     }
 
     const qrPages=await buildLocationQrPdfSheets(built.rows,built.po)
+    const wCenterPage=buildWCenterPdfSheet(built.rows,currentPickingHeader)
+    if(wCenterPage){
+      stage.appendChild(wCenterPage)
+      addedQrPages.push(wCenterPage)
+    }
     qrPages.forEach(page=>{
       stage.appendChild(page)
       addedQrPages.push(page)
@@ -14396,6 +17399,12 @@ async function saveSelectedJobPdf(){
     // หน้าแรก = ใบจัดงาน
     const jobCanvas=await canvasForPdfElement(built.sheet)
     addCanvasAcrossPdfPages(pdf,jobCanvas,{startOnNewPage:false,alias:'JOB'})
+
+    // ถ้า ERP ขาด แต่ W-CENTER มีของ ให้สร้างใบ W-CENTER แยก
+    if(wCenterPage){
+      const wcCanvas=await canvasForPdfElement(wCenterPage)
+      addCanvasAcrossPdfPages(pdf,wcCanvas,{startOnNewPage:true,alias:'WCENTER'})
+    }
 
     // หน้าถัดไป = QR Location ไม่ซ้ำของ PO นี้
     for(let i=0;i<qrPages.length;i++){
@@ -14448,6 +17457,25 @@ async function startCurrentPicking(){
     btn.disabled=false
   }
 }
+
+
+el('wCenterRefreshBtn')?.addEventListener('click',loadWCenterPage)
+el('wCenterSearch')?.addEventListener('input',renderWCenterPage)
+el('wCenterFilterLocation')?.addEventListener('change',renderWCenterPage)
+el('wCenterFilterColor')?.addEventListener('change',renderWCenterPage)
+el('wCenterFilterSize')?.addEventListener('change',renderWCenterPage)
+startWCenterRealtime()
+
+
+el('shortageSearchBtn')?.addEventListener('click',applyShortageReportFilters)
+el('shortagePoFilter')?.addEventListener('change',()=>{
+  fillShortageCodeFilter()
+  applyShortageReportFilters()
+})
+el('shortageCodeFilter')?.addEventListener('change',applyShortageReportFilters)
+el('shortageCustomerFilter')?.addEventListener('change',applyShortageReportFilters)
+el('shortageSort')?.addEventListener('change',applyShortageReportFilters)
+el('shortageExportBtn')?.addEventListener('click',exportShortageReportExcel)
 
 el('reloadActiveBtn').onclick=loadActivePicking
 el('activeJobPrintBtn').onclick=printActiveJob
