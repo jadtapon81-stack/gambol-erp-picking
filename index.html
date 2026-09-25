@@ -511,6 +511,73 @@ table.general th{background:#f9fafb;font-size:12px}
   border-radius:9px;font-weight:900;cursor:pointer;white-space:nowrap
 }
 .po-action:hover{background:#b91c1c}
+
+/* ACTIVE PICKING — compact status + delivery date */
+.active-picking-card{
+  grid-template-columns:minmax(220px,1.45fr) minmax(110px,.55fr) minmax(75px,.4fr) minmax(90px,.45fr) minmax(150px,.65fr) auto;
+}
+.active-status-wrap{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  flex-wrap:wrap;
+  margin-top:3px;
+}
+.active-status-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:31px;
+  padding:6px 10px;
+  border-radius:999px;
+  background:#ecfdf5;
+  color:#15803d;
+  font-size:11px;
+  font-weight:900;
+  white-space:nowrap;
+}
+.active-sent-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:31px;
+  padding:6px 12px;
+  border:1px solid #fecaca;
+  border-radius:9px;
+  background:#fff7f7;
+  color:#b91c1c;
+  font-size:11px;
+  font-weight:900;
+  cursor:pointer;
+  transition:.16s ease;
+  white-space:nowrap;
+}
+.active-sent-btn:hover{
+  background:#fee2e2;
+  border-color:#fca5a5;
+}
+.active-sent-btn:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+.active-delivery-date{
+  display:block;
+  margin-top:3px;
+  font-size:13px;
+  font-weight:900;
+  color:#111827;
+  white-space:nowrap;
+}
+
+@media(max-width:800px){
+  .active-picking-card{
+    grid-template-columns:1fr 1fr;
+  }
+  .active-picking-card .po-main,
+  .active-picking-card .po-action{
+    grid-column:1/-1;
+  }
+}
 .detail-head-card{
   display:grid;grid-template-columns:repeat(5,1fr);gap:8px;
   margin-bottom:12px;padding:12px;border:1px solid #e5e7eb;border-radius:12px;background:#fff
@@ -3232,7 +3299,7 @@ table.general th{background:#f9fafb;font-size:12px}
 }
 .upc-search-result table{
   width:100%;
-  min-width:620px;
+  min-width:900px;
   border-collapse:collapse;
 }
 .upc-search-result th,
@@ -3246,6 +3313,63 @@ table.general th{background:#f9fafb;font-size:12px}
   background:#dc2626;
   color:#fff;
 }
+
+/* UPC INLINE EDIT */
+.upc-search-result td.upc-action-cell{
+  width:150px;
+  white-space:nowrap;
+}
+.upc-edit-input,
+.upc-edit-select{
+  width:100%;
+  min-width:95px;
+  padding:7px 8px;
+  border:1.5px solid #93c5fd;
+  border-radius:8px;
+  background:#fff;
+  font-weight:800;
+  outline:none;
+}
+.upc-edit-barcode{min-width:155px}
+.upc-edit-item{min-width:120px}
+.upc-edit-color{min-width:80px}
+.upc-edit-size{min-width:75px}
+.upc-edit-customer{min-width:105px}
+.upc-edit-input:focus,
+.upc-edit-select:focus{
+  border-color:#2563eb;
+  box-shadow:0 0 0 3px rgba(37,99,235,.10);
+}
+.upc-row-actions{
+  display:flex;
+  gap:6px;
+  align-items:center;
+}
+.upc-row-btn{
+  border:0;
+  border-radius:8px;
+  padding:7px 10px;
+  font-size:10px;
+  font-weight:900;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.upc-row-btn.edit{background:#eff6ff;color:#1d4ed8}
+.upc-row-btn.save{background:#16a34a;color:#fff}
+.upc-row-btn.cancel{background:#f3f4f6;color:#374151}
+.upc-row-editing td{background:#f8fbff}
+.upc-edit-status{
+  display:none;
+  margin-top:10px;
+  padding:9px 11px;
+  border-radius:9px;
+  font-size:11px;
+  line-height:1.45;
+}
+.upc-edit-status.show{display:block}
+.upc-edit-status.ok{background:#ecfdf5;border:1px solid #86efac;color:#166534}
+.upc-edit-status.warn{background:#fff7ed;border:1px solid #fdba74;color:#9a3412}
+.upc-edit-status.error{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
 @media(max-width:760px){
   .upc-upload-grid,
   .upc-search-row{
@@ -3943,6 +4067,315 @@ table.general th{background:#f9fafb;font-size:12px}
 .pdf-detail-table.pdf-pbl-table th:nth-child(7){width:19%}
 .pdf-detail-table.pdf-pbl-table th:nth-child(8){width:11%}
 
+
+/* ASN NEW JOB SHEET: ITEM / CODE / SIZE / TOTAL / เศษ / กล่อง / ดึง / LOCATION / WAREHOUSE */
+.pdf-detail-table.pdf-asn-loose-table th:nth-child(1){width:5%}
+.pdf-detail-table.pdf-asn-loose-table th:nth-child(2){width:15%}
+.pdf-detail-table.pdf-asn-loose-table th:nth-child(3){width:8%}
+.pdf-detail-table.pdf-asn-loose-table th:nth-child(4){width:7%}
+.pdf-detail-table.pdf-asn-loose-table th:nth-child(5){width:9%}
+.pdf-detail-table.pdf-asn-loose-table th:nth-child(6){width:7%}
+.pdf-detail-table.pdf-asn-loose-table th:nth-child(7){width:7%}
+.pdf-detail-table.pdf-asn-loose-table th:nth-child(8){width:7%}
+.pdf-detail-table.pdf-asn-loose-table th:nth-child(9){width:20%}
+.pdf-detail-table.pdf-asn-loose-table th:nth-child(10){width:15%}
+
+.pdf-detail-table.pdf-asn-loose-table td:nth-child(2),
+.pdf-detail-table.pdf-asn-loose-table td:nth-child(9){text-align:left}
+
+.pdf-detail-table.pdf-asn-loose-table tr.asn-loose-row td{background:#fff8ed}
+.pdf-detail-table.pdf-asn-loose-table tr.asn-main-row td{background:#f3fbf5}
+.pdf-detail-table.pdf-asn-loose-table tr.job-shortage td{background:#fff1f2}
+
+.pdf-asn-loose-table .pdf-loose-qty{
+  color:#c2410c;
+  font-weight:900;
+}
+.pdf-asn-loose-table .pdf-main-cartons{
+  color:#166534;
+  font-weight:900;
+}
+.pdf-asn-loose-table .pdf-draw-qty{
+  color:#1d4ed8;
+  font-weight:900;
+}
+.pdf-asn-loose-table .pdf-empty-cell{color:#9ca3af}
+
+
+
+/* =========================================================
+   ASN PREPARATION SHEET — AUTO FIT COLUMNS
+   ========================================================= */
+.pdf-asn-original-wrap{
+  width:100%;
+  overflow:visible;
+  text-align:center;
+}
+
+.pdf-asn-original{
+  border-collapse:collapse;
+  table-layout:fixed;
+  width:auto !important;
+  max-width:none !important;
+  margin:0 auto;
+  background:#fff;
+  color:#111;
+  font-family:Arial,Tahoma,sans-serif;
+}
+
+.pdf-asn-original th,
+.pdf-asn-original td{
+  display:table-cell !important;
+  min-height:0 !important;
+  height:auto;
+  border:1px solid #111;
+  padding:4px 1.15ch !important;
+  font-size:11px;
+  line-height:1.22;
+  text-align:center !important;
+  vertical-align:middle !important;
+  background:#fff;
+  box-sizing:border-box;
+  white-space:normal;
+  word-break:normal;
+  overflow-wrap:normal;
+}
+
+.pdf-asn-original .asn-title{
+  height:31px;
+  font-size:17px;
+  font-weight:700;
+  text-align:center !important;
+}
+
+.pdf-asn-original .asn-meta-label{
+  font-weight:700;
+  white-space:nowrap;
+}
+
+.pdf-asn-original .asn-meta-value{
+  font-weight:600;
+  white-space:nowrap;
+}
+
+.pdf-asn-original .asn-loose-title{
+  color:#e60000;
+  font-weight:700;
+}
+
+.pdf-asn-original .asn-head{
+  font-weight:700;
+  white-space:nowrap;
+}
+
+.pdf-asn-original .asn-item,
+.pdf-asn-original .asn-loose-location,
+.pdf-asn-original .asn-wmt-location{
+  text-align:center !important;
+}
+
+.pdf-asn-original .asn-item{
+  font-weight:700;
+  white-space:nowrap;
+}
+
+.pdf-asn-original .asn-loose-head,
+.pdf-asn-original .asn-loose-stock{
+  color:#e60000;
+}
+
+.pdf-asn-original .asn-wmt-location .asn-wmt-main,
+.pdf-asn-original .asn-wmt-location .asn-support-line,
+.pdf-asn-original .asn-wmt-location .asn-shortage-line{
+  display:block;
+  text-align:center;
+}
+
+.pdf-asn-original .asn-wmt-location .asn-support-line{
+  margin-top:2px;
+  font-weight:700;
+  color:#166534;
+}
+
+.pdf-asn-original .asn-wmt-location .asn-support-line.wbt{
+  color:#1d4ed8;
+}
+
+.pdf-asn-original .asn-wmt-location .asn-shortage-line{
+  margin-top:2px;
+  color:#dc2626;
+  font-weight:900;
+}
+
+.pdf-asn-original .asn-total-row td{
+  height:28px;
+  font-weight:700;
+}
+
+/* width ถูกกำหนดด้วย colgroup แบบ ch จากข้อมูลจริง */
+.pdf-asn-original col{
+  min-width:0;
+}
+
+@media print{
+  .pdf-asn-original-wrap{
+    width:100% !important;
+    overflow:visible !important;
+  }
+
+  .pdf-asn-original{
+    margin:0 auto !important;
+  }
+
+  .pdf-asn-original th,
+  .pdf-asn-original td{
+    padding:3.5px 1ch !important;
+    font-size:10px !important;
+    line-height:1.18 !important;
+  }
+
+  .pdf-asn-original .asn-title{
+    font-size:15px !important;
+    height:27px !important;
+  }
+}
+
+
+
+/* =========================================================
+   PBL TWO-SHEET DESIGN: BOX SUMMARY + LOCATION PICKING
+   ========================================================= */
+.pbl-two-sheet{
+  width:100%;
+}
+.pbl-print-page{
+  width:100%;
+  box-sizing:border-box;
+  background:#fff;
+}
+.pbl-print-page + .pbl-print-page{
+  margin-top:28px;
+}
+.pbl-page-title{
+  border:2px solid #111;
+  padding:10px 12px;
+  text-align:center;
+  font-size:22px;
+  font-weight:900;
+  letter-spacing:.3px;
+}
+.pbl-page-sub{
+  text-align:center;
+  font-size:12px;
+  font-weight:700;
+  margin:6px 0 10px;
+  color:#374151;
+}
+.pbl-info-grid{
+  width:100%;
+  border-collapse:collapse;
+  margin-bottom:10px;
+}
+.pbl-info-grid td{
+  border:1px solid #111;
+  padding:6px 8px;
+  font-size:11px;
+  text-align:center;
+}
+.pbl-info-grid .label{
+  font-weight:900;
+  width:14%;
+  background:#f8fafc;
+}
+.pbl-info-grid .value{
+  font-weight:800;
+  width:19%;
+}
+.pbl-box-summary-table,
+.pbl-location-sheet-table{
+  width:100%;
+  border-collapse:collapse;
+  table-layout:auto;
+}
+.pbl-box-summary-table th,
+.pbl-box-summary-table td,
+.pbl-location-sheet-table th,
+.pbl-location-sheet-table td{
+  border:1px solid #111;
+  padding:6px 8px;
+  font-size:11px;
+  line-height:1.2;
+  text-align:center;
+  vertical-align:middle;
+}
+.pbl-box-summary-table th,
+.pbl-location-sheet-table th{
+  font-weight:900;
+  background:#fff3f3;
+}
+.pbl-box-summary-table td.item,
+.pbl-location-sheet-table td.item,
+.pbl-location-sheet-table td.location{
+  font-weight:800;
+}
+.pbl-box-summary-table .total-row td,
+.pbl-location-sheet-table .total-row td{
+  font-weight:900;
+  border-top:2px solid #111;
+}
+.pbl-size-group{
+  font-weight:900;
+}
+.pbl-pattern-note{
+  margin-top:8px;
+  padding:8px 10px;
+  border:1px solid #d1d5db;
+  border-radius:8px;
+  font-size:11px;
+  line-height:1.45;
+  background:#f8fafc;
+}
+.pbl-pattern-note b{font-weight:900}
+.pbl-location-sheet-table .shortage{
+  color:#b91c1c;
+  font-weight:900;
+}
+.pbl-location-sheet-table .wcenter-ok{
+  color:#166534;
+  font-weight:900;
+  background:#f0fdf4;
+}
+
+.pbl-page-badge{
+  float:right;
+  font-size:11px;
+  border:1px solid #fecaca;
+  background:#fff1f2;
+  padding:4px 8px;
+  border-radius:999px;
+  font-weight:800;
+}
+@media print{
+  .pbl-print-page{
+    break-inside:avoid;
+  }
+  .pbl-print-page.pbl-page-break{
+    break-before:page;
+    page-break-before:always;
+    margin-top:0;
+  }
+  .pbl-page-title{font-size:17px;padding:7px 8px}
+  .pbl-page-sub{font-size:9px;margin:4px 0 7px}
+  .pbl-info-grid td,
+  .pbl-box-summary-table th,
+  .pbl-box-summary-table td,
+  .pbl-location-sheet-table th,
+  .pbl-location-sheet-table td{
+    font-size:8.5px;
+    padding:4px 5px;
+  }
+  .pbl-pattern-note{font-size:8.5px;padding:5px 7px}
+}
 
 /* RESERVED STOCK */
 .reservation-summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
@@ -4654,8 +5087,8 @@ table.general th{background:#f9fafb;font-size:12px}
 <section class="page active" id="page-home">
   <div class="title-row"><h1>HOME</h1><div class="badge">ERP PICKING</div></div>
   <section class="cards">
-    <div class="card" data-page="create"><h2>CREATE<br>PICKING</h2><div class="card-icon">＋</div><p>LOTUS / BIG C</p></div>
-    <div class="card" data-page="pblmanual"><h2>CREATE<br>PBL</h2><div class="card-icon">✎</div><p>LOTUS / BIG C / CJ / MAXMART / VILLA / PTT / 7-11</p></div>
+    <div class="card" data-page="create"><h2>CREATE<br>PICKING</h2><div class="card-icon">＋</div><p>ASN / PBL · ตามจำนวนกล่องจากไฟล์</p></div>
+    <div class="card" data-page="pblmanual"><h2>CREATE<br>PBL</h2><div class="card-icon">✎</div><p>MIX BOX · หลายรุ่น / หลายสี / หลาย Size ต่อกล่อง</p></div>
     <div class="card" data-page="orders"><h2>PICKING<br>ORDER</h2><div class="card-icon">▤</div><p>ดูรายการ PO จาก Supabase</p></div>
     <div class="card" data-page="stock"><h2>ERP<br>STOCK</h2><div class="card-icon">▣</div><p>ตรวจสอบ erp_stock_ptt</p></div>
   </section>
@@ -4711,7 +5144,7 @@ table.general th{background:#f9fafb;font-size:12px}
   <div class="page-head">
     <div class="head-left">
       <button class="back-btn" data-page="home">←</button>
-      <div><h2 class="page-title">CREATE PICKING</h2><p class="page-sub">นำเข้าไฟล์ PO → ตรวจสอบ → บันทึก Supabase</p></div>
+      <div><h2 class="page-title">CREATE PICKING</h2><p class="page-sub">ASN / PBL · ตรวจสอบไฟล์ก่อน แล้วค่อยบันทึก Supabase</p></div>
     </div>
     <div class="badge">JOB ORDER FLOW</div>
   </div>
@@ -4735,7 +5168,7 @@ table.general th{background:#f9fafb;font-size:12px}
         <label>JOB TYPE</label>
         <select id="importType">
           <option value="ASN">ASN — CARTON & LOOSE</option>
-          <option value="PBL">PBL — FULL CARTON</option>
+          <option value="PBL">PBL — 6 PAIRS / CARTON</option>
         </select>
       </div>
 
@@ -4763,7 +5196,36 @@ table.general th{background:#f9fafb;font-size:12px}
 
     <div id="importStatus" class="import-status"></div>
 
-    
+<div id="lotusReviewPanel" class="bigc-po-type-panel">
+  <div class="bigc-po-type-head">
+    <div>
+      <h3>ตรวจสอบ LOTUS ก่อนบันทึก</h3>
+    </div>
+  </div>
+
+  <div class="bigc-po-type-table-wrap">
+    <table class="bigc-po-type-table">
+      <thead>
+        <tr>
+          <th>PO</th>
+          <th>JOB TYPE</th>
+          <th>รายการ</th>
+          <th>จำนวนรวม</th>
+          <th>กล่อง</th>
+          <th>DELIVERY DATE</th>
+        </tr>
+      </thead>
+      <tbody id="lotusReviewBody"></tbody>
+    </table>
+  </div>
+
+  <div id="lotusReviewStatus" class="location-qr-status"></div>
+
+  <button class="btn btn-primary" type="button" id="saveLotusBtn" disabled>
+    บันทึก LOTUS ลง Supabase
+  </button>
+</div>
+
 <div id="bigcPoTypePanel" class="bigc-po-type-panel">
   <div class="bigc-po-type-head">
     <div>
@@ -4845,10 +5307,10 @@ table.general th{background:#f9fafb;font-size:12px}
       <button class="back-btn" data-page="home">←</button>
       <div>
         <h2 class="page-title">CREATE PBL</h2>
-        <p class="page-sub">สร้าง PBL แบบ 1 กล่องมีหลาย Size ได้</p>
+        <p class="page-sub">PBL MIX BOX · 1 กล่องสามารถมีหลายรุ่น / หลายสี / หลาย Size ได้</p>
       </div>
     </div>
-    <div class="badge">PBL</div>
+    <div class="badge">PBL MIX BOX</div>
   </div>
 
   <div class="manual-pbl-meta">
@@ -4948,7 +5410,7 @@ table.general th{background:#f9fafb;font-size:12px}
     </div>
 
     <div class="pbl-template-info">
-      1 Template = 1 รูปแบบกล่อง · ในกล่องเดียวสามารถมีหลาย Size ได้ · ใช้ได้ทั้ง 6 หรือ 12 คู่/กล่อง
+      1 Template = 1 รูปแบบกล่อง · ในกล่องเดียวสามารถมีหลาย Item / หลาย Color / หลาย Size · ใช้ได้ทั้ง 6 หรือ 12 คู่/กล่อง
     </div>
 
     <div id="pblTemplatePatternList">
@@ -4966,8 +5428,8 @@ table.general th{background:#f9fafb;font-size:12px}
 
   
   
-  <div class="pbl-mode-switch" id="pblModeSwitch">
-    <button type="button" class="pbl-mode-btn active" data-pbl-mode="MIX">MIX COLOR</button>
+  <div class="pbl-mode-switch" id="pblModeSwitch" style="display:none">
+    <button type="button" class="pbl-mode-btn active" data-pbl-mode="MIX">MIX BOX</button>
     <button type="button" class="pbl-mode-btn" data-pbl-mode="SINGLE">สีเดียว</button>
     <button type="button" class="pbl-mode-btn" data-pbl-mode="HYBRID">MIX + สีเดียว</button>
   </div>
@@ -4976,9 +5438,9 @@ table.general th{background:#f9fafb;font-size:12px}
     <div class="pbl-mix-head">
       <div>
         <h3>BOX PATTERN</h3>
-        <small>1 กล่องสามารถรวมหลาย Item / หลายสีได้</small>
+        <small>สำหรับกล่องผสมหลาย Item / หลายสี · หลาย Size ใช้ BOX PATTERN TEMPLATE ด้านบน</small>
       </div>
-      <span class="badge">MIX COLOR</span>
+      <span class="badge">MIX BOX</span>
     </div>
 
     <div class="pbl-mix-top">
@@ -5189,7 +5651,7 @@ table.general th{background:#f9fafb;font-size:12px}
       type="text"
       inputmode="numeric"
       autocomplete="off"
-      placeholder="ค้นหาเลข PO เช่น 0056992455"
+      placeholder="ค้นหาเลข PO หรือชื่อไฟล์ เช่น 8658"
     >
     <button class="btn btn-primary" id="orderPoSearchBtn">ค้นหา</button>
     <button class="btn btn-secondary" id="orderPoClearBtn">ล้าง</button>
@@ -5199,7 +5661,7 @@ table.general th{background:#f9fafb;font-size:12px}
 
   <div class="table-wrap">
     <table class="general">
-      <thead><tr><th>ID</th><th>PO</th><th>Customer</th><th>Type</th><th>Delivery Date</th><th>Pairs</th><th>Cartons</th><th>Status</th><th>Action</th></tr></thead>
+      <thead><tr><th>ID</th><th>PO</th><th>Customer</th><th>Type</th><th>Delivery Date</th><th>Pairs</th><th>จำนวนกล่องที่ส่ง</th><th>Status</th><th>Action</th></tr></thead>
       <tbody id="ordersBody"><tr><td colspan="9">กำลังโหลด...</td></tr></tbody>
     </table>
   </div>
@@ -5279,7 +5741,7 @@ table.general th{background:#f9fafb;font-size:12px}
           <th>Color</th>
           <th>Warehouse</th>
           <th>Location</th>
-          <th>Available</th>
+          <th>Available / Reservation</th>
         </tr>
       </thead>
       <tbody id="stockBody">
@@ -5702,6 +6164,7 @@ table.general th{background:#f9fafb;font-size:12px}
       <button class="btn btn-secondary" id="upcSearchBtn">ค้นหา</button>
     </div>
     <div id="upcSearchResult" class="upc-search-result" style="display:none"></div>
+    <div id="upcEditStatus" class="upc-edit-status"></div>
   </div>
 </div>
 </section>
@@ -5713,7 +6176,7 @@ table.general th{background:#f9fafb;font-size:12px}
       <button class="back-btn" data-page="home">←</button>
       <div>
         <h2 class="page-title">UPLOAD ERP STOCK</h2>
-        <p class="page-sub">อัปโหลด CSV / Excel Export จาก D365 เข้า erp_stock_ptt โดยตรง</p>
+        <p class="page-sub">อัปโหลด ERP Stock ประจำวัน · ไฟล์ใหม่จะเป็น CURRENT STOCK ของระบบ</p>
       </div>
     </div>
     <div class="badge">CSV / EXCEL → SUPABASE</div>
@@ -5732,13 +6195,13 @@ table.general th{background:#f9fafb;font-size:12px}
       </div>
 
       <div class="erp-upload-note">
-        สามารถอัปโหลดข้อมูล ERP Stock เพิ่มต่อจากข้อมูลเดิมได้
-        โดยระบบจะ <b>Append</b> ข้อมูลใหม่เข้า <b>erp_stock_ptt</b> และไม่ลบข้อมูลเดิม
+        อัปโหลด ERP Stock รอบใหม่เพื่อแทนที่ CURRENT STOCK เดิม
+        ระบบจะ <b>Replace CURRENT STOCK</b> ใน <b>erp_stock_ptt</b> ด้วยไฟล์ล่าสุด เพื่อไม่ให้ Stock หลายวันปนกัน
       </div>
 
       <div class="erp-upload-actions">
         <button class="btn btn-primary" id="erpCheckCsvBtn">ตรวจสอบไฟล์</button>
-        <button class="btn btn-green" id="erpUploadCsvBtn" disabled>UPLOAD / ADD TO SUPABASE</button>
+        <button class="btn btn-green" id="erpUploadCsvBtn" disabled>UPLOAD / REPLACE CURRENT STOCK</button>
         <button class="btn btn-secondary" id="erpResetCsvBtn">ล้างไฟล์</button>
       </div>
     </div>
@@ -6128,6 +6591,7 @@ const RESERVATION_TABLE = 'picking_stock_reservations'
 const PBL_TEMPLATE_TABLE = 'pbl_template_items'
 const PBL_ASSORTMENT_TEMPLATE_TABLE = 'pbl_assortment_template_items'
 const LOOSE_LOCATION_TABLE = 'picking_loose_locations'
+const LOOSE_SKU_STOCK_TABLE = 'picking_loose_sku_stock'
 const FORBIDDEN_LOCATION_TABLE = 'picking_forbidden_locations'
 const BARCODE_MASTER_TABLE = 'barcode_master'
 const W_CENTER_VIEW = 'w_center_stock'
@@ -7889,9 +8353,33 @@ function calculateAsn(orderQty,looseBefore){
   return {boxQty:boxes,looseUsed:used,loosePull:pull,looseAfter:after,remark}
 }
 
-function calculatePbl(orderQty){
+function calculatePbl(orderQty,sourceBox=0,packSize=0){
   const q=num(orderQty)
-  return {boxQty:q/PACK_SIZE,looseUsed:0,loosePull:0,looseAfter:0,remark:''}
+  const sourceBoxes=Math.max(0,num(sourceBox))
+  const sourcePack=Math.max(0,num(packSize))
+
+  let boxQty=0
+
+  // Priority 1: จำนวนกล่องจากไฟล์ LOTUS
+  if(sourceBoxes>0){
+    boxQty=sourceBoxes
+
+  // Priority 2: ถ้าไฟล์มี Pack Size ให้คำนวณจาก Pack Size
+  }else if(sourcePack>0){
+    boxQty=q/sourcePack
+
+  // fallback มาตรฐาน PBL LOTUS / BIG C = 6 คู่ / กล่อง
+  }else{
+    boxQty=q/PACK_SIZE
+  }
+
+  return {
+    boxQty,
+    looseUsed:0,
+    loosePull:0,
+    looseAfter:0,
+    remark:''
+  }
 }
 
 async function preparePreview(parsed){
@@ -7957,12 +8445,28 @@ async function preparePreview(parsed){
     if(!item) messages.push('ไม่พบ Item')
     if(!code) messages.push('ไม่พบ CODE')
     if(!assort) messages.push('ไม่พบ Size')
-    if(raw.pairQty<=0){base='ERROR';messages.push('จำนวนคู่ต้องมากกว่า 0')}
-    if(parsed.type==='PBL' && raw.pairQty%PACK_SIZE!==0){base='ERROR';messages.push('PBL ต้องหาร 6 ลงตัว')}
+    if(raw.pairQty<=0){
+      base='ERROR'
+      messages.push('จำนวนคู่ต้องมากกว่า 0')
+    }
+
+    // LOTUS PBL:
+    // ไม่ตรวจหาร 6 ราย SKU เพราะบางไฟล์กระจายจำนวนคู่หลาย Size
+    // แต่ทั้ง PO ยังเป็นมาตรฐาน 6 คู่ / กล่อง
+    if(
+      parsed.type==='PBL' &&
+      norm(parsed.customer)!=='LOTUS' &&
+      raw.pairQty%PACK_SIZE!==0
+    ){
+      base='ERROR'
+      messages.push('PBL ต้องหาร 6 ลงตัว')
+    }
 
     const key=productKey(parsed.customer,item,code,assort)
     const looseBefore=parsed.type==='ASN' ? num(workingLoose.get(key)||0) : 0
-    const calc=parsed.type==='ASN' ? calculateAsn(raw.pairQty,looseBefore) : calculatePbl(raw.pairQty)
+    const calc=parsed.type==='ASN'
+      ? calculateAsn(raw.pairQty,looseBefore)
+      : calculatePbl(raw.pairQty,raw.sourceBox,raw.packSize)
     if(parsed.type==='ASN' && item && code && assort) workingLoose.set(key,calc.looseAfter)
 
     if(found){
@@ -7991,6 +8495,8 @@ async function preparePreview(parsed){
       masterSource:found ? 'UPC MASTER' : 'FILE FALLBACK',
       item,code,assort,
       orderPairs:raw.pairQty,
+      sourceBox:num(raw.sourceBox),
+      packSize:num(raw.packSize),
       cartonQty:calc.boxQty,
       looseBefore,
       looseUsed:calc.looseUsed,
@@ -8215,6 +8721,16 @@ async function saveParsedToSupabase(parsedArg=null,rowsArg=null,sourceFileName=n
   const createdBy=txt(el('importCreatedBy').value)||'ADMIN'
   localStorage.setItem('erp_picking_user',createdBy)
 
+  const headerTotalCartons=(
+    txt(parsed.type)==='PBL' &&
+    norm(parsed.customer)==='LOTUS'
+  )
+    ? (
+        Math.max(0,num(parsed.pblTotalCartons)) ||
+        (totals.pairs/PACK_SIZE)
+      )
+    : totals.boxes
+
   const headerPayload={
     po_no:parsed.po,
     po_type:parsed.type,
@@ -8222,7 +8738,7 @@ async function saveParsedToSupabase(parsedArg=null,rowsArg=null,sourceFileName=n
     source_file_name:sourceFileName || importState.file?.name || null,
     status:'READY_FOR_PICKING',
     total_pairs:totals.pairs,
-    total_cartons:totals.boxes,
+    total_cartons:headerTotalCartons,
     total_loose_used:totals.used,
     total_loose_pull:totals.pull,
     created_by:createdBy,
@@ -8715,6 +9231,192 @@ async function saveBigCBatchToSupabase(){
   }
 }
 
+
+function hideLotusReviewPanel(){
+  const panel=el('lotusReviewPanel')
+  if(panel) panel.classList.remove('show')
+
+  const body=el('lotusReviewBody')
+  if(body) body.innerHTML=''
+
+  const status=el('lotusReviewStatus')
+  if(status){
+    status.className='location-qr-status'
+    status.textContent=''
+  }
+
+  const btn=el('saveLotusBtn')
+  if(btn) btn.disabled=true
+}
+
+function renderLotusReviewPanel(){
+  const panel=el('lotusReviewPanel')
+  const body=el('lotusReviewBody')
+  const status=el('lotusReviewStatus')
+  const btn=el('saveLotusBtn')
+  const parsed=importState.parsed
+  const preview=importState.preview||[]
+
+  if(!panel || !body || !status || !btn) return
+
+  if(!parsed || norm(parsed.customer)!=='LOTUS' || !preview.length){
+    hideLotusReviewPanel()
+    return
+  }
+
+  const errors=preview.filter(r=>r.validationStatus==='ERROR')
+  const warnings=preview.filter(r=>r.validationStatus==='WARNING')
+  const totalPairs=preview.reduce((s,r)=>s+Math.max(0,num(r.orderPairs)),0)
+  const totalBoxes=(
+    txt(parsed.type)==='PBL' && num(parsed.pblTotalCartons)>0
+  )
+    ? num(parsed.pblTotalCartons)
+    : preview.reduce((s,r)=>s+Math.max(0,num(r.cartonQty)),0)
+
+  body.innerHTML=`
+    <tr>
+      <td><b>${esc(parsed.po||'-')}</b></td>
+      <td><b>${esc(parsed.type||'-')}</b></td>
+      <td>${preview.length}</td>
+      <td>${fmt(totalPairs)}</td>
+      <td><b>${fmt(totalBoxes)}</b></td>
+      <td>${esc(formatDeliveryDate(parsed.deliveryDate||''))}</td>
+    </tr>
+  `
+
+  panel.classList.add('show')
+
+  if(errors.length){
+    status.className='location-qr-status show warn'
+    status.textContent=`ยังมี ERROR ${errors.length} รายการ · ยังบันทึก Supabase ไม่ได้`
+    btn.disabled=true
+    return
+  }
+
+  status.className=warnings.length
+    ? 'location-qr-status show warn'
+    : 'location-qr-status show ok'
+
+  status.textContent=warnings.length
+    ? `ตรวจสอบผ่าน · Warning ${warnings.length} รายการ · ยังไม่ได้บันทึก Supabase`
+    : 'ตรวจสอบผ่าน · ยังไม่ได้บันทึก Supabase'
+
+  btn.disabled=false
+}
+
+async function saveLotusToSupabase(){
+  const parsed=importState.parsed
+  const preview=importState.preview||[]
+
+  if(!parsed || norm(parsed.customer)!=='LOTUS' || !preview.length){
+    setImportStatus('ไม่พบข้อมูล LOTUS ที่รอบันทึก','warn')
+    return
+  }
+
+  const errors=preview.filter(r=>r.validationStatus==='ERROR')
+  if(errors.length){
+    setImportStatus(
+      `ยังมี ERROR ${errors.length} รายการ จึงยังบันทึกไม่ได้`,
+      'error'
+    )
+    renderLotusReviewPanel()
+    return
+  }
+
+  if(!txt(parsed.deliveryDate)){
+    setImportStatus('กรุณาระบุ DELIVERY DATE ก่อนบันทึก PO','warn')
+    return
+  }
+
+  const btn=el('saveLotusBtn')
+  const oldText=btn?.textContent||'บันทึก LOTUS ลง Supabase'
+
+  if(btn){
+    btn.disabled=true
+    btn.textContent='กำลังบันทึก...'
+  }
+
+  try{
+    el('statDb').textContent='SAVING'
+    setImportStatus(
+      `กำลังบันทึก PO ${parsed.po||'-'} ลง Supabase...`,
+      'info'
+    )
+
+    const header=await saveParsedToSupabase(
+      parsed,
+      preview,
+      importState.file?.name||null
+    )
+
+    let pblTemplateResult={added:0,skipped:0}
+
+    if(txt(parsed.type)==='PBL'){
+      try{
+        pblTemplateResult=await saveImportedPblTemplate(parsed,preview)
+      }catch(templateError){
+        console.warn(
+          'บันทึก LOTUS PBL Template ไม่สำเร็จ',
+          templateError
+        )
+      }
+    }
+
+    importState.savedHeader=header
+    el('statDb').textContent='SAVED'
+
+    const warnings=preview.filter(r=>r.validationStatus==='WARNING').length
+    const totalPairs=preview.reduce((s,r)=>s+Math.max(0,num(r.orderPairs)),0)
+    const totalBoxes=(
+      txt(parsed.type)==='PBL' && num(parsed.pblTotalCartons)>0
+    )
+      ? num(parsed.pblTotalCartons)
+      : preview.reduce((s,r)=>s+Math.max(0,num(r.cartonQty)),0)
+
+    setImportStatus(
+      [
+        'บันทึก Supabase สำเร็จ',
+        `PO ${parsed.po}`,
+        `TYPE: ${parsed.type}`,
+        `รายการสินค้า: ${preview.length} รายการ`,
+        `จำนวนรวม: ${fmt(totalPairs)} คู่`,
+        `กล่อง: ${fmt(totalBoxes)}`,
+        `po_headers ID: ${header.id}`,
+        'สถานะ: READY_FOR_PICKING',
+        ...(warnings?[`Warning ${warnings} รายการ`]:[]),
+        ...(txt(parsed.type)==='PBL'
+          ? [`PBL Template: เพิ่ม ${pblTemplateResult.added} SKU`]
+          : [])
+      ].join('\n'),
+      warnings?'warn':'ok'
+    )
+
+    const status=el('lotusReviewStatus')
+    if(status){
+      status.className='location-qr-status show ok'
+      status.textContent='บันทึก LOTUS ลง Supabase เรียบร้อยแล้ว'
+    }
+
+    showToast('LOTUS บันทึก Supabase สำเร็จ')
+    loadOrders()
+
+  }catch(error){
+    console.error(error)
+    el('statDb').textContent='ERROR'
+    setImportStatus(
+      'บันทึก Supabase ไม่สำเร็จ\n'+(error?.message||error),
+      'error'
+    )
+    if(btn) btn.disabled=false
+  }finally{
+    if(btn){
+      btn.textContent=oldText
+      if(importState.savedHeader) btn.disabled=true
+    }
+  }
+}
+
+
 async function runImport(){
   const file=el('poExcelFile').files?.[0]
   if(!file){
@@ -8768,6 +9470,49 @@ async function runImport(){
     setImportStatus(`พบ PO ${parsed.po||'-'} · ${parsed.items.length} รายการ\n3/4 กำลังจับคู่สินค้าและคำนวณ Carton / Loose...`,'info')
     importState.preview=await preparePreview(parsed)
     importState.preview.forEach(r=>{r.poNo=parsed.po})
+
+    // LOTUS PBL ตรวจระดับ PO แทนระดับ SKU
+    // เช่นหลาย Size รวมกัน 30 คู่ = 5 กล่อง ถือว่าถูกต้อง
+    if(
+      txt(parsed.type)==='PBL' &&
+      norm(parsed.customer)==='LOTUS'
+    ){
+      const totalPblPairs=importState.preview.reduce(
+        (sum,r)=>sum+Math.max(0,num(r.orderPairs)),
+        0
+      )
+
+      if(totalPblPairs%PACK_SIZE!==0){
+        setImportStatus(
+          `LOTUS PBL ยอดรวม ${fmt(totalPblPairs)} คู่ ไม่ลงตัว 6 คู่ / กล่อง\n`+
+          `กรุณาตรวจสอบจำนวนรวมของ PO ${parsed.po||'-'}`,
+          'error'
+        )
+        return
+      }
+
+      const expectedBoxes=totalPblPairs/PACK_SIZE
+      const sourceBoxes=importState.preview.reduce(
+        (sum,r)=>sum+Math.max(0,num(r.sourceBox)),
+        0
+      )
+
+      // ถ้าไฟล์มีจำนวนกล่องมา ให้ใช้จากไฟล์
+      // ถ้าไม่มี ให้คง cartonQty ที่คำนวณจาก 6 คู่/กล่อง
+      if(sourceBoxes>0){
+        importState.preview.forEach(r=>{
+          if(num(r.sourceBox)>0){
+            r.cartonQty=num(r.sourceBox)
+          }
+        })
+      }
+
+      parsed.pblTotalPairs=totalPblPairs
+      parsed.pblTotalCartons=sourceBoxes>0
+        ? sourceBoxes
+        : expectedBoxes
+    }
+
     importState.csvText=previewToCsv(importState.preview)
 
     renderImportPreview()
@@ -8781,37 +9526,32 @@ async function runImport(){
       return
     }
 
-    setImportStatus(`3/4 แปลงเป็น CSV สำเร็จ${warnings?` · Warning ${warnings} รายการ`:''}\n4/4 กำลังบันทึก Supabase...`,warnings?'warn':'info')
-    const header=await saveParsedToSupabase()
-
-    let pblTemplateResult={added:0,skipped:0}
-    if(txt(parsed.type)==='PBL'){
-      try{
-        pblTemplateResult=await saveImportedPblTemplate(
-          parsed,
-          importState.preview
-        )
-      }catch(templateError){
-        console.warn('บันทึก LOTUS PBL Template ไม่สำเร็จ',templateError)
-      }
-    }
+    importState.savedHeader=null
+    el('statDb').textContent='NOT SAVED'
 
     setImportStatus(
       [
-        `สำเร็จ`,
-        `PO ${parsed.po} ถูกอ่านจากไฟล์ → แปลงเป็น CSV → บันทึก Supabase อัตโนมัติ`,
-        `po_headers ID: ${header.id}`,
+        `ตรวจสอบไฟล์สำเร็จ`,
+        `PO ${parsed.po}`,
+        `TYPE: ${parsed.type}`,
         `รายการสินค้า: ${importState.preview.length} รายการ`,
-        `สถานะ: READY_FOR_PICKING`,
-        `ยังไม่มีการตัด Stock`,
         ...(txt(parsed.type)==='PBL'
-          ? [`PBL Template: เพิ่ม ${pblTemplateResult.added} SKU`]
-          : [])
-      ].join('\n'),
+          ? [
+              `PBL: ${fmt(importState.preview.reduce((s,r)=>s+num(r.orderPairs),0))} คู่ / ${fmt(
+                num(parsed.pblTotalCartons) ||
+                importState.preview.reduce((s,r)=>s+num(r.cartonQty),0)
+              )} กล่อง`
+            ]
+          : []),
+        warnings?`Warning ${warnings} รายการ`:'',
+        `ยังไม่ได้บันทึกข้อมูลลง Supabase`,
+        `กรุณาตรวจสอบรายการด้านล่าง แล้วกด “บันทึก LOTUS ลง Supabase”`
+      ].filter(Boolean).join('\n'),
       warnings?'warn':'ok'
     )
-    showToast('Import PO สำเร็จ')
-    loadOrders()
+
+    renderLotusReviewPanel()
+    showToast('ตรวจสอบ LOTUS สำเร็จ · ยังไม่ได้บันทึก Supabase')
   }catch(error){
     console.error(error)
     setImportStatus('นำเข้าไม่สำเร็จ\n'+(error?.message||error),'error')
@@ -8830,6 +9570,7 @@ function refreshCustomerImportUi(){
   const typePanel=el('bigcPoTypePanel')
 
   if(customer==='BIG C'){
+    hideLotusReviewPanel()
     if(label){
       label.textContent='ไฟล์ BIG C (.xls / .xlsx / .xlsm) · 1 ไฟล์หลาย Sheet · ชื่อ Sheet = PO'
     }
@@ -8842,7 +9583,7 @@ function refreshCustomerImportUi(){
       label.textContent='ไฟล์ PO จากลูกค้า (.xls / .xlsx / .xlsm)'
     }
     if(btn){
-      btn.textContent='ตรวจสอบ → แปลง CSV → บันทึก Supabase'
+      btn.textContent='ตรวจสอบไฟล์'
     }
     if(typeWrap) typeWrap.style.display=''
     if(typePanel) typePanel.classList.remove('show')
@@ -8855,6 +9596,7 @@ el('importCustomer').addEventListener('change',()=>{
   importState={file:null,parsed:null,preview:[],csvText:'',savedHeader:null,batch:[]}
   renderImportPreview()
   el('bigcPoTypePanel')?.classList.remove('show')
+  hideLotusReviewPanel()
 })
 
 refreshCustomerImportUi()
@@ -8863,12 +9605,14 @@ refreshCustomerImportUi()
 el('setAllBigCAsnBtn').onclick=()=>setAllBigCPoTypes('ASN')
 el('setAllBigCPblBtn').onclick=()=>setAllBigCPoTypes('PBL')
 el('saveBigCBatchBtn').onclick=saveBigCBatchToSupabase
+el('saveLotusBtn').onclick=saveLotusToSupabase
 
 el('importPoBtn').onclick=runImport
 el('poExcelFile').addEventListener('change',()=>{
   clearImportStatus()
   importState={file:null,parsed:null,preview:[],csvText:'',savedHeader:null,batch:[]}
   renderImportPreview()
+  hideLotusReviewPanel()
 })
 
 el('resetImportBtn').onclick=()=>{
@@ -8877,6 +9621,7 @@ el('resetImportBtn').onclick=()=>{
   importState={file:null,parsed:null,preview:[],csvText:'',savedHeader:null,batch:[]}
   clearImportStatus()
   renderImportPreview()
+  hideLotusReviewPanel()
   jobRows.length=0
   renderJobRows()
   el('poNumber').value=''
@@ -9321,20 +10066,350 @@ async function clearUpcCustomer(){
   showToast(`ลบ UPC ${customer} แล้ว`)
 }
 
+
+let upcSearchRows=[]
+let upcEditingId=null
+
+function setUpcEditStatus(message,type='ok'){
+  const box=el('upcEditStatus')
+  if(!box) return
+
+  if(!message){
+    box.className='upc-edit-status'
+    box.textContent=''
+    return
+  }
+
+  box.className='upc-edit-status show '+type
+  box.textContent=message
+}
+
+function renderUpcSearchRows(){
+  const box=el('upcSearchResult')
+  const rows=upcSearchRows||[]
+
+  box.style.display='block'
+
+  if(!rows.length){
+    box.innerHTML='<div style="padding:18px;text-align:center;color:#6b7280">ไม่พบข้อมูล</div>'
+    return
+  }
+
+  box.innerHTML=`
+    <table>
+      <thead>
+        <tr>
+          <th>Barcode / UPC</th>
+          <th>Item</th>
+          <th>Color</th>
+          <th>Size</th>
+          <th>Customer</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.map(r=>{
+          const editing=String(upcEditingId)===String(r.id)
+
+          return `
+            <tr class="${editing?'upc-row-editing':''}">
+              <td>
+                ${editing
+                  ? `<input id="upcEditBarcode-${esc(r.id)}"
+                      class="upc-edit-input upc-edit-barcode"
+                      value="${esc(r.barcode)}"
+                      inputmode="numeric"
+                      autocomplete="off">`
+                  : `<b>${esc(r.barcode)}</b>`
+                }
+              </td>
+
+              <td>
+                ${editing
+                  ? `<input id="upcEditItem-${esc(r.id)}"
+                      class="upc-edit-input upc-edit-item"
+                      value="${esc(r.item||'')}"
+                      autocomplete="off">`
+                  : `${esc(r.item)}`
+                }
+              </td>
+
+              <td>
+                ${editing
+                  ? `<input id="upcEditColor-${esc(r.id)}"
+                      class="upc-edit-input upc-edit-color"
+                      value="${esc(r.color||'')}"
+                      autocomplete="off">`
+                  : `${esc(r.color||'-')}`
+                }
+              </td>
+
+              <td>
+                ${editing
+                  ? `<input id="upcEditSize-${esc(r.id)}"
+                      class="upc-edit-input upc-edit-size"
+                      value="${esc(r.size||'')}"
+                      autocomplete="off">`
+                  : `<b>${esc(r.size||'-')}</b>`
+                }
+              </td>
+
+              <td>
+                ${editing
+                  ? `<select id="upcEditCustomer-${esc(r.id)}"
+                      class="upc-edit-select upc-edit-customer">
+                      <option value="LOTUS" ${norm(r.customer)==='LOTUS'?'selected':''}>LOTUS</option>
+                      <option value="BIG C" ${norm(r.customer)==='BIG C'?'selected':''}>BIG C</option>
+                    </select>`
+                  : `${esc(r.customer)}`
+                }
+              </td>
+
+              <td class="upc-action-cell">
+                ${editing
+                  ? `<div class="upc-row-actions">
+                       <button class="upc-row-btn save" data-upc-save-id="${esc(r.id)}">บันทึก</button>
+                       <button class="upc-row-btn cancel" data-upc-cancel="1">ยกเลิก</button>
+                     </div>`
+                  : `<button class="upc-row-btn edit" data-upc-edit-id="${esc(r.id)}">แก้ไขข้อมูล</button>`
+                }
+              </td>
+            </tr>
+          `
+        }).join('')}
+      </tbody>
+    </table>
+  `
+
+  box.querySelectorAll('[data-upc-edit-id]').forEach(btn=>{
+    btn.addEventListener('click',()=>startUpcInlineEdit(btn.dataset.upcEditId))
+  })
+
+  box.querySelectorAll('[data-upc-save-id]').forEach(btn=>{
+    btn.addEventListener('click',()=>saveUpcInlineEdit(btn.dataset.upcSaveId))
+  })
+
+  box.querySelectorAll('[data-upc-cancel]').forEach(btn=>{
+    btn.addEventListener('click',cancelUpcInlineEdit)
+  })
+
+  if(upcEditingId!==null){
+    const ids=[
+      'upcEditBarcode-',
+      'upcEditItem-',
+      'upcEditColor-',
+      'upcEditSize-',
+      'upcEditCustomer-'
+    ]
+
+    ids.forEach(prefix=>{
+      const input=el(prefix+upcEditingId)
+      if(!input) return
+
+      input.addEventListener('keydown',e=>{
+        if(e.key==='Enter'){
+          e.preventDefault()
+          saveUpcInlineEdit(upcEditingId)
+        }
+
+        if(e.key==='Escape'){
+          e.preventDefault()
+          cancelUpcInlineEdit()
+        }
+      })
+    })
+
+    const first=el('upcEditBarcode-'+upcEditingId)
+    if(first){
+      first.focus()
+      first.select()
+    }
+  }
+}
+
+function startUpcInlineEdit(id){
+  upcEditingId=String(id)
+  setUpcEditStatus('')
+  renderUpcSearchRows()
+}
+
+function cancelUpcInlineEdit(){
+  upcEditingId=null
+  setUpcEditStatus('')
+  renderUpcSearchRows()
+}
+
+async function saveUpcInlineEdit(id){
+  const row=(upcSearchRows||[]).find(r=>String(r.id)===String(id))
+
+  if(!row){
+    setUpcEditStatus('ไม่พบรายการ UPC ที่ต้องการแก้ไข','error')
+    return
+  }
+
+  const barcodeInput=el('upcEditBarcode-'+id)
+  const itemInput=el('upcEditItem-'+id)
+  const colorInput=el('upcEditColor-'+id)
+  const sizeInput=el('upcEditSize-'+id)
+  const customerInput=el('upcEditCustomer-'+id)
+
+  const newBarcode=normalizeUpcBarcode(barcodeInput?.value)
+  const newItem=cleanUpcCell(itemInput?.value).toUpperCase()
+
+  // เก็บ Color ตามที่ผู้ใช้กรอก เช่น -BR / -CR / -BL
+  // Matching ฝั่ง LOTUS จะ normalize ขีดหน้าเองตอนค้นหา ERP
+  const newColor=cleanUpcCell(colorInput?.value).toUpperCase()
+
+  const newSize=cleanUpcCell(sizeInput?.value).toUpperCase()
+  const newCustomer=norm(customerInput?.value)
+
+  if(!newBarcode){
+    setUpcEditStatus('กรุณากรอก Barcode / UPC ให้ถูกต้อง','warn')
+    barcodeInput?.focus()
+    return
+  }
+
+  if(!newItem){
+    setUpcEditStatus('กรุณากรอก Item','warn')
+    itemInput?.focus()
+    return
+  }
+
+  if(!newSize){
+    setUpcEditStatus('กรุณากรอก Size','warn')
+    sizeInput?.focus()
+    return
+  }
+
+  if(!['LOTUS','BIG C'].includes(newCustomer)){
+    setUpcEditStatus('Customer ต้องเป็น LOTUS หรือ BIG C','warn')
+    customerInput?.focus()
+    return
+  }
+
+  const oldData={
+    barcode:String(row.barcode||''),
+    item:String(row.item||''),
+    color:String(row.color||''),
+    size:String(row.size||''),
+    customer:String(row.customer||'')
+  }
+
+  const newData={
+    barcode:newBarcode,
+    item:newItem,
+    color:newColor,
+    size:newSize,
+    customer:newCustomer
+  }
+
+  const changed=
+    oldData.barcode!==newData.barcode ||
+    oldData.item!==newData.item ||
+    oldData.color!==newData.color ||
+    oldData.size!==newData.size ||
+    norm(oldData.customer)!==newData.customer
+
+  if(!changed){
+    upcEditingId=null
+    renderUpcSearchRows()
+    setUpcEditStatus('ข้อมูลไม่มีการเปลี่ยนแปลง','warn')
+    return
+  }
+
+  const changes=[]
+
+  if(oldData.barcode!==newData.barcode){
+    changes.push(`Barcode: ${oldData.barcode} → ${newData.barcode}`)
+  }
+  if(oldData.item!==newData.item){
+    changes.push(`Item: ${oldData.item||'-'} → ${newData.item}`)
+  }
+  if(oldData.color!==newData.color){
+    changes.push(`Color: ${oldData.color||'-'} → ${newData.color||'-'}`)
+  }
+  if(oldData.size!==newData.size){
+    changes.push(`Size: ${oldData.size||'-'} → ${newData.size}`)
+  }
+  if(norm(oldData.customer)!==newData.customer){
+    changes.push(`Customer: ${oldData.customer||'-'} → ${newData.customer}`)
+  }
+
+  const ok=confirm(
+    `ยืนยันแก้ไขข้อมูล UPC หรือไม่?\n\n`+
+    changes.join('\n')
+  )
+
+  if(!ok) return
+
+  try{
+    setUpcEditStatus('กำลังบันทึกข้อมูล...','warn')
+
+    const {data,error}=await db.from(BARCODE_MASTER_TABLE)
+      .update({
+        barcode:newBarcode,
+        item:newItem,
+        color:newColor,
+        size:newSize,
+        customer:newCustomer,
+        updated_at:new Date().toISOString()
+      })
+      .eq('id',row.id)
+      .select('id,barcode,item,color,size,customer,updated_at,created_at')
+      .single()
+
+    if(error) throw error
+
+    const index=upcSearchRows.findIndex(
+      r=>String(r.id)===String(row.id)
+    )
+
+    if(index>=0){
+      upcSearchRows[index]=data
+    }
+
+    upcEditingId=null
+    renderUpcSearchRows()
+
+    setUpcEditStatus(
+      `แก้ไขข้อมูลสำเร็จ · ${data.barcode} · ${data.item} ${data.color||''} ${data.size} · ${data.customer}`,
+      'ok'
+    )
+
+    showToast('แก้ไข UPC MASTER สำเร็จ')
+  }catch(error){
+    console.error(error)
+
+    let message=error?.message||String(error)
+
+    if(/duplicate|unique|barcode_master.*key|23505/i.test(message)){
+      message='Barcode / UPC นี้มีอยู่แล้วใน Customer เดียวกัน'
+    }
+
+    setUpcEditStatus(
+      'แก้ไขข้อมูลไม่สำเร็จ: '+message,
+      'error'
+    )
+  }
+}
+
 async function searchUpcMaster(){
   const customer=txt(el('upcSearchCustomer').value)
   const q=txt(el('upcSearchInput').value)
   const box=el('upcSearchResult')
 
   if(!q){
+    upcSearchRows=[]
+    upcEditingId=null
     box.style.display='none'
     box.innerHTML=''
+    setUpcEditStatus('')
     return
   }
 
   try{
     const safe=q.replace(/[%_]/g,'')
-    const {data,error}=await db.from('barcode_master')
+    const {data,error}=await db.from(BARCODE_MASTER_TABLE)
       .select('barcode,item,color,size,customer,updated_at,created_at,id')
       .eq('customer',customer)
       .or(`barcode.ilike.%${safe}%,item.ilike.%${safe}%,color.ilike.%${safe}%,size.ilike.%${safe}%`)
@@ -9344,39 +10419,13 @@ async function searchUpcMaster(){
 
     if(error) throw error
 
-    const rows=data||[]
-    box.style.display='block'
-
-    if(!rows.length){
-      box.innerHTML='<div style="padding:18px;text-align:center;color:#6b7280">ไม่พบข้อมูล</div>'
-      return
-    }
-
-    box.innerHTML=`
-      <table>
-        <thead>
-          <tr>
-            <th>Barcode</th>
-            <th>Item</th>
-            <th>Color</th>
-            <th>Size</th>
-            <th>Customer</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rows.map(r=>`
-            <tr>
-              <td><b>${esc(r.barcode)}</b></td>
-              <td>${esc(r.item)}</td>
-              <td>${esc(r.color||'-')}</td>
-              <td><b>${esc(r.size||'-')}</b></td>
-              <td>${esc(r.customer)}</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    `
+    upcSearchRows=data||[]
+    upcEditingId=null
+    setUpcEditStatus('')
+    renderUpcSearchRows()
   }catch(error){
+    upcSearchRows=[]
+    upcEditingId=null
     box.style.display='block'
     box.innerHTML='<div style="padding:14px;color:#b91c1c">'+esc(error?.message||error)+'</div>'
   }
@@ -9389,6 +10438,16 @@ el('upcClearCustomerBtn')?.addEventListener('click',clearUpcCustomer)
 el('upcSearchBtn')?.addEventListener('click',searchUpcMaster)
 el('upcSearchInput')?.addEventListener('keydown',e=>{
   if(e.key==='Enter') searchUpcMaster()
+})
+el('upcSearchCustomer')?.addEventListener('change',()=>{
+  upcSearchRows=[]
+  upcEditingId=null
+  const box=el('upcSearchResult')
+  if(box){
+    box.style.display='none'
+    box.innerHTML=''
+  }
+  setUpcEditStatus('')
 })
 el('upcCustomer')?.addEventListener('change',resetUpcUpload)
 
@@ -9769,46 +10828,49 @@ async function uploadErpCsvToSupabase(){
     return
   }
 
-  if(erpUploadState.dbCount>0){
-    const ok=confirm(
-      `erp_stock_ptt มีข้อมูลเดิม ${erpUploadState.dbCount.toLocaleString('th-TH')} แถว\n\n`+
-      `กำลังจะเพิ่มข้อมูลใหม่ ${erpUploadState.rows.length.toLocaleString('th-TH')} แถวต่อท้าย\n\n`+
-      `ข้อมูลเดิมจะไม่ถูกลบ\n\nดำเนินการต่อหรือไม่?`
-    )
-    if(!ok) return
-  }
+  const total=erpUploadState.rows.length
+  const currentCount=await currentErpDbCount()
+  const now=new Date()
+  const todayText=now.toLocaleDateString('th-TH',{day:'2-digit',month:'2-digit',year:'numeric'})
 
-  if(!erpUploadState.valid || !erpUploadState.rows.length){
-    setErpUploadStatus('กรุณาตรวจสอบไฟล์ก่อนอัปโหลด','error')
-    return
-  }
+  const ok=confirm(
+    'ยืนยันเปลี่ยน ERP CURRENT STOCK หรือไม่?\n\n'+
+    'วันที่ Stock: '+todayText+'\n'+
+    'ไฟล์: '+(erpUploadState.file?.name||'-')+'\n'+
+    'ข้อมูลเดิม: '+currentCount.toLocaleString('th-TH')+' แถว\n'+
+    'ข้อมูลใหม่: '+total.toLocaleString('th-TH')+' แถว\n\n'+
+    'ระบบจะล้าง ERP Current เดิม แล้วใช้ไฟล์นี้เป็นข้อมูลล่าสุด\n'+
+    'Reservation ของงานที่ยัง Active จะยังอยู่'
+  )
+  if(!ok) return
 
   const uploadBtn=el('erpUploadCsvBtn')
   uploadBtn.disabled=true
 
   try{
-    const dbCount=await currentErpDbCount()
-    erpUploadState.dbCount=dbCount
-    el('erpStatDb').textContent=dbCount.toLocaleString('th-TH')
-const total=erpUploadState.rows.length
-    const ok=confirm(
-      'ยืนยันอัปโหลด ERP STOCK เข้า Supabase หรือไม่?\n\n'+
-      'ไฟล์: '+(erpUploadState.file?.name||'-')+'\n'+
-      'จำนวน: '+total.toLocaleString('th-TH')+' แถว\n'+
-      'ตาราง: erp_stock_ptt'
-    )
-    if(!ok){
-      uploadBtn.disabled=false
-      return
-    }
-
     el('erpUploadProgress').className='erp-upload-progress show'
     el('erpUploadProgressBar').style.width='0%'
-    setErpUploadStatus('กำลังอัปโหลดข้อมูลเข้า Supabase...','info')
+    setErpUploadStatus('กำลังเปลี่ยน ERP CURRENT STOCK...','info')
+
+    const {error:deleteError}=await db.from(ERP_TABLE).delete().gte('id',1)
+    if(deleteError) throw deleteError
+
+    const {count:remainingCount,error:remainingError}=await db
+      .from(ERP_TABLE)
+      .select('id',{count:'exact',head:true})
+
+    if(remainingError) throw remainingError
+
+    if(Number(remainingCount||0)>0){
+      throw new Error(
+        'ไม่สามารถ Replace ERP CURRENT STOCK ได้ เพราะข้อมูลเดิมยังเหลือ '+
+        Number(remainingCount||0).toLocaleString('th-TH')+
+        ' แถว กรุณาตรวจสอบ DELETE Policy / RLS ของ erp_stock_ptt'
+      )
+    }
 
     const chunkSize=300
     let inserted=0
-
     for(let i=0;i<total;i+=chunkSize){
       const chunk=erpUploadState.rows.slice(i,i+chunkSize)
       const {error}=await db.from(ERP_TABLE).insert(chunk)
@@ -9825,37 +10887,34 @@ const total=erpUploadState.rows.length
 
     const after=await currentErpDbCount()
     erpUploadState.dbCount=after
-    el('erpStatDb').textContent=after.toLocaleString('th-TH')
-    el('erpStatDb').className='erp-db-empty'
+    if(el('erpStatDb')) el('erpStatDb').textContent=after.toLocaleString('th-TH')
 
-    if(after!==total){
-      setErpUploadStatus(
-        `อัปโหลดเสร็จ แต่จำนวนในฐานข้อมูลคือ ${after.toLocaleString('th-TH')} แถว `+
-        `ขณะที่ไฟล์มี ${total.toLocaleString('th-TH')} แถว กรุณาตรวจสอบ`,
-        'warn'
-      )
-    }else{
-      setErpUploadStatus(
-        `อัปโหลด ERP STOCK สำเร็จ\n`+
-        `${total.toLocaleString('th-TH')} แถวถูกบันทึกลง erp_stock_ptt แล้ว`,
-        'ok'
-      )
-    }
+    setErpUploadMeta({
+      uploadedAt:new Date().toISOString(),
+      stockDate:new Date().toISOString().slice(0,10),
+      fileName:erpUploadState.file?.name||'',
+      rowCount:after
+    })
 
-    await refreshClearErpButtonVisibility()
-    showToast('UPLOAD ERP STOCK สำเร็จ')
-    uploadBtn.disabled=true
+    currentShippedHoldMap=new Map()
+
+    setErpUploadStatus(
+      `ERP CURRENT STOCK วันที่ ${todayText}\n${after.toLocaleString('th-TH')} แถว · พร้อมใช้งาน`,
+      after===total?'ok':'warn'
+    )
+
+    await refreshErpDbStatus()
+    showToast('เปลี่ยน ERP CURRENT STOCK สำเร็จ')
   }catch(error){
     console.error(error)
     setErpUploadStatus(
       'อัปโหลดไม่สำเร็จ\n'+(error?.message||error)+
-      '\n\nหากเป็น Permission / RLS กรุณาตรวจ Policy ของ erp_stock_ptt',
+      '\n\nกรุณาตรวจสอบ ERP STOCK ก่อนใช้งาน',
       'error'
     )
     uploadBtn.disabled=false
   }
 }
-
 if(el('erpCheckCsvBtn')) el('erpCheckCsvBtn').onclick=checkErpCsv
 if(el('erpUploadCsvBtn')) el('erpUploadCsvBtn').onclick=uploadErpCsvToSupabase
 if(el('erpResetCsvBtn')) el('erpResetCsvBtn').onclick=resetErpUpload
@@ -9864,8 +10923,16 @@ if(el('erpCsvFile')) el('erpCsvFile').addEventListener('change',()=>{
   if(el('erpUploadCsvBtn')) el('erpUploadCsvBtn').disabled=true
   if(el('erpStockStats')) el('erpStockStats').className='erp-stock-stats'
   if(el('erpUploadStatus')){
-    el('erpUploadStatus').className='import-status'
-    el('erpUploadStatus').textContent=''
+    const hasFile=Boolean(el('erpCsvFile')?.files?.[0])
+    if(hasFile){
+      setErpUploadStatus(
+        'เลือกไฟล์แล้ว · กด “ตรวจสอบไฟล์” เพื่อเปิดปุ่ม Upload',
+        'info'
+      )
+    }else{
+      el('erpUploadStatus').className='import-status'
+      el('erpUploadStatus').textContent=''
+    }
   }
 })
 
@@ -10158,12 +11225,15 @@ async function loadOrders(searchValue=null){
       : txt(searchValue)
 
   try{
-    const fields='id,po_no,customer,po_type,delivery_date,total_pairs,total_cartons,production_cartons,pbl_pairs_per_carton,status'
+    const fields='id,po_no,customer,po_type,delivery_date,total_pairs,total_cartons,production_cartons,pbl_pairs_per_carton,status,source_file_name'
 
     const {data,error}=await headerQueryCompat(fields,q=>{
       q=q.order('id',{ascending:false})
       if(searchText){
-        q=q.ilike('po_no',`%${searchText.replace(/[%_]/g,'')}%`).limit(100)
+        const safeSearch=searchText.replace(/[%_,()]/g,'').trim()
+        q=q.or(
+          `po_no.ilike.%${safeSearch}%,source_file_name.ilike.%${safeSearch}%`
+        ).limit(100)
       }else{
         q=q.limit(100)
       }
@@ -10172,15 +11242,18 @@ async function loadOrders(searchValue=null){
 
     if(error) throw error
 
-    // ไม่แสดง PO ที่ Delivery Date เป็นอดีต
-    // PO ที่ยังไม่มี Delivery Date ยังแสดง เพื่อให้ผู้ใช้เข้าไปกำหนดวันที่ได้
-    const visibleOrders=(data||[]).filter(r=>!isPastOrderDeliveryDate(r.delivery_date))
+    // หน้ารวม: ซ่อน PO ที่ Delivery Date เป็นอดีต
+    // แต่ถ้าผู้ใช้ "ค้นหา" โดยตรง ให้แสดงผลที่พบทั้งหมด
+    // เพื่อให้ค้นหา PO เก่า / PO ที่เคยบันทึกวันที่ผิด / PO จากชื่อไฟล์ได้
+    const visibleOrders=searchText
+      ? (data||[])
+      : (data||[]).filter(r=>!isPastOrderDeliveryDate(r.delivery_date))
 
     if(info){
       if(searchText){
         info.className='po-search-info show'
         info.textContent=
-          `ผลค้นหา PO "${searchText}" · พบ ${visibleOrders.length.toLocaleString('th-TH')} รายการ`
+          `ผลค้นหา PO / ชื่อไฟล์ "${searchText}" · พบ ${visibleOrders.length.toLocaleString('th-TH')} รายการ`
       }else{
         info.className='po-search-info'
         info.textContent=''
@@ -10204,10 +11277,20 @@ async function loadOrders(searchValue=null){
       return `
         <tr>
           <td>${esc(r.id)}</td>
-          <td><b>${esc(r.po_no||'-')}</b></td>
+          <td>
+            <b>${esc(r.po_no||'-')}</b>
+            ${r.source_file_name ? `<div style="font-size:10px;color:#64748b;margin-top:3px">ไฟล์: ${esc(r.source_file_name)}</div>` : ''}
+          </td>
           <td>${esc(r.customer||'-')}</td>
           <td>${esc(r.po_type||'-')}</td>
-          <td><b>${r.delivery_date ? esc(formatDeliveryDate(r.delivery_date)) : '-'}</b></td>
+          <td>
+            <b>${r.delivery_date ? esc(formatDeliveryDate(r.delivery_date)) : '-'}</b>
+            ${
+              searchText && r.delivery_date && isPastOrderDeliveryDate(r.delivery_date)
+                ? '<div style="margin-top:3px;font-size:9px;font-weight:800;color:#b45309">วันที่จัดส่งย้อนหลัง</div>'
+                : ''
+            }
+          </td>
           <td>${fmt(r.total_pairs)}</td>
 
           <td>
@@ -10222,7 +11305,7 @@ async function loadOrders(searchValue=null){
                 data-production-cartons="${esc(r.id)}"
                 data-saved-value="${productionValue===''?'':esc(productionValue)}"
                 placeholder="0"
-                aria-label="Cartons ที่ผลิตได้ PO ${esc(r.po_no||'')}"
+                aria-label="จำนวนกล่องที่ส่ง PO ${esc(r.po_no||'')}"
               >
               <button
                 class="order-carton-save"
@@ -10234,7 +11317,7 @@ async function loadOrders(searchValue=null){
               ${
                 norm(r.po_type)==='PBL'
                   ? 'ค่าเริ่มต้น = จำนวนคู่ ÷ 6 · แก้ไขได้'
-                  : 'ASN บังคับกรอกจำนวนกล่องที่ขึ้นไลน์ผลิตได้จริง'
+                  : 'ASN ต้องกรอกจำนวนกล่องที่ส่งเอง'
               }
             </small>
           </td>
@@ -13356,6 +14439,7 @@ resetManualPblSizeRows()
    ========================= */
 let looseLocationRows=[]
 let activeLooseLocationKeys=new Set()
+let currentLooseSkuStockMap=new Map()
 function customerWarehouseAllowed(customer,warehouse){const c=norm(customer);const w=txt(warehouse).toUpperCase();if(c==='BIGC')return w==='WMT-BC';if(c==='LOTUS')return w.startsWith('WMT-LT-');return true}
 function looseLocationKey(warehouse,location){return norm(warehouse)+'||'+norm(location)}
 function setLooseMasterStatus(message,type='ok'){const box=el('looseMasterStatus');if(!box)return;box.className='loose-master-status show '+type;box.textContent=message}
@@ -13369,6 +14453,336 @@ el('looseMasterSearch')?.addEventListener('input',renderLooseLocationMaster)
 let currentPickingLooseKeys=new Set()
 async function loadPickingLooseLocationKeys(customer){try{const rows=await fetchLooseLocationSettings(customer);currentPickingLooseKeys=new Set(rows.map(r=>looseLocationKey(r.warehouse,r.location)))}catch(error){console.warn('โหลดงานเศษไม่สำเร็จ',error);currentPickingLooseKeys=new Set()}}
 function isLooseLocationRow(row){return currentPickingLooseKeys.has(looseLocationKey(row?.warehouse,row?.location))}
+
+
+function looseSkuStockCanonicalItem(customer,item){
+  const c=norm(customer)
+  const raw=txt(item).toUpperCase().trim()
+  return c==='LOTUS' ? normalizeLotusErpItem(raw) : raw
+}
+
+function looseSkuStockCanonicalColor(customer,color){
+  const c=norm(customer)
+  const raw=txt(color).toUpperCase().trim()
+  return c==='LOTUS' ? normalizeLotusColor(raw) : raw.replace(/^-+/,'')
+}
+
+
+function looseSkuFamilyKey(customer,item,color){
+  return [
+    norm(customer),
+    norm(looseSkuStockCanonicalItem(customer,item)),
+    norm(looseSkuStockCanonicalColor(customer,color))
+  ].join('|')
+}
+
+function looseSkuStockKey(customer,item,color,size){
+  return [
+    norm(customer),
+    norm(looseSkuStockCanonicalItem(customer,item)),
+    norm(looseSkuStockCanonicalColor(customer,color)),
+    norm(size)
+  ].join('|')
+}
+
+function getLooseSkuStockRecord(customer,item,color,size){
+  return currentLooseSkuStockMap.get(
+    looseSkuStockKey(customer,item,color,size)
+  ) || null
+}
+
+async function loadLooseSkuStockMemory(customer){
+  currentLooseSkuStockMap=new Map()
+
+  try{
+    const {data,error}=await db.from(LOOSE_SKU_STOCK_TABLE)
+      .select('id,customer,item,color,size,warehouse,location,balance_pairs,source,is_active,created_at,updated_at')
+      .eq('customer',customer)
+      .eq('is_active',true)
+      .limit(5000)
+
+    if(error) throw error
+
+    ;(data||[]).forEach(r=>{
+      currentLooseSkuStockMap.set(
+        looseSkuStockKey(
+          r.customer,
+          r.item,
+          r.color,
+          r.size
+        ),
+        r
+      )
+    })
+  }catch(error){
+    console.warn('โหลดฐานจำงานเศษราย SKU ไม่สำเร็จ',error)
+    currentLooseSkuStockMap=new Map()
+  }
+}
+
+function erpRowMatchesItemColorIgnoringSize(item,row,header=currentPickingHeader){
+  const customer=txt(header?.customer)
+  const customerKey=norm(customer)
+  const wantedItem=looseSkuStockCanonicalItem(customer,item?.item)
+  const wantedColor=looseSkuStockCanonicalColor(customer,item?.code)
+
+  if(!customerWarehouseAllowed(customer,row?.warehouse)) return false
+  if(isForbiddenLocationRow(row)) return false
+
+  if(customerKey==='LOTUS'){
+    const lotus=normalizeLotusItemColorFromErp(row)
+
+    return (
+      norm(lotus.item)===norm(wantedItem) &&
+      (!wantedColor || norm(lotus.color)===norm(wantedColor))
+    )
+  }
+
+  return (
+    norm(row?.item_number)===norm(wantedItem) &&
+    (!wantedColor || norm(row?.color)===norm(wantedColor))
+  )
+}
+
+function findSiblingLooseLocationForItem(item,erpRows,header=currentPickingHeader){
+  const candidates=(erpRows||[])
+    .filter(r=>
+      erpRowMatchesItemColorIgnoringSize(item,r,header) &&
+      isLooseLocationRow(r)
+    )
+
+  if(!candidates.length) return null
+
+  const grouped=new Map()
+
+  candidates.forEach(r=>{
+    const key=looseLocationKey(r.warehouse,r.location)
+
+    if(!grouped.has(key)){
+      grouped.set(key,{
+        warehouse:txt(r.warehouse),
+        location:txt(r.location),
+        totalAvailable:0,
+        rowCount:0
+      })
+    }
+
+    const g=grouped.get(key)
+    g.totalAvailable+=Math.max(0,num(r.available_physical))
+    g.rowCount++
+  })
+
+  return [...grouped.values()]
+    .sort((a,b)=>
+      b.rowCount-a.rowCount ||
+      b.totalAvailable-a.totalAvailable ||
+      a.location.localeCompare(b.location)
+    )[0] || null
+}
+
+async function upsertLooseSkuStockMemory({
+  customer,
+  item,
+  color,
+  size,
+  warehouse,
+  location,
+  balancePairs=0,
+  source='SIBLING_ERP'
+}={}){
+  if(!customer || !item || !size || !warehouse || !location) return null
+
+  const payload={
+    customer:txt(customer),
+    item:looseSkuStockCanonicalItem(customer,item),
+    color:looseSkuStockCanonicalColor(customer,color),
+    size:txt(size),
+    warehouse:txt(warehouse),
+    location:txt(location),
+    balance_pairs:Math.max(0,num(balancePairs)),
+    source:txt(source)||'SIBLING_ERP',
+    is_active:true,
+    updated_at:new Date().toISOString()
+  }
+
+  try{
+    const {data,error}=await db.from(LOOSE_SKU_STOCK_TABLE)
+      .upsert(
+        payload,
+        {onConflict:'customer,item,color,size'}
+      )
+      .select('id,customer,item,color,size,warehouse,location,balance_pairs,source,is_active,created_at,updated_at')
+      .single()
+
+    if(error) throw error
+
+    currentLooseSkuStockMap.set(
+      looseSkuStockKey(
+        data.customer,
+        data.item,
+        data.color,
+        data.size
+      ),
+      data
+    )
+
+    return data
+  }catch(error){
+    console.warn('บันทึกฐานจำงานเศษราย SKU ไม่สำเร็จ',payload,error)
+    return null
+  }
+}
+
+async function inferMissingLooseSkuStockMemories(items,erpRows,header=currentPickingHeader){
+  if(norm(header?.po_type)!=='ASN') return
+
+  /*
+   * สร้าง Map จาก SKU เดียวกัน (รุ่น/สีเดียวกัน) แต่ Size อื่น
+   * ตัวอย่าง:
+   * GW11283BKYL 37/38/39 = LT-E-2
+   * ดังนั้น Size 36 ที่ ERP ยังไม่มี ให้จำ LT-E-2 อัตโนมัติ
+   */
+  const familyLooseMap=new Map()
+
+  ;(items||[]).forEach(srcItem=>{
+    const exactLoose=matchErp(srcItem,erpRows,header)
+      .find(loc=>Boolean(loc?._isLoose))
+
+    if(!exactLoose) return
+
+    familyLooseMap.set(
+      looseSkuFamilyKey(
+        header?.customer,
+        srcItem?.item,
+        srcItem?.code
+      ),
+      {
+        warehouse:txt(exactLoose.warehouse),
+        location:txt(exactLoose.location)
+      }
+    )
+  })
+
+  for(const item of (items||[])){
+    const key=looseSkuStockKey(
+      header?.customer,
+      item?.item,
+      item?.code,
+      item?.assort
+    )
+
+    if(currentLooseSkuStockMap.has(key)) continue
+
+    // ถ้า Size นี้มีงานเศษใน ERP อยู่แล้ว ใช้ ERP โดยตรง ไม่สร้างฐานแยก
+    const exactLoose=matchErp(item,erpRows,header)
+      .find(loc=>Boolean(loc?._isLoose))
+
+    if(exactLoose) continue
+
+    const familyKey=looseSkuFamilyKey(
+      header?.customer,
+      item?.item,
+      item?.code
+    )
+
+    const sibling=
+      familyLooseMap.get(familyKey) ||
+      findSiblingLooseLocationForItem(item,erpRows,header)
+
+    if(!sibling) continue
+
+    await upsertLooseSkuStockMemory({
+      customer:header?.customer,
+      item:item?.item,
+      color:item?.code,
+      size:item?.assort,
+      warehouse:sibling.warehouse,
+      location:sibling.location,
+      balancePairs:0,
+      source:'SIBLING_ERP'
+    })
+  }
+}
+
+function applyLooseSkuStockMemoryToLocations(item,locations,header=currentPickingHeader){
+  const rows=(locations||[]).map(r=>({...r}))
+
+  if(norm(header?.po_type)!=='ASN') return rows
+
+  const memory=getLooseSkuStockRecord(
+    header?.customer,
+    item?.item,
+    item?.code,
+    item?.assort
+  )
+
+  if(!memory) return rows
+
+  const sameIndex=rows.findIndex(r=>
+    norm(r.warehouse)===norm(memory.warehouse) &&
+    norm(r.location)===norm(memory.location)
+  )
+
+  if(sameIndex>=0){
+    // ERP มี SKU/Size นี้แล้ว -> ติ๊กเป็นงานเศษอัตโนมัติ
+    rows[sameIndex]={
+      ...rows[sameIndex],
+      _isLoose:true,
+      _looseMemoryMapped:true,
+      _looseMemory:false
+    }
+    return rows
+  }
+
+  // ERP ยังไม่มี SKU/Size นี้ -> ใช้ฐานจำแยกเป็น Location งานเศษจำลอง
+  rows.push({
+    item_number:looseSkuStockCanonicalItem(header?.customer,item?.item),
+    color_name:'',
+    size:txt(item?.assort),
+    color:looseSkuStockCanonicalColor(header?.customer,item?.code),
+    warehouse:txt(memory.warehouse),
+    location:txt(memory.location),
+    available_physical:Math.max(0,num(memory.balance_pairs)),
+    _isLoose:true,
+    _looseMemory:true,
+    _looseMemoryMapped:true
+  })
+
+  return rows
+}
+
+async function persistLooseSkuStockBalancesFromCurrentJob(rows,header=currentPickingHeader){
+  if(norm(header?.po_type)!=='ASN') return
+
+  const prep=buildAsnPreparationRows(
+    rows,
+    header,
+    {useStoredSnapshot:false}
+  )
+
+  for(const r of prep){
+    const memory=getLooseSkuStockRecord(
+      header?.customer,
+      r.model,
+      r.color,
+      r.size
+    )
+
+    if(!memory) continue
+    if(!r.looseLocation || r.looseLocation==='-') continue
+
+    await upsertLooseSkuStockMemory({
+      customer:header?.customer,
+      item:r.model,
+      color:r.color,
+      size:r.size,
+      warehouse:memory.warehouse,
+      location:r.looseLocation,
+      balancePairs:r.looseBalance,
+      source:memory.source||'SIBLING_ERP'
+    })
+  }
+}
 
 /* =========================================================
    FORBIDDEN LOCATION MASTER
@@ -13595,6 +15009,9 @@ function isForbiddenLocationRow(row){
    STOCK RESERVATION
    ========================= */
 let currentReservationMap=new Map()
+let currentOwnReservationMap=new Map()
+let currentShippedHoldMap=new Map()
+const ERP_UPLOAD_META_KEY='gambol_erp_current_upload_meta_v1'
 let reservationRealtimeChannel=null
 let reservationRealtimeTimer=null
 
@@ -13613,23 +15030,97 @@ async function loadReservationMap(excludePoId=null){
     .select('po_id,erp_item_number,erp_color,erp_size,warehouse,location,reserved_qty,status')
     .in('status',['ACTIVE','CONSUMED'])
     .limit(10000)
+
   const {data,error}=await q
   if(error) throw error
-  const map=new Map()
+
+  const otherMap=new Map()
+  const ownMap=new Map()
+
   ;(data||[]).forEach(r=>{
-    if(excludePoId && Number(r.po_id)===Number(excludePoId)) return
     const key=reservationErpKey(r)
-    map.set(key,(map.get(key)||0)+Math.max(0,num(r.reserved_qty)))
+    const qty=Math.max(0,num(r.reserved_qty))
+
+    if(excludePoId && Number(r.po_id)===Number(excludePoId)){
+      ownMap.set(key,(ownMap.get(key)||0)+qty)
+      return
+    }
+
+    otherMap.set(key,(otherMap.get(key)||0)+qty)
   })
-  currentReservationMap=map
-  return map
+
+  currentReservationMap=otherMap
+  currentOwnReservationMap=ownMap
+
+  return otherMap
+}
+
+function getErpUploadMeta(){
+  try{return JSON.parse(localStorage.getItem(ERP_UPLOAD_META_KEY)||'null')||null}
+  catch(e){return null}
+}
+function setErpUploadMeta(meta){
+  localStorage.setItem(ERP_UPLOAD_META_KEY,JSON.stringify(meta||{}))
+}
+function shippedHoldKeyFromJobRow(r){
+  return [norm(r?.model||r?.item_code||''),norm(r?.color||''),norm(r?.size||''),norm(r?.warehouse||''),norm(r?.location||'')].join('|')
+}
+function shippedHoldKeyFromErpRow(r){
+  return [norm(r?.item_number||''),norm(r?.color||''),norm(r?.size||''),norm(r?.warehouse||''),norm(r?.location||'')].join('|')
+}
+async function loadShippedHoldMap(){
+  currentShippedHoldMap=new Map()
+  const meta=getErpUploadMeta()
+  if(!meta?.uploadedAt) return currentShippedHoldMap
+
+  try{
+    const {data:heads,error:hErr}=await db.from(HEADER_TABLE)
+      .select('id,completed_at,status')
+      .eq('status','COMPLETED')
+      .gte('completed_at',meta.uploadedAt)
+      .limit(5000)
+    if(hErr) throw hErr
+
+    const ids=(heads||[]).map(r=>Number(r.id)).filter(Boolean)
+    if(!ids.length) return currentShippedHoldMap
+
+    const {data:rows,error:rErr}=await db.from(PICKING_JOB_TABLE)
+      .select('po_id,model,color,size,warehouse,location,pick_qty,is_shortage')
+      .in('po_id',ids)
+      .eq('is_shortage',false)
+      .limit(20000)
+    if(rErr) throw rErr
+
+    ;(rows||[]).forEach(r=>{
+      const qty=Math.max(0,num(r.pick_qty))
+      if(qty<=0) return
+      const key=shippedHoldKeyFromJobRow(r)
+      currentShippedHoldMap.set(key,(currentShippedHoldMap.get(key)||0)+qty)
+    })
+  }catch(error){
+    console.warn('SHIPPED HOLD load failed',error)
+    currentShippedHoldMap=new Map()
+  }
+  return currentShippedHoldMap
 }
 
 function applyReservationToErpRows(rows,map=currentReservationMap){
   return (rows||[]).map(r=>{
+    const reservationKey=reservationErpKey(r)
     const raw=Math.max(0,num(r.available_physical))
-    const reserved=Math.max(0,num(map.get(reservationErpKey(r))||0))
-    return {...r,_erpAvailable:raw,_reservedOther:reserved,available_physical:Math.max(0,raw-reserved)}
+    const reservedOther=Math.max(0,num(map.get(reservationKey)||0))
+    const reservedSelf=Math.max(0,num(currentOwnReservationMap.get(reservationKey)||0))
+    const shippedHold=Math.max(0,num(currentShippedHoldMap.get(shippedHoldKeyFromErpRow(r))||0))
+    const available=Math.max(0,raw-reservedOther-shippedHold)
+
+    return {
+      ...r,
+      _erpAvailable:raw,
+      _reservedOther:reservedOther,
+      _reservedSelf:reservedSelf,
+      _shippedHold:shippedHold,
+      available_physical:available
+    }
   })
 }
 
@@ -13879,7 +15370,7 @@ function poStatusLabel(status){
   if(s==='READY_FOR_PICKING') return 'READY FOR PICKING'
   if(s==='PICKING') return 'PICKING'
   if(s==='JOB_CREATED') return 'ทำใบจัดแล้ว'
-  if(s==='COMPLETED') return 'COMPLETED'
+  if(s==='COMPLETED') return 'ส่งแล้ว'
   return s||'-'
 }
 
@@ -13904,7 +15395,7 @@ async function loadActivePicking(){
 
   try{
     const {data,error}=await headerQueryCompat(
-      'id,po_no,customer,po_type,total_pairs,total_cartons,production_cartons,pbl_pairs_per_carton,status,created_by',
+      'id,po_no,customer,po_type,total_pairs,total_cartons,production_cartons,pbl_pairs_per_carton,status,created_by,delivery_date',
       q=>q
         .eq('status','JOB_CREATED')
         .order('id',{ascending:false})
@@ -13924,12 +15415,26 @@ async function loadActivePicking(){
     }
 
     list.innerHTML=rows.map(r=>`
-      <div class="po-card">
+      <div class="po-card active-picking-card">
         <div class="po-main">
           <strong>PO ${esc(r.po_no||'-')}</strong>
-          <span>${esc(r.customer||'-')} · ${esc(r.po_type||'-')} · ทำใบจัดแล้ว</span>
+          <span>${esc(r.customer||'-')} · ${esc(r.po_type||'-')}</span>
         </div>
-        <div class="po-metric"><small>PAIRS</small><b>${fmt(r.total_pairs)}</b></div>
+
+        <div class="po-metric">
+          <small>DELIVERY DATE</small>
+          <span class="active-delivery-date">${
+            r.delivery_date
+              ? esc(formatDeliveryDate(r.delivery_date))
+              : '-'
+          }</span>
+        </div>
+
+        <div class="po-metric">
+          <small>PAIRS</small>
+          <b>${fmt(r.total_pairs)}</b>
+        </div>
+
         <div class="po-metric">
           <small>TOTAL CARTONS</small>
           <b>${
@@ -13938,13 +15443,59 @@ async function loadActivePicking(){
               : fmt(displayedProductionCartons(r,0))
           }</b>
         </div>
-        <div class="po-metric"><small>STATUS</small><b>ทำใบจัดแล้ว</b></div>
-        <button class="po-action" data-active-job-po="${esc(r.id)}">เปิด Active Sheet</button>
+
+        <div class="po-metric">
+          <small>STATUS</small>
+          <div class="active-status-wrap">
+            <span class="active-status-badge">ทำใบจัดแล้ว</span>
+            <button
+              class="active-sent-btn"
+              type="button"
+              data-active-sent-po="${esc(r.id)}"
+              data-active-sent-no="${esc(r.po_no||'')}">
+              ส่งแล้ว
+            </button>
+          </div>
+        </div>
+
+        <button class="po-action" data-active-job-po="${esc(r.id)}">
+          เปิด Active Sheet
+        </button>
       </div>
     `).join('')
 
     list.querySelectorAll('[data-active-job-po]').forEach(btn=>{
       btn.onclick=()=>openActiveJobSheet(Number(btn.dataset.activeJobPo))
+    })
+
+    list.querySelectorAll('[data-active-sent-po]').forEach(btn=>{
+      btn.onclick=async()=>{
+        const poId=Number(btn.dataset.activeSentPo)
+        const poNo=txt(btn.dataset.activeSentNo)
+
+        const ok=confirm(
+          `ยืนยันสถานะ “ส่งแล้ว” ?\n\n`+
+          `PO ${poNo||poId}\n\n`+
+          `ระบบจะย้าย PO ไป COMPLETED และ Release Reservation`
+        )
+
+        if(!ok) return
+
+        btn.disabled=true
+        btn.textContent='กำลังบันทึก...'
+
+        try{
+          await markActivePoAsSent(poId,poNo)
+        }catch(error){
+          console.error(error)
+          alert(
+            'เปลี่ยนเป็นส่งแล้วไม่สำเร็จ\n\n'+
+            (error?.message||error)
+          )
+          btn.disabled=false
+          btn.textContent='ส่งแล้ว'
+        }
+      }
     })
   }catch(error){
     console.error(error)
@@ -13953,6 +15504,60 @@ async function loadActivePicking(){
       '<div class="empty"><div><strong style="color:#b91c1c">โหลดไม่สำเร็จ</strong>'+
       esc(error?.message||error)+'</div></div>'
   }
+}
+
+
+async function markActivePoAsSent(poId,poNo=''){
+  if(!poId) throw new Error('ไม่พบ PO ID')
+
+  const completedBy=
+    localStorage.getItem('erp_picking_user') ||
+    'ADMIN'
+
+  const nowIso=new Date().toISOString()
+
+  // ส่งแล้ว = งานออกจากคลังแล้ว จึงคืน/ลบ Reservation ทันที
+  const releaseRes=await db.rpc(
+    'release_picking_reservation',
+    {
+      p_po_id:Number(poId),
+      p_reason:'SENT'
+    }
+  )
+
+  if(releaseRes.error){
+    throw new Error(
+      'Release Reservation ไม่สำเร็จ: '+
+      (releaseRes.error.message||releaseRes.error)
+    )
+  }
+
+  const {data,error}=await db
+    .from(HEADER_TABLE)
+    .update({
+      status:'COMPLETED',
+      completed_at:nowIso,
+      completed_by:completedBy
+    })
+    .eq('id',Number(poId))
+    .eq('status','JOB_CREATED')
+    .select('id,po_no,status,completed_at,completed_by')
+    .single()
+
+  if(error) throw error
+  if(!data) throw new Error('ไม่พบ PO หรือสถานะ PO เปลี่ยนไปแล้ว')
+
+  // โหลด SHIPPED HOLD จาก job rows หลังสถานะเปลี่ยนเป็น COMPLETED
+  await loadShippedHoldMap()
+
+  await Promise.all([
+    loadActivePicking(),
+    loadCompletedJobs()
+  ])
+
+  showToast(
+    `PO ${poNo||data.po_no||poId} · ส่งแล้ว · Release Reservation เรียบร้อย`
+  )
 }
 
 
@@ -14215,6 +15820,169 @@ function renderActiveJobRows(){
   }
 }
 
+
+async function syncLooseSkuMemoryFromActiveJob(){
+  if(!activeJobHeader || norm(activeJobHeader?.po_type)!=='ASN') return
+
+  try{
+    await Promise.all([
+      loadPickingLooseLocationKeys(activeJobHeader.customer),
+      loadLooseSkuStockMemory(activeJobHeader.customer)
+    ])
+
+    const pdfRows=activeJobRowsForPdf()
+
+    // Location งานเศษที่เห็นจริงในใบจัดเก่า
+    const familyLooseMap=new Map()
+
+    ;(pdfRows||[]).forEach(r=>{
+      if(Boolean(r.shortage)) return
+      if(norm(r.loose)!=='เศษ') return
+
+      const location=txt(r.location)
+      const warehouse=txt(r.warehouse)
+
+      if(!location || location==='-' || !warehouse || warehouse==='-') return
+
+      familyLooseMap.set(
+        looseSkuFamilyKey(
+          activeJobHeader.customer,
+          r.model,
+          r.color
+        ),
+        {warehouse,location}
+      )
+    })
+
+    // ERP ปัจจุบันใช้เป็น fallback เพิ่มเติม
+    const uniqueModels=[
+      ...new Set(
+        (pdfRows||[])
+          .map(r=>txt(r.model))
+          .filter(v=>v && v!=='-')
+      )
+    ]
+
+    let erpRows=[]
+    if(uniqueModels.length){
+      erpRows=await fetchErpRowsForItems(
+        uniqueModels,
+        activeJobHeader
+      )
+    }
+
+    // เพิ่ม Location งานเศษจาก ERP ของ Size อื่นเข้ามาใน family map
+    ;(pdfRows||[]).forEach(r=>{
+      const fakeItem={
+        item:r.model,
+        code:r.color,
+        assort:r.size
+      }
+
+      const exactLoose=matchErp(
+        fakeItem,
+        erpRows,
+        activeJobHeader
+      ).find(loc=>Boolean(loc?._isLoose))
+
+      if(exactLoose){
+        familyLooseMap.set(
+          looseSkuFamilyKey(
+            activeJobHeader.customer,
+            r.model,
+            r.color
+          ),
+          {
+            warehouse:txt(exactLoose.warehouse),
+            location:txt(exactLoose.location)
+          }
+        )
+      }
+    })
+
+    const prepRows=buildAsnPreparationRows(
+      pdfRows,
+      activeJobHeader,
+      {useStoredSnapshot:false}
+    )
+
+    let inserted=0
+
+    for(const r of prepRows){
+      const memoryKey=looseSkuStockKey(
+        activeJobHeader.customer,
+        r.model,
+        r.color,
+        r.size
+      )
+
+      // ถ้ามีฐานจำอยู่แล้ว ไม่เขียนทับแบบเดาสุ่ม
+      if(currentLooseSkuStockMap.has(memoryKey)) continue
+
+      const fakeItem={
+        item:r.model,
+        code:r.color,
+        assort:r.size
+      }
+
+      // ถ้า ERP มี Size นี้ที่งานเศษอยู่แล้ว ไม่ต้องสร้างฐานแยก
+      const exactLoose=matchErp(
+        fakeItem,
+        erpRows,
+        activeJobHeader
+      ).find(loc=>Boolean(loc?._isLoose))
+
+      if(exactLoose) continue
+
+      const sibling=
+        familyLooseMap.get(
+          looseSkuFamilyKey(
+            activeJobHeader.customer,
+            r.model,
+            r.color
+          )
+        ) ||
+        findSiblingLooseLocationForItem(
+          fakeItem,
+          erpRows,
+          activeJobHeader
+        )
+
+      if(!sibling) continue
+
+      /*
+       * ถ้าเดิมไม่มีงานเศษของ Size นี้:
+       * 15 คู่ -> 3 กล่อง -> ดึง 3 -> เก็บ 3 คู่กลับ Location งานเศษ
+       * ใช้ looseBalance ที่ buildAsnPreparationRows คำนวณไว้
+       */
+      const saved=await upsertLooseSkuStockMemory({
+        customer:activeJobHeader.customer,
+        item:r.model,
+        color:r.color,
+        size:r.size,
+        warehouse:sibling.warehouse,
+        location:sibling.location,
+        balancePairs:Math.max(0,num(r.looseBalance)),
+        source:'ACTIVE_JOB_BACKFILL'
+      })
+
+      if(saved) inserted++
+    }
+
+    if(inserted>0){
+      // โหลดใหม่ให้ PDF รอบนี้เห็น Location/ยอดที่เพิ่งสร้างทันที
+      await loadLooseSkuStockMemory(activeJobHeader.customer)
+      console.log('Loose SKU Memory Backfill:',{
+        po:activeJobHeader.po_no,
+        inserted
+      })
+    }
+  }catch(error){
+    console.warn('syncLooseSkuMemoryFromActiveJob failed',error)
+  }
+}
+
+
 async function openActiveJobSheet(poId,options={}){
   activeJobPoId=Number(poId)
   activeJobMode=options.fromCompleted?'completed':'active'
@@ -14228,7 +15996,7 @@ async function openActiveJobSheet(poId,options={}){
   notice.className='detail-message'
 
   try{
-    const [headerRes,rowsRes]=await Promise.all([
+    const [headerRes,rowsRes,sourceItemsRes]=await Promise.all([
       headerQueryCompat(
         'id,po_no,customer,po_type,total_pairs,total_cartons,production_cartons,pbl_pairs_per_carton,status,created_by,delivery_date,completed_at,completed_by',
         q=>q.eq('id',activeJobPoId).single()
@@ -14238,14 +16006,43 @@ async function openActiveJobSheet(poId,options={}){
         .select('id,po_id,po_item_id,line_no,item_code,model,color,size,warehouse,location,pick_qty,box_qty,loose_text,is_shortage,scanned,scanned_at,scanned_by,created_by,created_at,w_center_has_stock,w_center_available,w_center_pick_qty,w_center_locations,w_center_sources')
         .eq('po_id',activeJobPoId)
         .order('line_no',{ascending:true})
-        .order('id',{ascending:true})
+        .order('id',{ascending:true}),
+
+      db.from(ITEM_TABLE)
+        .select('id,line_no,item,code,assort,order_pairs,carton_qty,remark')
+        .eq('po_id',activeJobPoId)
+        .order('line_no',{ascending:true})
     ])
 
     if(headerRes.error) throw headerRes.error
     if(rowsRes.error) throw rowsRes.error
+    if(sourceItemsRes.error) throw sourceItemsRes.error
 
     activeJobHeader=headerRes.data
-    activeJobAllRowsState=rowsRes.data||[]
+
+    const sourceItemMap=new Map(
+      (sourceItemsRes.data||[]).map(r=>[String(r.id),r])
+    )
+
+    activeJobAllRowsState=(rowsRes.data||[]).map(r=>({
+      ...r,
+      source_carton_qty:
+        sourceItemMap.has(String(r.po_item_id))
+          ? Math.max(0,num(sourceItemMap.get(String(r.po_item_id)).carton_qty))
+          : 0,
+      source_order_pairs:
+        sourceItemMap.has(String(r.po_item_id))
+          ? Math.max(0,num(sourceItemMap.get(String(r.po_item_id)).order_pairs))
+          : 0,
+      source_remark:
+        sourceItemMap.has(String(r.po_item_id))
+          ? txt(sourceItemMap.get(String(r.po_item_id)).remark)
+          : ''
+    }))
+
+    // Backfill ฐานจำงานเศษสำหรับใบจัดเก่าที่สร้างก่อนมีระบบ picking_loose_sku_stock
+    // เช่น GW11283BKYL 36 จะเรียนรู้ LT-E-2 จาก Size 37/38/39
+    await syncLooseSkuMemoryFromActiveJob()
 
     // ใช้เฉพาะรายการที่ไม่ใช่งานขาดสำหรับ logic การสแกน/ปิดงาน
     // แต่หน้า Active Job จะแสดง activeJobAllRowsState ทั้งหมดให้ตรงกับใบจัด
@@ -14540,6 +16337,19 @@ function activeJobRowsForPdf(){
       itemUsablePairs:total.usablePairs,
       itemShortagePairs:total.shortagePairs,
       itemTotalBox:total.box,
+
+      // จำนวนกล่องจาก po_items ต้นฉบับ
+      // ใช้กับ PBL แบบปกติ เช่น 24 คู่ / 4 กล่อง = 6 คู่ต่อกล่อง
+      sourceCartonQty:firstOfItem
+        ? Math.max(0,num(r.source_carton_qty))
+        : 0,
+      sourceOrderPairs:firstOfItem
+        ? Math.max(0,num(r.source_order_pairs))
+        : 0,
+      sourceRemark:firstOfItem
+        ? txt(r.source_remark)
+        : '',
+
       firstOfItem,
 
       loose:r.loose_text||'',
@@ -14693,6 +16503,1378 @@ function pblPickCartons(row,header=null){
 }
 
 
+/*
+ * ASN ใบจัดแบบใหม่
+ * - ใช้ยอดที่ระบบ Allocation ไว้แล้ว (งานเศษก่อน -> Location หลัก -> งานขาด)
+ * - เศษ = จำนวนคู่ที่หยิบจาก Location งานเศษ
+ * - กล่อง = จำนวนกล่องเต็มที่ต้องยกจาก Location หลัก
+ * - ดึง = จำนวนคู่ส่วนเกินที่ต้องดึงออกจากกล่องเต็ม
+ *   สูตร: (กล่อง x 6) - จำนวนคู่ที่ต้องใช้จาก Location หลัก
+ */
+function buildAsnLoosePullRows(rows){
+  const groups=new Map()
+
+  ;(rows||[]).forEach((r,index)=>{
+    const key=String(
+      r.poItemId ??
+      r.po_item_id ??
+      r.lineNo ??
+      r.line_no ??
+      [
+        r.model||'',
+        r.color||'',
+        r.size||'',
+        index
+      ].join('|')
+    )
+
+    if(!groups.has(key)){
+      groups.set(key,{
+        model:txt(r.model)||'-',
+        color:txt(r.color)||'-',
+        size:txt(r.size)||'-',
+        rows:[]
+      })
+    }
+
+    groups.get(key).rows.push(r)
+  })
+
+  const output=[]
+  let no=1
+
+  groups.forEach(group=>{
+    const totalFromItem=group.rows.find(r=>num(r.itemTotalPairs)>0)?.itemTotalPairs
+    const total=totalFromItem>0
+      ? Math.max(0,num(totalFromItem))
+      : group.rows.reduce(
+          (sum,r)=>sum+Math.max(0,num(r.pairs ?? r.pick_qty)),
+          0
+        )
+
+    let first=true
+
+    group.rows.forEach(r=>{
+      const pick=Math.max(0,num(r.pairs ?? r.pick_qty))
+      if(pick<=0) return
+
+      const shortage=Boolean(r.shortage || r.is_shortage)
+      const isLoose=!shortage && norm(r.loose ?? r.loose_text)==='เศษ'
+
+      let looseQty=''
+      let boxQty=''
+      let drawQty=''
+      let location=txt(r.location)||'-'
+      let warehouse=txt(r.warehouse)||'-'
+
+      if(shortage){
+        // งานขาด ASN ต้องแจ้งจำนวนกล่องเต็มที่ต้องใช้ และจำนวนคู่ที่ต้องดึงออก
+        // ตัวอย่าง: ขาด 1 คู่ => 1 กล่อง / ดึง 5 คู่
+        //          ขาด 5 คู่ => 1 กล่อง / ดึง 1 คู่
+        //          ขาด 7 คู่ => 2 กล่อง / ดึง 5 คู่
+        boxQty=Math.ceil(pick/PACK_SIZE)
+        drawQty=Math.max(0,(boxQty*PACK_SIZE)-pick)
+
+        location=(r.wCenterHasStock||r.w_center_has_stock)
+          ? `งานขาด ${fmt(pick)} คู่ (มี W-CENTER)`
+          : `งานขาด ${fmt(pick)} คู่`
+        warehouse='-'
+      }else if(isLoose){
+        looseQty=pick
+      }else{
+        const storedBox=Math.max(0,num(r.box ?? r.box_qty))
+        boxQty=storedBox>0
+          ? storedBox
+          : Math.ceil(pick/PACK_SIZE)
+
+        const extra=Math.max(0,(boxQty*PACK_SIZE)-pick)
+        drawQty=extra>0 ? extra : ''
+      }
+
+      output.push({
+        no:first ? no : '',
+        model:first ? group.model : '',
+        color:first ? group.color : '',
+        size:first ? group.size : '',
+        total:first ? total : '',
+        looseQty,
+        boxQty,
+        drawQty,
+        location,
+        warehouse,
+        shortage,
+        isLoose,
+        groupStart:first
+      })
+
+      first=false
+    })
+
+    if(first){
+      output.push({
+        no,
+        model:group.model,
+        color:group.color,
+        size:group.size,
+        total,
+        looseQty:'',
+        boxQty:'',
+        drawQty:'',
+        location:'-',
+        warehouse:'-',
+        shortage:false,
+        isLoose:false,
+        groupStart:true
+      })
+    }
+
+    no++
+  })
+
+  return output
+}
+
+
+function asnPrepSnapshotStorageKey(poId){
+  return 'erp_picking_asn_prep_snapshot_v1_'+String(poId||'')
+}
+
+function loadAsnPrepSnapshot(poId){
+  if(!poId) return {}
+  try{
+    const raw=localStorage.getItem(asnPrepSnapshotStorageKey(poId))
+    const parsed=raw ? JSON.parse(raw) : {}
+    return parsed && typeof parsed==='object' ? parsed : {}
+  }catch(e){
+    return {}
+  }
+}
+
+function saveAsnPrepSnapshot(poId,rows,header){
+  if(!poId || norm(header?.po_type)!=='ASN') return
+
+  try{
+    const prep=buildAsnPreparationRows(rows,header,{useStoredSnapshot:false})
+    const snapshot={}
+
+    prep.forEach(r=>{
+      snapshot[r.key]={
+        looseStock:r.looseStock,
+        looseLocation:r.looseLocation
+      }
+    })
+
+    localStorage.setItem(
+      asnPrepSnapshotStorageKey(poId),
+      JSON.stringify(snapshot)
+    )
+  }catch(e){
+    console.warn('save ASN preparation snapshot',e)
+  }
+}
+
+/*
+ * ASN: เงื่อนไข "เศษ / ดึง"
+ *
+ * 1 กล่อง = 6 คู่
+ * remainder = TOTAL % 6
+ *
+ * ถ้า remainder = 0:
+ *   - ใช้กล่องเต็มอย่างเดียว
+ *
+ * ถ้า stock งานเศษ >= remainder:
+ *   - หมายเหตุ = เศษ remainder
+ *   - จำนวนกล่อง = floor(TOTAL / 6)
+ *   - เหลือ = stock เศษ - remainder
+ *
+ * ถ้า stock งานเศษ < remainder:
+ *   - หมายเหตุ = ดึง (6 - remainder)
+ *   - จำนวนกล่อง = ceil(TOTAL / 6)
+ *   - เหลือ = stock เศษ + จำนวนที่ดึง
+ */
+
+function asnPrepDisplayItemCode(model,color,fallback){
+  let m=txt(model)
+  let c=txt(color).replace(/^-+/,'').trim()
+
+  if(!m || m==='-'){
+    let f=txt(fallback)
+    if(!f) return '-'
+
+    // เคส fallback เช่น GW41152-BL-BL / GW41152-BLBL
+    if(c){
+      const escColor=c.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')
+      f=f.replace(new RegExp('(?:[-_ ]?'+escColor+'){1,2}$','i'),'')
+      return f+c
+    }
+    return f
+  }
+
+  if(c){
+    const escColor=c.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')
+    // ถ้า Item มีสีติดท้ายอยู่แล้ว ให้ตัดออกก่อนแล้วค่อยต่อสี 1 ครั้ง
+    m=m.replace(new RegExp('[-_ ]?'+escColor+'$','i'),'')
+    return m+c
+  }
+
+  return m
+}
+
+
+
+function asnPrepLooseLocationFromPickingState(groupKey){
+  try{
+    const data=pickingLineData.get(String(groupKey))
+    if(!data || !Array.isArray(data.locations)) return ''
+
+    return (
+      data.locations
+        .filter(loc=>loc && loc._isLoose && !isHiddenPickingLocation(loc))
+        .map(loc=>txt(loc.location))
+        .find(Boolean)
+    ) || ''
+  }catch(e){
+    return ''
+  }
+}
+
+function asnPrepWbtSupportFromRows(shortageRows,shortagePairs){
+  // เตรียมรองรับ WBT ในอนาคตโดยไม่บังคับ schema ปัจจุบัน
+  // ถ้ายังไม่มีข้อมูล WBT จะคืนค่า 0/ว่าง
+  const rows=Array.isArray(shortageRows) ? shortageRows : []
+
+  const available=Math.max(
+    ...rows.map(r=>num(
+      r.wbtAvailable ??
+      r.wbt_available ??
+      0
+    )),
+    0
+  )
+
+  const pickQty=Math.min(
+    Math.max(0,num(shortagePairs)),
+    rows.reduce(
+      (sum,r)=>sum+Math.max(0,num(
+        r.wbtPickQty ??
+        r.wbt_pick_qty ??
+        0
+      )),
+      0
+    )
+  )
+
+  const locations=rows
+    .map(r=>txt(
+      r.wbtLocations ??
+      r.wbt_locations ??
+      ''
+    ))
+    .filter(Boolean)
+    .filter((v,i,a)=>a.indexOf(v)===i)
+    .join(', ')
+
+  return {
+    available,
+    pickQty,
+    locations,
+    hasStock:pickQty>0 || available>0
+  }
+}
+
+function asnPrepBuildWmtDisplay({
+  mainLocations='',
+  mainBoxes='',
+  shortagePairs=0,
+  wcPick=0,
+  wcLocations='',
+  wbtPick=0,
+  wbtLocations=''
+}={}){
+  const parts=[]
+
+  if(txt(mainLocations)){
+    parts.push(
+      `<span class="asn-wmt-main">${esc(mainLocations)}</span>`
+    )
+  }
+
+  /*
+   * เงื่อนไขใหม่:
+   * - W-CENTER ต้องมีเพียงพอครบทั้งงานขาด จึงจะใช้
+   * - ถ้าไม่พอ แม้มีบางส่วน ห้ามนำมาหักออก
+   * - WBT ใช้หลักเดียวกัน
+   * - หากทั้งสองแหล่งไม่เพียงพอ ให้คิด "งานขาด" จากยอดขาดเต็มจำนวน
+   *
+   * ตัวอย่าง:
+   * ERP ขาด 23 คู่, W-CENTER มี 5 คู่
+   * => ไม่ใช้ 5 คู่นั้น
+   * => งานขาด ceil(23/6) = 4 กล่อง
+   */
+  const shortage=Math.max(0,num(shortagePairs))
+  const wcAvailable=Math.max(0,num(wcPick))
+  const wbtAvailable=Math.max(0,num(wbtPick))
+
+  if(shortage>0 && wcAvailable>=shortage){
+    parts.push(
+      `<span class="asn-support-line">W-CENTER เพียงพอ</span>`
+    )
+
+    return {
+      html:parts.join(''),
+      box:mainBoxes
+    }
+  }
+
+  if(shortage>0 && wbtAvailable>=shortage){
+    parts.push(
+      `<span class="asn-support-line wbt">WBT เพียงพอ</span>`
+    )
+
+    return {
+      html:parts.join(''),
+      box:mainBoxes
+    }
+  }
+
+  if(shortage>0){
+    const shortageBoxes=Math.ceil(shortage/PACK_SIZE)
+
+    parts.push(
+      `<span class="asn-shortage-line">งานขาด ${fmt(shortageBoxes)} กล่อง</span>`
+    )
+  }
+
+  return {
+    html:parts.join(''),
+    box:mainBoxes
+  }
+}
+
+function buildAsnPreparationRows(rows,header,{useStoredSnapshot=true}={}){
+  const groups=new Map()
+
+  ;(rows||[]).forEach((r,index)=>{
+    const key=String(
+      r.poItemId ??
+      r.po_item_id ??
+      r.lineNo ??
+      r.line_no ??
+      [r.model||'',r.color||'',r.size||'',index].join('|')
+    )
+
+    if(!groups.has(key)){
+      groups.set(key,{
+        key,
+        itemCode:
+          asnPrepDisplayItemCode(
+            r.model,
+            r.color,
+            r.itemCode||r.item_code
+          ),
+        model:txt(r.model)||'-',
+        color:txt(r.color)||'-',
+        size:txt(r.size)||'-',
+        rows:[]
+      })
+    }
+
+    groups.get(key).rows.push(r)
+  })
+
+  const poId=
+    header?.id ||
+    currentPickingPoId ||
+    activeJobPoId ||
+    null
+
+  const stored=useStoredSnapshot
+    ? loadAsnPrepSnapshot(poId)
+    : {}
+
+  // หา Location งานเศษร่วมของ SKU เดียวกันจาก rows ในใบจัดเอง
+  const rowFamilyLooseMap=new Map()
+
+  groups.forEach(group=>{
+    const looseRow=group.rows.find(r=>
+      !(r.shortage || r.is_shortage) &&
+      norm(r.loose ?? r.loose_text)==='เศษ' &&
+      txt(r.location) &&
+      txt(r.location)!=='-'
+    )
+
+    if(looseRow){
+      rowFamilyLooseMap.set(
+        looseSkuFamilyKey(
+          header?.customer,
+          group.model,
+          group.color
+        ),
+        {
+          warehouse:txt(looseRow.warehouse),
+          location:txt(looseRow.location)
+        }
+      )
+    }
+  })
+
+  const output=[]
+
+  groups.forEach(group=>{
+    const allRows=group.rows
+
+    const totalFromItem=
+      allRows.find(r=>num(r.itemTotalPairs)>0)?.itemTotalPairs
+
+    const totalPairs=totalFromItem>0
+      ? Math.max(0,num(totalFromItem))
+      : allRows.reduce(
+          (sum,r)=>sum+Math.max(0,num(r.pairs ?? r.pick_qty)),
+          0
+        )
+
+    const looseRows=allRows.filter(r=>
+      !(r.shortage || r.is_shortage) &&
+      norm(r.loose ?? r.loose_text)==='เศษ'
+    )
+
+    const mainRows=allRows.filter(r=>
+      !(r.shortage || r.is_shortage) &&
+      norm(r.loose ?? r.loose_text)!=='เศษ'
+    )
+
+    const shortageRows=allRows.filter(r=>
+      Boolean(r.shortage || r.is_shortage)
+    )
+
+    const looseLocation=
+      (
+        looseRows
+          .map(r=>txt(r.location))
+          .find(Boolean)
+      ) || ''
+
+    let looseStock=looseRows.reduce((sum,r)=>{
+      const stock=r.stockBefore ?? r.stock_before
+      if(stock!==undefined && stock!==null && txt(stock)!==''){
+        return sum+Math.max(0,num(stock))
+      }
+      return sum
+    },0)
+
+    const looseMemory=getLooseSkuStockRecord(
+      header?.customer,
+      group.model,
+      group.color,
+      group.size
+    )
+
+    if(
+      looseStock<=0 &&
+      looseMemory &&
+      txt(looseMemory.balance_pairs)!==''
+    ){
+      looseStock=Math.max(0,num(looseMemory.balance_pairs))
+    }
+
+    if(
+      looseStock<=0 &&
+      stored[group.key] &&
+      txt(stored[group.key].looseStock)!==''
+    ){
+      looseStock=Math.max(0,num(stored[group.key].looseStock))
+    }
+
+    if(looseStock<=0 && looseRows.length){
+      looseStock=looseRows.reduce(
+        (sum,r)=>sum+Math.max(0,num(r.pairs ?? r.pick_qty)),
+        0
+      )
+    }
+
+    const siblingLoose=rowFamilyLooseMap.get(
+      looseSkuFamilyKey(
+        header?.customer,
+        group.model,
+        group.color
+      )
+    )
+
+    const looseLocFinal=
+      looseLocation ||
+      asnPrepLooseLocationFromPickingState(group.key) ||
+      txt(looseMemory?.location) ||
+      txt(siblingLoose?.location) ||
+      txt(stored[group.key]?.looseLocation) ||
+      '-'
+
+    const remainder=totalPairs % PACK_SIZE
+
+    let boxQty=Math.floor(totalPairs/PACK_SIZE)
+    let noteType=''
+    let noteQty=''
+    let looseBalance=looseStock
+
+    if(remainder>0){
+      if(looseStock>=remainder){
+        noteType='เศษ'
+        noteQty=remainder
+        looseBalance=Math.max(0,looseStock-remainder)
+      }else{
+        noteType='ดึง'
+        noteQty=PACK_SIZE-remainder
+        boxQty=Math.ceil(totalPairs/PACK_SIZE)
+        looseBalance=looseStock+noteQty
+      }
+    }
+
+    const wmtLocationText=
+      mainRows
+        .map(r=>txt(r.location))
+        .filter(Boolean)
+        .filter((v,i,a)=>a.indexOf(v)===i)
+        .join(', ')
+
+    const storedMainBoxes=
+      mainRows.reduce(
+        (sum,r)=>sum+Math.max(0,num(r.box ?? r.box_qty)),
+        0
+      )
+
+    const wmtBoxQty=
+      wmtLocationText
+        ? (storedMainBoxes>0 ? storedMainBoxes : boxQty)
+        : ''
+
+    const shortagePairs=
+      shortageRows.reduce(
+        (sum,r)=>sum+Math.max(0,num(r.pairs ?? r.pick_qty)),
+        0
+      )
+
+    const wcAvailable=Math.max(
+      ...shortageRows.map(r=>num(r.wCenterAvailable ?? r.w_center_available)),
+      0
+    )
+
+    const wcPick=
+      shortageRows.reduce(
+        (sum,r)=>sum+Math.max(0,num(r.wCenterPickQty ?? r.w_center_pick_qty)),
+        0
+      )
+
+    const wcLocations=
+      shortageRows
+        .map(r=>txt(r.wCenterLocations ?? r.w_center_locations))
+        .filter(Boolean)
+        .filter((v,i,a)=>a.indexOf(v)===i)
+        .join(', ')
+
+    const wbtSupport=asnPrepWbtSupportFromRows(
+      shortageRows,
+      shortagePairs
+    )
+
+    const wmtDisplay=asnPrepBuildWmtDisplay({
+      mainLocations:wmtLocationText,
+      mainBoxes:wmtBoxQty,
+      shortagePairs,
+      wcPick,
+      wcLocations,
+      wbtPick:wbtSupport.pickQty,
+      wbtLocations:wbtSupport.locations
+    })
+
+    output.push({
+      key:group.key,
+      itemCode:group.itemCode,
+      model:group.model,
+      color:group.color,
+      size:group.size,
+      totalPairs,
+      boxQty,
+      noteType,
+      noteQty,
+      looseLocation:looseLocFinal,
+      looseStock,
+      looseBalance,
+      wmtLocationText,
+      wmtBoxQty,
+      shortagePairs,
+      wcPick,
+      wcLocations,
+      wbtPick:wbtSupport.pickQty,
+      wbtLocations:wbtSupport.locations,
+      wmtDisplayHtml:wmtDisplay.html,
+      wmtDisplayBox:wmtDisplay.box
+    })
+  })
+
+  return output
+}
+
+
+function asnOriginalWCenterText(row){
+  const raw=String(row?.wCenterText||'').trim()
+
+  if(!raw || raw==='ไม่มี'){
+    return ''
+  }
+
+  if(raw.startsWith('มีสินค้าเพียงพอ')){
+    return 'มีสินค้าเพียงพอ'
+  }
+
+  const firstLine=raw
+    .replace(/<br\s*\/?>[\s\S]*$/i,'')
+    .replace(/<[^>]*>/g,'')
+    .trim()
+
+  return firstLine
+}
+
+
+
+function asnPrepPlainText_(html){
+  return String(html||'')
+    .replace(/<br\s*\/?>/gi,' ')
+    .replace(/<[^>]*>/g,'')
+    .replace(/&nbsp;/gi,' ')
+    .replace(/\s+/g,' ')
+    .trim()
+}
+
+function asnPrepDisplayLength_(value){
+  const s=asnPrepPlainText_(value)
+
+  let len=0
+  for(const ch of s){
+    // ภาษาไทย/ตัวอักษรกว้าง ให้เผื่อ 1.25 ตัวอักษร
+    len += /[^\x00-\x7F]/.test(ch) ? 1.25 : 1
+  }
+
+  return Math.ceil(len)
+}
+
+function asnPrepFitWidths_(prepRows){
+  const headers=[
+    'รุ่น / สี',
+    'ไซส์',
+    'จำนวน กล่อง',
+    'ประเภท',
+    'จำนวน',
+    'คู่',
+    'LOCATION',
+    'เศษ',
+    'เหลือ',
+    'LOCATION',
+    'กล่อง'
+  ]
+
+  const values=headers.map(h=>[h])
+
+  ;(prepRows||[]).forEach(r=>{
+    values[0].push(r.itemCode)
+    values[1].push(r.size)
+    values[2].push(r.boxQty)
+    values[3].push(r.noteType)
+    values[4].push(r.noteQty)
+    values[5].push(r.totalPairs)
+    values[6].push(r.looseLocation==='-'?'':r.looseLocation)
+    values[7].push(r.looseLocation==='-'?'':r.looseStock)
+    values[8].push(r.looseLocation==='-'?'':r.looseBalance)
+    values[9].push(r.wmtDisplayHtml||'')
+    values[10].push(r.wmtDisplayBox===''?'':r.wmtDisplayBox)
+  })
+
+  return values.map((arr,index)=>{
+    const maxLen=Math.max(
+      ...arr.map(asnPrepDisplayLength_),
+      1
+    )
+
+    // +4ch = เผื่อประมาณซ้าย 2 + ขวา 2 ตัวอักษร
+    // min/max ป้องกันคอลัมน์เล็กหรือใหญ่เกินไป
+    let width=Math.max(5,maxLen+4)
+
+    if(index===0) width=Math.max(width,12)
+    if(index===6) width=Math.max(width,10)
+    if(index===9) width=Math.max(width,14)
+
+    width=Math.min(width,index===9 ? 34 : 22)
+
+    return width
+  })
+}
+
+
+function buildAsnPreparationTableHtml(rows,header){
+  const prepRows=buildAsnPreparationRows(rows,header)
+  const fitWidths=asnPrepFitWidths_(prepRows)
+
+  const customer=txt(header?.customer)||'-'
+  const po=txt(header?.po_no)||'-'
+  const deliveryDate=formatDeliveryDate(header?.delivery_date||'')
+  const shippedCartons=displayedProductionCartons(header,null)
+
+  const totalBoxes=prepRows.reduce(
+    (sum,r)=>sum+Math.max(0,num(r.boxQty)),
+    0
+  )
+
+  const totalPairs=prepRows.reduce(
+    (sum,r)=>sum+Math.max(0,num(r.totalPairs)),
+    0
+  )
+
+  return `
+    <div class="pdf-asn-original-wrap">
+    <table class="pdf-asn-original">
+      <colgroup>
+        ${fitWidths.map(w=>`<col style="width:${w}ch">`).join('')}
+      </colgroup>
+
+      <thead>
+        <tr>
+          <th colspan="11" class="asn-title">
+            ใบจัดเตรียม ${esc(customer)}
+          </th>
+        </tr>
+
+        <tr>
+          <th class="asn-meta-label">PO</th>
+          <th class="asn-meta-value">${esc(po)}</th>
+
+          <th class="asn-meta-label">วันที่จัดส่ง</th>
+          <th class="asn-meta-value">${esc(deliveryDate)}</th>
+
+          <th class="asn-meta-label">จำนวนกล่องที่ส่ง</th>
+          <th class="asn-meta-value">
+            ${shippedCartons===null?'':fmt(shippedCartons)}
+          </th>
+
+          <th colspan="3" class="asn-loose-title">งานเศษ</th>
+          <th colspan="2" class="asn-head">WMT</th>
+        </tr>
+
+        <tr>
+          <th class="asn-head">รุ่น / สี</th>
+          <th class="asn-head">ไซส์</th>
+          <th class="asn-head">จำนวน กล่อง</th>
+
+          <th colspan="2" class="asn-head">หมายเหตุ</th>
+
+          <th class="asn-head">คู่</th>
+
+          <th class="asn-head asn-loose-head">LOCATION</th>
+          <th class="asn-head asn-loose-head">เศษ</th>
+          <th class="asn-head">เหลือ</th>
+
+          <th class="asn-head">LOCATION</th>
+          <th class="asn-head">กล่อง</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        ${prepRows.map(r=>`
+          <tr>
+            <td class="asn-item">${esc(r.itemCode)}</td>
+            <td>${esc(r.size)}</td>
+            <td>${fmt(r.boxQty)}</td>
+
+            <td>${esc(r.noteType)}</td>
+            <td>${r.noteQty===''?'':fmt(r.noteQty)}</td>
+
+            <td>${fmt(r.totalPairs)}</td>
+
+            <td class="asn-loose-location">
+              ${r.looseLocation==='-'?'':esc(r.looseLocation)}
+            </td>
+
+            <td class="asn-loose-stock">
+              ${r.looseLocation==='-'?'':fmt(r.looseStock)}
+            </td>
+
+            <td>
+              ${r.looseLocation==='-'?'':fmt(r.looseBalance)}
+            </td>
+
+            <td class="asn-wmt-location">
+              ${r.wmtDisplayHtml||''}
+            </td>
+
+            <td class="asn-wmt-box">
+              ${r.wmtDisplayBox===''?'':fmt(r.wmtDisplayBox)}
+            </td>
+          </tr>
+        `).join('')}
+
+        <tr class="asn-total-row">
+          <td></td>
+          <td>รวม</td>
+          <td>${fmt(totalBoxes)}</td>
+          <td colspan="2"></td>
+          <td>${fmt(totalPairs)}</td>
+          <td colspan="5"></td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  `
+}
+
+
+function buildAsnPreparationMetaHtml(header,po,customer){
+  return ''
+}
+
+
+function pblGcd_(a,b){
+  a=Math.abs(Math.round(num(a)))
+  b=Math.abs(Math.round(num(b)))
+  while(b){
+    const t=b
+    b=a%b
+    a=t
+  }
+  return a||0
+}
+
+function pblGcdArray_(values){
+  const nums=(values||[])
+    .map(v=>Math.max(0,Math.round(num(v))))
+    .filter(v=>v>0)
+  if(!nums.length) return 0
+  return nums.reduce((g,v)=>pblGcd_(g,v))
+}
+
+function pblNumericSize_(value){
+  const s=String(value??'').trim()
+  if(!/^\d+(?:\.\d+)?$/.test(s)) return null
+  return Number(s)
+}
+
+function pblCompactSizeGroup_(sizes){
+  const clean=[...new Set((sizes||[]).map(v=>String(v??'').trim()).filter(Boolean))]
+  if(!clean.length) return '-'
+
+  const numeric=clean.map(v=>({raw:v,n:pblNumericSize_(v)}))
+  if(numeric.every(x=>x.n!==null)){
+    numeric.sort((a,b)=>a.n-b.n)
+    if(numeric.length===1) return numeric[0].raw
+
+    const diffs=[]
+    for(let i=1;i<numeric.length;i++) diffs.push(numeric[i].n-numeric[i-1].n)
+    const firstDiff=diffs[0]
+    const contiguous=firstDiff>0 && diffs.every(d=>Math.abs(d-firstDiff)<1e-9)
+    if(contiguous) return `${numeric[0].raw}-${numeric[numeric.length-1].raw}`
+    return numeric.map(x=>x.raw).join(', ')
+  }
+
+  return clean.join(', ')
+}
+
+function pblRequiredRows_(rows){
+  const groups=new Map()
+
+  ;(rows||[]).forEach((r,index)=>{
+    const key=String(
+      r.poItemId ??
+      r.po_item_id ??
+      r.lineNo ??
+      r.line_no ??
+      [r.model||'',r.color||'',r.size||'',index].join('|')
+    )
+
+    if(!groups.has(key)){
+      groups.set(key,{
+        model:txt(r.model)||'-',
+        color:txt(r.color)||'-',
+        size:txt(r.size)||'-',
+        itemCode:txt(r.itemCode||r.item_code)||((txt(r.model)||'')+(txt(r.color)||'')),
+        totalPairs:0,
+        cartonQty:0,
+        sourceRemark:''
+      })
+    }
+
+    const g=groups.get(key)
+    const explicit=Math.max(
+      0,
+      num(r.sourceOrderPairs || r.itemTotalPairs)
+    )
+
+    if(explicit>0){
+      g.totalPairs=Math.max(g.totalPairs,explicit)
+    }else{
+      g.totalPairs+=Math.max(0,num(r.pairs ?? r.pick_qty))
+    }
+
+    const sourceBox=Math.max(0,num(r.sourceCartonQty))
+    if(sourceBox>0){
+      g.cartonQty=Math.max(g.cartonQty,sourceBox)
+    }
+
+    if(!g.sourceRemark && txt(r.sourceRemark)){
+      g.sourceRemark=txt(r.sourceRemark)
+    }
+  })
+
+  return [...groups.values()].filter(r=>r.totalPairs>0)
+}
+
+function isStandardImportedPbl_(requiredRows){
+  const rows=requiredRows||[]
+  if(!rows.length) return false
+
+  // PBL จาก CREATE PICKING จะมี carton_qty ของทุก Size มาจากไฟล์
+  // เช่น 24 คู่ / 4 กล่อง = 6 คู่/กล่อง
+  return rows.every(r=>
+    Math.max(0,num(r.cartonQty))>0 &&
+    Math.max(0,num(r.totalPairs))>0
+  )
+}
+
+function buildPblBoxPatterns_(rows){
+  const required=pblRequiredRows_(rows)
+
+  // ----------------------------------------------------------
+  // PBL แบบปกติจาก CREATE PICKING
+  // ไม่ MIX Size เข้าด้วยกัน
+  //
+  // ตัวอย่าง:
+  // GM42166 NV Size 7 = 24 คู่ / 4 กล่อง
+  // => 6 คู่/กล่อง, 4 กล่อง, Total 24
+  // ----------------------------------------------------------
+  if(isStandardImportedPbl_(required)){
+    return required.map((r,index)=>{
+      const boxCount=Math.max(0,num(r.cartonQty))
+      const totalPairs=Math.max(0,num(r.totalPairs))
+      const pairsPerBox=
+        boxCount>0
+          ? totalPairs/boxCount
+          : 0
+
+      return {
+        no:index+1,
+        item:r.model,
+        color:r.color,
+        sizeGroup:r.size,
+        pairsPerBox,
+        boxCount,
+        totalPairs,
+        mode:'STANDARD'
+      }
+    })
+  }
+
+  // ----------------------------------------------------------
+  // PBL MIX BOX จาก CREATE PBL
+  // คง logic เดิม: หลาย Size อยู่ใน Pattern กล่องเดียวกัน
+  // ----------------------------------------------------------
+  const patterns=new Map()
+
+  required.forEach(r=>{
+    const key=[norm(r.model),norm(r.color)].join('|')
+
+    if(!patterns.has(key)){
+      patterns.set(key,{
+        item:r.model,
+        color:r.color,
+        sizes:[],
+        sizeTotals:[],
+        totalPairs:0
+      })
+    }
+
+    const p=patterns.get(key)
+    p.sizes.push(r.size)
+    p.sizeTotals.push(r.totalPairs)
+    p.totalPairs+=r.totalPairs
+  })
+
+  return [...patterns.values()].map((p,index)=>{
+    const boxCount=pblGcdArray_(p.sizeTotals) || 1
+    const pairsPerBox=p.totalPairs/boxCount
+    const sizeGroup=pblCompactSizeGroup_(p.sizes)
+
+    return {
+      no:index+1,
+      item:p.item,
+      color:p.color,
+      sizeGroup,
+      pairsPerBox,
+      boxCount,
+      totalPairs:p.totalPairs,
+      mode:'MIX'
+    }
+  })
+}
+
+function buildPblBoxSummaryHtml(rows,header){
+  const required=pblRequiredRows_(rows)
+  const standardPbl=isStandardImportedPbl_(required)
+  const patterns=buildPblBoxPatterns_(rows)
+  const h=header||{}
+  const totalBoxes=patterns.reduce((s,r)=>s+Math.max(0,num(r.boxCount)),0)
+  const totalPairs=patterns.reduce((s,r)=>s+Math.max(0,num(r.totalPairs)),0)
+
+  // PBL ปกติของ LOTUS / BIG C:
+  // 6 คู่ต่อกล่องอยู่แล้ว จึงไม่ต้องแสดง Pairs/Box
+  if(standardPbl){
+    return `
+      <section class="pbl-print-page">
+        <div class="pbl-page-title">PBL BOX SUMMARY</div>
+        <div class="pbl-page-sub">สรุปจำนวนกล่องตาม Item / Color / Size จากไฟล์ต้นฉบับ ก่อนหา Location</div>
+
+        <table class="pbl-info-grid">
+          <tr>
+            <td class="label">CUSTOMER</td>
+            <td class="value">${esc(h.customer||'-')}</td>
+            <td class="label">PO NUMBER</td>
+            <td class="value">${esc(h.po_no||'-')}</td>
+            <td class="label">TYPE</td>
+            <td class="value">PBL</td>
+            <td class="label">DELIVERY DATE</td>
+            <td class="value">${esc(formatDeliveryDate(h.delivery_date||''))}</td>
+          </tr>
+        </table>
+
+        <table class="pbl-box-summary-table">
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>Item</th>
+              <th>Color</th>
+              <th>Size</th>
+              <th>Box</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            ${patterns.map(r=>`
+              <tr>
+                <td>${r.no}</td>
+                <td class="item">${esc(r.item)}</td>
+                <td>${esc(r.color)}</td>
+                <td class="pbl-size-group">${esc(r.sizeGroup)}</td>
+                <td>${fmt(r.boxCount)}</td>
+                <td>${fmt(r.totalPairs)}</td>
+              </tr>
+            `).join('')}
+
+            <tr class="total-row">
+              <td colspan="4">TOTAL</td>
+              <td>${fmt(totalBoxes)}</td>
+              <td>${fmt(totalPairs)}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="pbl-pattern-note">
+          <b>TYPE: PBL</b> · LOTUS / BIG C ใช้ 6 คู่ต่อกล่อง · จำนวนกล่องใช้จากไฟล์ต้นฉบับโดยตรง
+        </div>
+      </section>
+    `
+  }
+
+  // CREATE PBL แบบ MIX BOX ยังคงต้องใช้ Pairs/Box
+  return `
+    <section class="pbl-print-page">
+      <div class="pbl-page-title">PBL BOX SUMMARY</div>
+      <div class="pbl-page-sub">สรุปรูปแบบกล่อง MIX ตาม Item / Color / Size Group ก่อนหา Location</div>
+
+      <table class="pbl-info-grid">
+        <tr>
+          <td class="label">CUSTOMER</td>
+          <td class="value">${esc(h.customer||'-')}</td>
+          <td class="label">PO NUMBER</td>
+          <td class="value">${esc(h.po_no||'-')}</td>
+          <td class="label">TYPE</td>
+          <td class="value">PBL</td>
+          <td class="label">DELIVERY DATE</td>
+          <td class="value">${esc(formatDeliveryDate(h.delivery_date||''))}</td>
+        </tr>
+      </table>
+
+      <table class="pbl-box-summary-table">
+        <thead>
+          <tr>
+            <th>No.</th>
+            <th>Item</th>
+            <th>Color</th>
+            <th>Size</th>
+            <th>Pairs/Box</th>
+            <th>Box</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${patterns.map(r=>`
+            <tr>
+              <td>${r.no}</td>
+              <td class="item">${esc(r.item)}</td>
+              <td>${esc(r.color)}</td>
+              <td class="pbl-size-group">${esc(r.sizeGroup)}</td>
+              <td>${fmt(r.pairsPerBox)}</td>
+              <td>${fmt(r.boxCount)}</td>
+              <td>${fmt(r.totalPairs)}</td>
+            </tr>
+          `).join('')}
+
+          <tr class="total-row">
+            <td colspan="4"></td>
+            <td>TOTAL</td>
+            <td>${fmt(totalBoxes)}</td>
+            <td>${fmt(totalPairs)}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="pbl-pattern-note">
+        <b>TYPE: PBL MIX BOX</b> · ใช้สำหรับหลาย Size / หลายสี / หลายรุ่นต่อกล่อง
+      </div>
+    </section>
+  `
+}
+
+function buildPblLocationPickingHtml(rows,header){
+  const h=header||{}
+  const required=pblRequiredRows_(rows)
+  const bySku=new Map()
+
+  ;(rows||[]).forEach(r=>{
+    const key=[norm(r.model),norm(r.color),norm(r.size)].join('|')
+    if(!bySku.has(key)) bySku.set(key,[])
+    bySku.get(key).push(r)
+  })
+
+  const lines=[]
+
+  required.forEach(req=>{
+    const key=[norm(req.model),norm(req.color),norm(req.size)].join('|')
+    const skuRows=bySku.get(key)||[]
+
+    const sourcePairs=Math.max(0,num(req.totalPairs))
+    const sourceBoxes=Math.max(0,num(req.cartonQty))
+    const pairsPerBox=
+      sourceBoxes>0
+        ? sourcePairs/sourceBoxes
+        : PACK_SIZE
+
+    skuRows.forEach(r=>{
+      const qty=Math.max(0,num(r.pairs ?? r.pick_qty))
+      if(qty<=0) return
+
+      const isShortage=Boolean(r.shortage || r.is_shortage)
+
+      /*
+       * PBL ใช้เงื่อนไข W-CENTER เหมือน ASN:
+       * - ต้องเป็นบรรทัดงานขาด
+       * - W-CENTER ต้องมีเพียงพอครบทั้งยอดขาดของบรรทัดนั้น
+       * - ถ้ามีพอ -> หน้าใบจัดหลักแสดง "W-CENTER เพียงพอ"
+       * - ถ้าไม่พอ -> ยังแสดง "งานขาด"
+       *
+       * รายละเอียด Location / จำนวนที่ต้องหยิบจาก W-CENTER
+       * จะอยู่ใน W-CENTER PICKING SHEET แยกต่างหาก
+       */
+      const wcHas=Boolean(
+        r.wCenterHasStock ??
+        r.w_center_has_stock
+      )
+
+      const wcPick=Math.max(
+        0,
+        num(
+          r.wCenterPickQty ??
+          r.w_center_pick_qty ??
+          0
+        )
+      )
+
+      const wCenterSufficient=
+        isShortage &&
+        wcHas &&
+        qty>0 &&
+        wcPick>=qty
+
+      let boxQty=0
+
+      if(wCenterSufficient){
+        // W-CENTER จ่ายเป็นกล่องเต็ม
+        boxQty=Math.ceil(qty/PACK_SIZE)
+      }else if(pairsPerBox>0){
+        boxQty=qty/pairsPerBox
+      }
+
+      if(Math.abs(boxQty-Math.round(boxQty))<0.000001){
+        boxQty=Math.round(boxQty)
+      }
+
+      let location=txt(r.location)||'-'
+      let warehouse=txt(r.warehouse)||'-'
+      let statusClass=''
+
+      if(isShortage){
+        if(wCenterSufficient){
+          location='W-CENTER เพียงพอ'
+          warehouse='W-CENTER'
+          statusClass='wcenter-ok'
+        }else{
+          location='งานขาด'
+          warehouse='-'
+          statusClass='shortage'
+        }
+      }
+
+      lines.push({
+        item:txt(req.model || req.item || req.itemCode),
+        color:req.color,
+        size:req.size,
+        pairs:qty,
+        boxes:boxQty,
+        location,
+        warehouse,
+        shortage:isShortage && !wCenterSufficient,
+        wCenterSufficient,
+        statusClass
+      })
+    })
+  })
+
+  const totalPairs=lines.reduce(
+    (sum,r)=>sum+Math.max(0,num(r.pairs)),
+    0
+  )
+
+  const totalBoxes=lines.reduce(
+    (sum,r)=>sum+Math.max(0,num(r.boxes)),
+    0
+  )
+
+  return `
+    <section class="pbl-print-page">
+      <div class="pbl-page-title">PBL LOCATION PICKING SHEET</div>
+      <div class="pbl-page-sub">ใบจัดสินค้า PBL แสดง Item / Color / Size / จำนวนคู่ / จำนวนกล่อง / Location สำหรับหยิบจริง</div>
+
+      <table class="pbl-info-grid">
+        <tr>
+          <td class="label">CUSTOMER</td>
+          <td class="value">${esc(h.customer||'-')}</td>
+          <td class="label">PO NUMBER</td>
+          <td class="value">${esc(h.po_no||'-')}</td>
+          <td class="label">TYPE</td>
+          <td class="value">PBL</td>
+          <td class="label">DELIVERY DATE</td>
+          <td class="value">${esc(formatDeliveryDate(h.delivery_date||''))}</td>
+        </tr>
+      </table>
+
+      <table class="pbl-location-sheet-table">
+        <thead>
+          <tr>
+            <th>No.</th>
+            <th>Item</th>
+            <th>Color</th>
+            <th>Size</th>
+            <th>คู่</th>
+            <th>กล่อง</th>
+            <th>Location</th>
+            <th>Warehouse</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${lines.map((r,i)=>`
+            <tr>
+              <td>${i+1}</td>
+              <td class="item">${esc(r.item)}</td>
+              <td>${esc(r.color)}</td>
+              <td>${esc(r.size)}</td>
+              <td>${fmt(r.pairs)}</td>
+              <td>${fmt(r.boxes)}</td>
+              <td class="location ${r.statusClass||''}">
+                ${
+                  r.wCenterSufficient
+                    ? '<b>W-CENTER เพียงพอ</b>'
+                    : esc(r.location)
+                }
+              </td>
+              <td>
+                ${
+                  r.wCenterSufficient
+                    ? '<b>W-CENTER</b>'
+                    : esc(r.warehouse)
+                }
+              </td>
+            </tr>
+          `).join('')}
+
+          <tr class="total-row">
+            <td colspan="4">TOTAL</td>
+            <td>${fmt(totalPairs)}</td>
+            <td>${fmt(totalBoxes)}</td>
+            <td colspan="2"></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="pbl-pattern-note">
+        งานขาดที่ W-CENTER มีเพียงพอจะแสดง “W-CENTER เพียงพอ” และมีใบ W-CENTER PICKING SHEET แยกรายละเอียดให้หยิบ · รายการที่ W-CENTER ไม่พอจะแสดง “งานขาด”
+      </div>
+    </section>
+  `
+}
+
+function buildPblTwoSheetHtml(rows,header){
+  // เหลือเฉพาะ PBL LOCATION PICKING SHEET หน้าเดียว
+  return buildPblLocationPickingHtml(rows,header)
+}
+
+function buildJobBreakdownTableHtml(rows,compactRows,header){
+  const isPbl=isPblJobType(header?.po_type)
+
+  if(isPbl){
+    return `
+      <table class="pdf-detail-table pdf-pbl-table">
+        <thead>
+          <tr>
+            <th>NO.</th>
+            <th>ITEM CODE</th>
+            <th>SIZE</th>
+            <th>TOTAL(คู่)</th>
+            <th>คู่</th>
+            <th>กล่อง</th>
+            <th>Location</th>
+            <th>warehouse</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${(compactRows||[]).map(r=>`
+            <tr class="${[
+              r.shortage?'job-shortage':'',
+              r.groupStart?'item-group-start':''
+            ].filter(Boolean).join(' ')}">
+              <td>${r.no}</td>
+              <td class="item"><b>${esc(r.itemCode)}</b></td>
+              <td>${esc(r.size)}</td>
+              <td>${r.total==='' ? '' : `<span class="pdf-item-total">${fmt(r.total)}</span>`}</td>
+              <td class="${r.shortage?'pdf-shortage-total':'pdf-pick-qty'}"><b>${fmt(r.pick)}</b></td>
+              <td class="pdf-main-cartons">${pblPickCartons(r,header)==='' ? '-' : fmt(pblPickCartons(r,header))}</td>
+              <td class="loc"><b>${esc(r.location)}</b></td>
+              <td>${esc(r.warehouse||'-')}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `
+  }
+
+  return buildAsnPreparationTableHtml(rows,header)
+}
+
 function buildFullCartonLocationSummaryHtml(rows,isPbl){
   if(isPbl) return ''
 
@@ -14737,6 +17919,7 @@ function buildActiveJobPdfSheet(){
     activePdfCartonsValue===null
       ? '-'
       : fmt(activePdfCartonsValue)
+
   const createdBy=txt(h.created_by)||'ADMIN'
 
   const firstCreated=activeJobAllRowsState.find(r=>r.created_at)?.created_at
@@ -14752,84 +17935,17 @@ function buildActiveJobPdfSheet(){
 
   const sheet=el('selectedJobPdfSheet')
 
-  sheet.innerHTML=`
-    <div class="pdf-job-title">ใบจัดงาน ${esc(customer)} - CARTON & LOOSE</div>
-    <div class="pdf-job-sub">${isPbl ? `PBL: แสดงจำนวนคู่และจำนวนกล่องของแต่ละ Location · 1 กล่อง = ${pblPackSizeFromHeader(h)} คู่` : 'ASN: กล่อง = จำนวนคู่จากโลเคชั่นหลัก ÷ 6 และปัดขึ้น · งานเศษไม่คิดเป็นกล่อง · หากสินค้าไม่ครบจะแยกแถว “งานขาด”'}</div>
-
-    <table class="pdf-meta">
-      <tr>
-        <td class="label">CUSTOMER</td>
-        <td class="value">${esc(customer)}</td>
-        <td class="label">PO NUMBER</td>
-        <td class="value">${esc(po)}</td>
-      </tr>
-      <tr>
-        <td class="label">JOB TYPE</td>
-        <td class="value">${esc(type)}</td>
-        <td class="label">DELIVERY DATE</td>
-        <td class="value">${esc(formatDeliveryDate(h.delivery_date||''))}</td>
-      </tr>
-      <tr>
-        <td class="label">TOTAL PAIRS</td>
-        <td class="value">${esc(totalPairs)}</td>
-        <td class="label">TOTAL CARTONS</td>
-        <td class="value">${esc(totalCartons)}</td>
-      </tr>
-      <tr>
-        <td class="label">CREATED BY</td>
-        <td class="value">${esc(createdBy)}</td>
-        <td class="label">STATUS</td>
-        <td class="value">ทำใบจัดแล้ว</td>
-      </tr>
-    </table>
-
-    <div class="pdf-section">ITEM / SIZE / PICKING BREAKDOWN</div>
-
-    <table class="pdf-detail-table ${isPbl ? 'pdf-pbl-table' : 'pdf-asn-table'}">
-      <thead>
-        <tr>
-          <th>NO.</th>
-          <th>ITEM CODE</th>
-          <th>SIZE</th>
-          <th>TOTAL(คู่)</th>
-          <th>${isPbl ? 'คู่' : 'หยิบ'}</th>
-          ${isPbl ? '<th>กล่อง</th>' : '<th>เศษ</th><th>กล่อง</th>'}
-          <th>Location</th>
-          <th>warehouse</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${compactRows.map(r=>`
-          <tr class="${[
-            r.shortage?'job-shortage':'',
-            r.groupStart?'item-group-start':''
-          ].filter(Boolean).join(' ')}">
-            <td>${r.no}</td>
-            <td class="item"><b>${esc(r.itemCode)}</b></td>
-            <td>${esc(r.size)}</td>
-            <td>${r.total==='' ? '' : `<span class="pdf-item-total">${fmt(r.total)}</span>`}</td>
-            <td class="${r.shortage?'pdf-shortage-total':'pdf-pick-qty'}"><b>${fmt(r.pick)}</b></td>
-            ${isPbl
-              ? `<td class="pdf-main-cartons">${pblPickCartons(r)==='' ? '-' : fmt(pblPickCartons(r,h))}</td>`
-              : `<td>${esc(r.loose||'-')}</td><td class="pdf-main-cartons">${asnMainLocationCartons(r)==='' ? '-' : fmt(asnMainLocationCartons(r))}</td>`
-            }
-            <td class="loc"><b>${esc(r.location)}</b></td>
-            <td>${esc(r.warehouse||'-')}</td>
-          </tr>
-        `).join('')}
-      </tbody>
-    </table>
-
-    ${buildFullCartonLocationSummaryHtml(rows,isPbl)}
-
-    <div class="pdf-footer-note">
-      CREATED AT ${esc(createdAt)}
-    </div>
-  `
+  if(isPbl){
+    sheet.innerHTML=buildPblTwoSheetHtml(rows,h)
+  }else{
+    sheet.innerHTML=`
+      ${buildAsnPreparationMetaHtml(h,po,customer)}
+      ${buildAsnPreparationTableHtml(rows,h)}
+    `
+  }
 
   return {sheet,po,customer,rows}
 }
-
 
 function normalizedWCenterSourcesFromRow(r){
   if(Array.isArray(r?.wCenterSources) && r.wCenterSources.length) return r.wCenterSources
@@ -14843,57 +17959,119 @@ function normalizedWCenterSourcesFromRow(r){
 }
 
 function buildWCenterPdfSheet(rows,header){
-  const lines=[]
+  const rawLines=[]
 
   ;(rows||[]).forEach(r=>{
     if(!(r.shortage || r.is_shortage)) return
 
     const has=Boolean(r.wCenterHasStock ?? r.w_center_has_stock)
+    const shortageNeed=Math.max(0,num(r.pairs ?? r.pick_qty))
     const pick=Math.max(0,num(r.wCenterPickQty ?? r.w_center_pick_qty))
-    if(!has || pick<=0) return
+
+    // W-CENTER ต้องพอครบทั้งยอดขาดเท่านั้น
+    // ถ้า ERP ขาด 23 คู่ แต่ W-CENTER มี 5 คู่ -> ไม่ใช้ W-CENTER
+    if(
+      !has ||
+      shortageNeed<=0 ||
+      pick<shortageNeed
+    ) return
 
     const sources=normalizedWCenterSourcesFromRow(r)
 
     if(sources.length){
+      let remainingNeed=shortageNeed
+
       sources.forEach(src=>{
-        lines.push({
+        if(remainingNeed<=0) return
+
+        const sourcePick=Math.min(
+          remainingNeed,
+          Math.max(0,num(src.pickQty))
+        )
+
+        if(sourcePick<=0) return
+
+        rawLines.push({
           itemCode:r.itemCode||r.item_code||((r.model||'')+(r.color||'')),
           model:r.model||'-',
           color:r.color||'-',
           size:r.size||'-',
-          shortage:Math.max(0,num(r.pairs ?? r.pick_qty)),
+          shortage:shortageNeed,
           location:txt(src.location)||'-',
-          pickQty:Math.max(0,num(src.pickQty)),
+          pickQty:sourcePick,
           available:Math.max(0,num(src.available))
         })
+
+        remainingNeed-=sourcePick
       })
     }else{
-      lines.push({
+      rawLines.push({
         itemCode:r.itemCode||r.item_code||((r.model||'')+(r.color||'')),
         model:r.model||'-',
         color:r.color||'-',
         size:r.size||'-',
-        shortage:Math.max(0,num(r.pairs ?? r.pick_qty)),
+        shortage:shortageNeed,
         location:txt(r.wCenterLocations ?? r.w_center_locations)||'-',
-        pickQty:pick,
+        pickQty:shortageNeed,
         available:Math.max(0,num(r.wCenterAvailable ?? r.w_center_available))
       })
     }
   })
 
-  if(!lines.length) return null
+  if(!rawLines.length) return null
+
+  // รวม SKU + Location เดียวกัน ไม่ให้ซ้ำหลายบรรทัด
+  const grouped=new Map()
+
+  rawLines.forEach(r=>{
+    const key=[
+      norm(r.model),
+      norm(r.color),
+      norm(r.size),
+      norm(r.location)
+    ].join('|')
+
+    if(!grouped.has(key)){
+      grouped.set(key,{
+        ...r,
+        shortage:0,
+        pickQty:0,
+        available:0
+      })
+    }
+
+    const g=grouped.get(key)
+    g.shortage=Math.max(g.shortage,Math.max(0,num(r.shortage)))
+    g.pickQty+=Math.max(0,num(r.pickQty))
+    g.available+=Math.max(0,num(r.available))
+  })
+
+  const lines=[...grouped.values()]
+    .sort((a,b)=>
+      norm(a.model).localeCompare(norm(b.model)) ||
+      norm(a.color).localeCompare(norm(b.color)) ||
+      norm(a.size).localeCompare(norm(b.size),undefined,{numeric:true}) ||
+      norm(a.location).localeCompare(norm(b.location))
+    )
+    .map(r=>({
+      ...r,
+      pickBoxes:r.pickQty>0
+        ? Math.ceil(r.pickQty/PACK_SIZE)
+        : 0
+    }))
 
   const h=header||{}
   const sheet=document.createElement('div')
   sheet.className='pdf-wcenter-sheet'
 
-  const totalPick=lines.reduce((s,r)=>s+r.pickQty,0)
+  const totalPickPairs=lines.reduce((s,r)=>s+r.pickQty,0)
+  const totalPickBoxes=lines.reduce((s,r)=>s+r.pickBoxes,0)
 
   sheet.innerHTML=`
     <div class="pdf-wcenter-title">W-CENTER PICKING SHEET</div>
     <div class="pdf-wcenter-sub">
       PO ${esc(h.po_no||'-')} · ${esc(h.customer||'-')} · ${esc(h.po_type||'-')}
-      · รายการสำรองสำหรับงานที่ ERP ขาด
+      · รายละเอียดสินค้าสำรองสำหรับงานที่ ERP ขาด
     </div>
 
     <table class="pdf-meta">
@@ -14907,7 +18085,7 @@ function buildWCenterPdfSheet(rows,header){
         <td class="label">CUSTOMER</td>
         <td class="value">${esc(h.customer||'-')}</td>
         <td class="label">TOTAL W-CENTER</td>
-        <td class="value">${fmt(totalPick)} คู่</td>
+        <td class="value">${fmt(totalPickPairs)} คู่ / ${fmt(totalPickBoxes)} กล่อง</td>
       </tr>
     </table>
 
@@ -14918,9 +18096,10 @@ function buildWCenterPdfSheet(rows,header){
           <th>ITEM</th>
           <th>COLOR</th>
           <th>SIZE</th>
-          <th>ERP ขาด</th>
+          <th>ERP ขาด (คู่)</th>
           <th>W-CENTER LOCATION</th>
-          <th>หยิบ</th>
+          <th>ต้องใช้ (คู่)</th>
+          <th>ให้หยิบ (กล่องเต็ม)</th>
         </tr>
       </thead>
       <tbody>
@@ -14933,16 +18112,21 @@ function buildWCenterPdfSheet(rows,header){
             <td>${fmt(r.shortage)}</td>
             <td class="left"><b>${esc(r.location)}</b></td>
             <td><b>${fmt(r.pickQty)}</b></td>
+            <td><b>${fmt(r.pickBoxes)}</b></td>
           </tr>
         `).join('')}
       </tbody>
     </table>
 
-    <div class="pdf-wcenter-total">รวมที่ต้องหยิบจาก W-CENTER ${fmt(totalPick)} คู่</div>
+    <div class="pdf-wcenter-total">
+      รวม W-CENTER ${fmt(totalPickPairs)} คู่ · ให้หยิบ ${fmt(totalPickBoxes)} กล่องเต็ม
+      <br>
+    </div>
   `
 
   return sheet
 }
+
 
 async function printActiveJob(){
   const built=buildActiveJobPdfSheet()
@@ -16387,22 +19571,43 @@ async function openPickingDetail(poId,source='active'){
     setDetailMessage('กำลังค้นหา Location จาก ERP Stock...','info')
     await Promise.all([
       loadPickingLooseLocationKeys(h.customer),
-      loadPickingForbiddenLocationKeys(h.customer)
+      loadPickingForbiddenLocationKeys(h.customer),
+      loadLooseSkuStockMemory(h.customer),
+      loadShippedHoldMap()
     ])
+
     const [rawErpRows]=await Promise.all([
       fetchErpRowsForItems(items.map(r=>r.item)),
       fetchWCenterRowsForPicking(items.map(r=>r.item))
     ])
+
+    // ถ้า Size นี้ยังไม่มีงานเศษใน ERP ให้จำ Location จาก SKU เดียวกัน Size อื่น
+    await inferMissingLooseSkuStockMemories(
+      items,
+      rawErpRows,
+      h
+    )
+
     await loadReservationMap(currentPickingPoId)
     const erpRows=applyReservationToErpRows(rawErpRows)
     let missing=0, shortage=0
 
     el('pickingDetailList').innerHTML=items.map((item,index)=>{
       // เรียง Location ที่มียอดมากไว้ด้านบน แต่ยังแสดง Location = 0 แบบ disabled
-      const locs=matchErp(item,erpRows)
+      const locs=applyLooseSkuStockMemoryToLocations(
+        item,
+        matchErp(item,erpRows,h),
+        h
+      )
         .filter(loc=>!isHiddenPickingLocation(loc))
         .slice()
-        .sort((a,b)=>num(b.available_physical)-num(a.available_physical))
+        .sort((a,b)=>{
+          // งานเศษให้อยู่ด้านบนก่อน แล้วค่อยเรียงตาม Available
+          if(Boolean(a._isLoose)!==Boolean(b._isLoose)){
+            return a._isLoose ? -1 : 1
+          }
+          return num(b.available_physical)-num(a.available_physical)
+        })
 
       const total=locs.reduce((s,r)=>s+num(r.available_physical),0)
       const required=num(item.order_pairs)
@@ -16467,8 +19672,29 @@ async function openPickingDetail(poId,source='active'){
                     <td>${esc(loc.warehouse||'-')}</td>
                     <td><b>${esc(loc.location||'-')}</b>${loc._isLoose?'<span class="loc-loose-badge">งานเศษ</span>':''}</td>
                     <td class="${available>0?'loc-ok':'loc-short'}">
-                      ${fmt(available)}
-                      ${num(loc._reservedOther)>0?`<div style="font-size:8px;color:#2563eb;margin-top:2px">จองโดย PO อื่น ${fmt(loc._reservedOther)} คู่</div>`:''}
+                      <div style="font-weight:800;font-size:14px">${fmt(available)}</div>
+                      ${loc._looseMemory
+                        ? `<div style="font-size:9px;color:#b45309;margin-top:3px;line-height:1.35;font-weight:700">
+                             งานเศษ DB ${fmt(available)} คู่
+                           </div>
+                           <div style="font-size:9px;color:#94a3b8;line-height:1.35">
+                             ไม่ใช้ ERP Reservation
+                           </div>`
+                        : `<div style="font-size:9px;color:#64748b;margin-top:3px;line-height:1.35">
+                             ERP ${fmt(loc._erpAvailable)} คู่
+                           </div>
+                           <div style="font-size:9px;color:${num(loc._reservedOther)>0?'#2563eb':'#94a3b8'};line-height:1.35">
+                             Reserved PO อื่น ${fmt(loc._reservedOther)} คู่
+                           </div>
+                           ${num(loc._shippedHold)>0
+                             ? `<div style="font-size:9px;color:#b91c1c;line-height:1.35;font-weight:700">ส่งแล้ว รอ ERP ใหม่ ${fmt(loc._shippedHold)} คู่</div>`
+                             : ''
+                           }
+                           ${num(loc._reservedSelf)>0
+                             ? `<div style="font-size:9px;color:#b45309;line-height:1.35">Reserved PO นี้ ${fmt(loc._reservedSelf)} คู่</div>`
+                             : ''
+                           }`
+                      }
                     </td>
                     <td id="locPick_${item.id}_${locIndex}" class="loc-pick-qty">0</td>
                   </tr>`
@@ -16686,6 +19912,8 @@ function selectedPickingRowsForPdf(){
         erpColor:txt(loc.color)||txt(item.code)||'',
         erpSize:txt(loc.size)||txt(item.assort)||'',
         stockBefore:Math.max(0,num(loc.available_physical)),
+        looseMemory:Boolean(loc._looseMemory),
+        looseMemoryMapped:Boolean(loc._looseMemoryMapped),
         shortage:false
       })
 
@@ -16926,7 +20154,8 @@ function buildSelectedJobPdfSheet(){
   const rows=selectedPickingRowsForPdf()
   const compactRows=compactJobSheetRows(rows)
   const h=currentPickingHeader||{}
-  const isPbl=isPblJobType(currentPickingHeader?.po_type)
+  const isPbl=isPblJobType(h?.po_type)
+
   if(!rows.length){
     showToast('ไม่พบรายการสำหรับสร้างใบจัดงาน')
     return null
@@ -16936,6 +20165,7 @@ function buildSelectedJobPdfSheet(){
   const customer=txt(el('detailCustomer')?.textContent)||'-'
   const type=txt(el('detailType')?.textContent)||'-'
   const totalPairs=txt(el('detailPairs')?.textContent)||'0'
+
   const calculatedCartons=rows.reduce((s,r)=>s+(
     r.shortage || r.loose==='เศษ'
       ? 0
@@ -16951,7 +20181,12 @@ function buildSelectedJobPdfSheet(){
     pdfCartonsValue===null
       ? '-'
       : fmt(pdfCartonsValue)
-  const createdBy=txt(el('importCreatedBy')?.value)||txt(el('createdBy')?.value)||'ADMIN'
+
+  const createdBy=
+    txt(el('importCreatedBy')?.value)||
+    txt(el('createdBy')?.value)||
+    'ADMIN'
+
   const createdAt=new Date().toLocaleString('th-TH',{
     year:'numeric',month:'2-digit',day:'2-digit',
     hour:'2-digit',minute:'2-digit'
@@ -16959,78 +20194,17 @@ function buildSelectedJobPdfSheet(){
 
   const sheet=el('selectedJobPdfSheet')
 
-  sheet.innerHTML=`
-    <div class="pdf-job-title">ใบจัดงาน ${esc(customer)} - CARTON & LOOSE</div>
-    <div class="pdf-job-sub">${isPbl ? `PBL: แสดงจำนวนคู่และจำนวนกล่องของแต่ละ Location · 1 กล่อง = ${pblPackSizeFromHeader(h)} คู่` : 'ASN: กล่อง = จำนวนคู่จากโลเคชั่นหลัก ÷ 6 และปัดขึ้น · งานเศษไม่คิดเป็นกล่อง · หากสินค้าไม่ครบจะแยกแถว “งานขาด”'}</div>
-
-    <table class="pdf-meta">
-      <tr>
-        <td class="label">CUSTOMER</td>
-        <td class="value">${esc(customer)}</td>
-        <td class="label">PO NUMBER</td>
-        <td class="value">${esc(po)}</td>
-      </tr>
-      <tr>
-        <td class="label">JOB TYPE</td>
-        <td class="value">${esc(type)}</td>
-        <td class="label">TOTAL PAIRS</td>
-        <td class="value">${esc(totalPairs)}</td>
-      </tr>
-      <tr>
-        <td class="label">CREATED BY</td>
-        <td class="value">${esc(createdBy)}</td>
-        <td class="label">TOTAL CARTONS</td>
-        <td class="value">${esc(totalCartons)}</td>
-      </tr>
-    </table>
-
-    <div class="pdf-section">ITEM / SIZE / PICKING BREAKDOWN</div>
-
-    <table class="pdf-detail-table ${isPbl ? 'pdf-pbl-table' : 'pdf-asn-table'}">
-      <thead>
-        <tr>
-          <th>NO.</th>
-          <th>ITEM CODE</th>
-          <th>SIZE</th>
-          <th>TOTAL(คู่)</th>
-          <th>${isPbl ? 'คู่' : 'หยิบ'}</th>
-          ${isPbl ? '<th>กล่อง</th>' : '<th>เศษ</th><th>กล่อง</th>'}
-          <th>Location</th>
-          <th>warehouse</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${compactRows.map(r=>`
-          <tr class="${[
-            r.shortage?'job-shortage':'',
-            r.groupStart?'item-group-start':''
-          ].filter(Boolean).join(' ')}">
-            <td>${r.no}</td>
-            <td class="item"><b>${esc(r.itemCode)}</b></td>
-            <td>${esc(r.size)}</td>
-            <td>${r.total==='' ? '' : `<span class="pdf-item-total">${fmt(r.total)}</span>`}</td>
-            <td class="${r.shortage?'pdf-shortage-total':'pdf-pick-qty'}"><b>${fmt(r.pick)}</b></td>
-            ${isPbl
-              ? `<td class="pdf-main-cartons">${pblPickCartons(r)==='' ? '-' : fmt(pblPickCartons(r,h))}</td>`
-              : `<td>${esc(r.loose||'-')}</td><td class="pdf-main-cartons">${asnMainLocationCartons(r)==='' ? '-' : fmt(asnMainLocationCartons(r))}</td>`
-            }
-            <td class="loc"><b>${esc(r.location)}</b></td>
-            <td>${esc(r.warehouse||'-')}</td>
-          </tr>
-        `).join('')}
-      </tbody>
-    </table>
-
-    ${buildFullCartonLocationSummaryHtml(rows,isPbl)}
-
-    <div class="pdf-footer-note">
-      CREATED AT ${esc(createdAt)}
-    </div>
-  `
+  if(isPbl){
+    sheet.innerHTML=buildPblTwoSheetHtml(rows,h)
+  }else{
+    sheet.innerHTML=`
+      ${buildAsnPreparationMetaHtml(h,po,customer)}
+      ${buildAsnPreparationTableHtml(rows,h)}
+    `
+  }
 
   return {sheet,po,customer,rows}
 }
-
 
 function syncJobOrderEditorFromSelections(){
   if(!allPickingLocationsReady()) return false
@@ -17107,6 +20281,13 @@ async function persistCurrentJobOrder(){
     throw new Error('ไม่พบรายการสำหรับสร้างใบจัดงาน')
   }
 
+  // เก็บ snapshot งานเศษของ ASN ไว้ใช้กับใบจัดเตรียมหลังสร้างงาน
+  saveAsnPrepSnapshot(
+    currentPickingPoId,
+    rows,
+    currentPickingHeader
+  )
+
   // เก็บสถานะ scanned เดิมไว้ หากมีการสร้างใบจัดซ้ำ
   const existingRes=await db.from(PICKING_JOB_TABLE)
     .select('id,po_item_id,warehouse,location,is_shortage,scanned,scanned_at,scanned_by,w_center_has_stock,w_center_available,w_center_pick_qty,w_center_locations,w_center_sources')
@@ -17177,13 +20358,65 @@ async function persistCurrentJobOrder(){
   })
 
   const reservationRows=rows
-    .filter(r=>!r.shortage && num(r.pairs)>0)
+    .filter(r=>
+      !r.shortage &&
+      num(r.pairs)>0 &&
+      !Boolean(r.looseMemory)
+    )
     .map(r=>({
       po_item_id:r.poItemId||null,line_no:r.lineNo||null,item_code:r.itemCode||null,
       model:r.model||null,color:r.color||null,size:r.size||null,
       erp_item_number:r.erpItemNumber||r.model||null,erp_color:r.erpColor||r.color||null,erp_size:r.erpSize||r.size||null,
       warehouse:r.warehouse||null,location:r.location||null,reserved_qty:num(r.pairs)
     }))
+
+  /*
+   * งานเศษที่มาจาก picking_loose_sku_stock ไม่ใช่ ERP stock row จริง
+   * จึงห้ามส่งเข้า replace_picking_reservations()
+   *
+   * ตัวอย่าง:
+   *   GW42265 / BK / 8 / G-01-BC-J1
+   *   หน้า Picking แสดงงานเศษ 5 คู่จากฐานจำแยก
+   *   แต่ erp_stock_ptt ของ SKU/Size นี้อาจเป็น 0
+   *
+   * ถ้าส่งไป ERP Reservation RPC จะเกิด:
+   *   หน้าเห็น Available 5 แต่ RPC เห็น ERP = 0 -> สร้างใบจัดไม่ได้
+   *
+   * งานเศษฐานจำจะถูกตัด/อัปเดตผ่านระบบ picking_loose_sku_stock แยกต่างหาก
+   */
+
+  /*
+   * สำคัญ: คืน Reservation เดิมของ PO ปัจจุบันก่อนจองใหม่
+   *
+   * หน้า Picking ตั้งใจไม่หัก Reservation ของ PO ตัวเอง เพื่อให้ผู้ใช้เห็น Stock
+   * ที่ PO นี้เคยจองไว้และสามารถสร้างใบจัดซ้ำได้ แต่ RPC ฝั่งฐานข้อมูลอาจยังเห็น
+   * Reservation เดิมของ PO นี้เป็น ACTIVE/CONSUMED และนำไปหักซ้ำ ทำให้เกิดอาการ:
+   *   หน้า Picking Available = 5 แต่ตอนสร้างใบแจ้งคงเหลือ = 0
+   *
+   * คืนยอดเดิมก่อน แล้ว replace_picking_reservations จะคำนวณจาก Stock ล่าสุดจริง
+   * โดย Reservation ของ PO อื่นยังคงถูกหักตามปกติ
+   */
+  const releaseBeforeReplace=await db.rpc('release_picking_reservation',{
+    p_po_id:Number(currentPickingPoId),
+    p_reason:'REBUILD_BEFORE_REPLACE'
+  })
+
+  if(releaseBeforeReplace.error){
+    throw new Error(
+      'คืน Reservation เดิมก่อนจองใหม่ไม่สำเร็จ: '+
+      (releaseBeforeReplace.error.message||releaseBeforeReplace.error)
+    )
+  }
+
+  // โหลด Reservation ใหม่หลังคืนของ PO ตัวเอง เพื่อให้ state ฝั่งหน้าเว็บตรงกับฐาน
+  await loadReservationMap(currentPickingPoId)
+
+  console.log('Picking Reservation Build',{
+    poId:currentPickingPoId,
+    totalJobRows:rows.length,
+    erpReservationRows:reservationRows.length,
+    looseMemoryRows:rows.filter(r=>Boolean(r.looseMemory)).length
+  })
 
   const reserveRes=await db.rpc('replace_picking_reservations',{
     p_po_id:Number(currentPickingPoId),p_rows:reservationRows
@@ -17228,17 +20461,24 @@ async function persistCurrentJobOrder(){
     )
   }
 
+  // เก็บยอดงานเศษที่เกิดจากการ "ดึง" หรือยอดคงเหลือ
+  // เฉพาะ SKU/Size ที่ถูกจำไว้ในฐานแยก
+  await persistLooseSkuStockBalancesFromCurrentJob(
+    rows,
+    currentPickingHeader
+  )
+
   return rows
 }
 
 async function openJobOrderPreview(){
-  // ASN ต้องกรอกจำนวน TOTAL CARTONS ที่ขึ้นไลน์ผลิตได้จริงก่อน
+  // ASN ต้องกรอกจำนวนกล่องที่ส่งเองก่อน
   if(!hasRequiredProductionCartons(currentPickingHeader)){
     setDetailMessage(
-      'ASN ยังไม่ได้กรอก TOTAL CARTONS · กรุณากรอกในหน้า PICKING ORDER และกดบันทึกก่อนสร้างใบจัดงาน',
+      'ASN ยังไม่ได้กรอกจำนวนกล่องที่ส่ง · กรุณากรอกในหน้า PICKING ORDER และกดบันทึกก่อนสร้างใบจัดงาน',
       'warn'
     )
-    showToast('กรุณากรอก TOTAL CARTONS ของ ASN ก่อน')
+    showToast('กรุณากรอกจำนวนกล่องที่ส่งของ ASN ก่อน')
     return
   }
 
@@ -17311,11 +20551,29 @@ async function openJobOrderPreview(){
     await openActiveJobSheet(currentPickingPoId,{showCreatedSuccess:true})
   }catch(error){
     console.error(error)
-    setDetailMessage('สร้างใบจัดงานไม่สำเร็จ: '+(error?.message||error),'warn')
+    const errorMessage=String(error?.message||error||'')
+    setDetailMessage('สร้างใบจัดงานไม่สำเร็จ: '+errorMessage,'warn')
+
+    // ถ้า Stock เปลี่ยนระหว่างเลือก Location กับตอนกดสร้างใบจัด
+    // โหลด PO ใหม่ทันที เพื่อให้ Available / checkbox ตรงกับฐานข้อมูลล่าสุด
+    if(/Stock ไม่พอ|คงเหลือ/i.test(errorMessage)){
+      try{
+        await openPickingDetail(currentPickingPoId,currentPickingSource)
+        setDetailMessage(
+          'Stock มีการเปลี่ยนแปลงระหว่างสร้างใบจัด · ระบบรีเฟรชยอดล่าสุดแล้ว กรุณาตรวจ Location อีกครั้ง',
+          'warn'
+        )
+      }catch(refreshError){
+        console.warn('refresh picking after reservation conflict',refreshError)
+      }
+    }
+
     alert(
       'สร้างใบจัดงานไม่สำเร็จ\n\n'+
-      (error?.message||error)+
-      '\n\nตรวจสอบว่ารัน SQL สร้างตาราง picking_job_locations แล้ว'
+      errorMessage+
+      (/Stock ไม่พอ|คงเหลือ/i.test(errorMessage)
+        ? '\n\nระบบรีเฟรช Available ล่าสุดให้แล้ว กรุณาตรวจ Location อีกครั้ง'
+        : '\n\nตรวจสอบว่ารัน SQL สร้างตาราง picking_job_locations แล้ว')
     )
   }finally{
     if(btn){
@@ -17517,8 +20775,21 @@ async function refreshErpDbStatus(){
       note.className='stock-db-note show warn'
       note.textContent='หน้าเว็บมองเห็นฐาน ERP = 0 แถว หาก Supabase มีข้อมูลอยู่จริง ให้รัน RLS Policy สำหรับ erp_stock_ptt ก่อน'
     }else{
-      note.className='stock-db-note show ok'
-      note.textContent='เชื่อมต่อ erp_stock_ptt สำเร็จ · พบ '+total.toLocaleString('th-TH')+' แถว'
+      const meta=getErpUploadMeta()
+      const todayIso=new Date().toISOString().slice(0,10)
+      const isToday=meta?.stockDate===todayIso
+
+      if(meta?.stockDate){
+        const d=new Date(meta.stockDate+'T00:00:00')
+        const dateText=d.toLocaleDateString('th-TH',{day:'2-digit',month:'2-digit',year:'numeric'})
+        note.className='stock-db-note show '+(isToday?'ok':'warn')
+        note.textContent=
+          `ERP CURRENT STOCK ${dateText} · ${total.toLocaleString('th-TH')} แถว`+
+          (isToday?' · ข้อมูลวันนี้':' · ข้อมูลไม่ใช่ของวันนี้ กรุณาอัปโหลด ERP ใหม่')
+      }else{
+        note.className='stock-db-note show warn'
+        note.textContent='เชื่อมต่อ erp_stock_ptt สำเร็จ · พบ '+total.toLocaleString('th-TH')+' แถว · ยังไม่มีวันที่ Upload'
+      }
     }
   }catch(error){
     badge.textContent='DB: ERROR'
