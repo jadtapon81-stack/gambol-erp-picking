@@ -17388,6 +17388,7 @@ function pblRequiredRows_(rows){
 
     if(!groups.has(key)){
       groups.set(key,{
+        groupKey:key,
         model:txt(r.model)||'-',
         color:txt(r.color)||'-',
         size:txt(r.size)||'-',
@@ -17640,108 +17641,126 @@ function buildPblBoxSummaryHtml(rows,header){
   `
 }
 
+function pblRowGroupKey_(r,index=0){
+  return String(
+    r?.poItemId ??
+    r?.po_item_id ??
+    r?.lineNo ??
+    r?.line_no ??
+    [r?.model||'',r?.color||'',r?.size||'',index].join('|')
+  )
+}
+
 function buildPblLocationPickingHtml(rows,header){
   const h=header||{}
-  const required=pblRequiredRows_(rows)
-  const bySku=new Map()
+  const sourceRows=rows||[]
+  const required=pblRequiredRows_(sourceRows)
 
-  ;(rows||[]).forEach(r=>{
-    const key=[norm(r.model),norm(r.color),norm(r.size)].join('|')
-    if(!bySku.has(key)) bySku.set(key,[])
-    bySku.get(key).push(r)
+  // เก็บ allocation ตาม PO item เดิม ไม่แยก 1 SKU ออกเป็นหลายบรรทัดในใบจัด
+  const byItem=new Map()
+  sourceRows.forEach((r,index)=>{
+    const key=pblRowGroupKey_(r,index)
+    if(!byItem.has(key)) byItem.set(key,[])
+    byItem.get(key).push(r)
   })
 
-  const lines=[]
-
-  required.forEach(req=>{
-    const key=[norm(req.model),norm(req.color),norm(req.size)].join('|')
-    const skuRows=bySku.get(key)||[]
+  const lines=required.map((req,index)=>{
+    const itemRows=byItem.get(String(req.groupKey))||[]
 
     const sourcePairs=Math.max(0,num(req.totalPairs))
     const sourceBoxes=Math.max(0,num(req.cartonQty))
-    const pairsPerBox=
-      sourceBoxes>0
-        ? sourcePairs/sourceBoxes
-        : PACK_SIZE
+    const pairsPerBox=(sourceBoxes>0 && sourcePairs>0)
+      ? sourcePairs/sourceBoxes
+      : PACK_SIZE
 
-    skuRows.forEach(r=>{
-      const qty=Math.max(0,num(r.pairs ?? r.pick_qty))
-      if(qty<=0) return
+    const normalRows=itemRows.filter(r=>
+      !Boolean(r.shortage || r.is_shortage) &&
+      Math.max(0,num(r.pairs ?? r.pick_qty))>0
+    )
 
-      const isShortage=Boolean(r.shortage || r.is_shortage)
+    const shortageRows=itemRows.filter(r=>
+      Boolean(r.shortage || r.is_shortage) &&
+      Math.max(0,num(r.pairs ?? r.pick_qty))>0
+    )
 
-      /*
-       * PBL ใช้เงื่อนไข W-CENTER เหมือน ASN:
-       * - ต้องเป็นบรรทัดงานขาด
-       * - W-CENTER ต้องมีเพียงพอครบทั้งยอดขาดของบรรทัดนั้น
-       * - ถ้ามีพอ -> หน้าใบจัดหลักแสดง "W-CENTER เพียงพอ"
-       * - ถ้าไม่พอ -> ยังแสดง "งานขาด"
-       *
-       * รายละเอียด Location / จำนวนที่ต้องหยิบจาก W-CENTER
-       * จะอยู่ใน W-CENTER PICKING SHEET แยกต่างหาก
-       */
-      const wcHas=Boolean(
-        r.wCenterHasStock ??
-        r.w_center_has_stock
-      )
+    const normalPairs=normalRows.reduce(
+      (sum,r)=>sum+Math.max(0,num(r.pairs ?? r.pick_qty)),
+      0
+    )
 
-      const wcPick=Math.max(
-        0,
-        num(
-          r.wCenterPickQty ??
-          r.w_center_pick_qty ??
-          0
-        )
-      )
+    const shortagePairs=shortageRows.reduce(
+      (sum,r)=>sum+Math.max(0,num(r.pairs ?? r.pick_qty)),
+      0
+    )
 
-      const wCenterSufficient=
-        isShortage &&
-        wcHas &&
-        qty>0 &&
-        wcPick>=qty
+    const normalLocations=[...new Set(
+      normalRows
+        .map(r=>txt(r.location))
+        .filter(Boolean)
+    )]
 
-      let boxQty=0
+    const normalWarehouses=[...new Set(
+      normalRows
+        .map(r=>txt(r.warehouse))
+        .filter(Boolean)
+    )]
 
-      if(wCenterSufficient){
-        // W-CENTER จ่ายเป็นกล่องเต็ม
-        boxQty=Math.ceil(qty/PACK_SIZE)
-      }else if(pairsPerBox>0){
-        boxQty=qty/pairsPerBox
-      }
-
-      if(Math.abs(boxQty-Math.round(boxQty))<0.000001){
-        boxQty=Math.round(boxQty)
-      }
-
-      let location=txt(r.location)||'-'
-      let warehouse=txt(r.warehouse)||'-'
-      let statusClass=''
-
-      if(isShortage){
-        if(wCenterSufficient){
-          location='W-CENTER เพียงพอ'
-          warehouse='W-CENTER'
-          statusClass='wcenter-ok'
-        }else{
-          location='งานขาด'
-          warehouse='-'
-          statusClass='shortage'
-        }
-      }
-
-      lines.push({
-        item:txt(req.model || req.item || req.itemCode),
-        color:req.color,
-        size:req.size,
-        pairs:qty,
-        boxes:boxQty,
-        location,
-        warehouse,
-        shortage:isShortage && !wCenterSufficient,
-        wCenterSufficient,
-        statusClass
+    // W-CENTER ต้องพอครบทุกส่วนที่ขาดของ SKU นั้น
+    const wCenterSufficient=
+      shortageRows.length>0 &&
+      shortageRows.every(r=>{
+        const need=Math.max(0,num(r.pairs ?? r.pick_qty))
+        const has=Boolean(r.wCenterHasStock ?? r.w_center_has_stock)
+        const pick=Math.max(0,num(r.wCenterPickQty ?? r.w_center_pick_qty ?? 0))
+        return need>0 && has && pick>=need
       })
-    })
+
+    const locationParts=[]
+    const warehouseParts=[]
+
+    normalLocations.forEach(v=>locationParts.push(v))
+    normalWarehouses.forEach(v=>warehouseParts.push(v))
+
+    if(shortagePairs>0){
+      if(wCenterSufficient){
+        locationParts.push('W-CENTER เพียงพอ')
+        warehouseParts.push('W-CENTER')
+      }else{
+        locationParts.push(`งานขาด ${fmt(shortagePairs)} คู่`)
+        warehouseParts.push('-')
+      }
+    }
+
+    if(!locationParts.length){
+      locationParts.push('งานขาด')
+      warehouseParts.push('-')
+    }
+
+    // ใบ PBL ต้องมีจำนวนบรรทัดเท่ากับรายการต้นฉบับ
+    // จำนวนคู่/กล่องใช้ยอดต้นฉบับของ SKU ไม่ใช่ยอดแยกตาม Location
+    const displayPairs=sourcePairs>0
+      ? sourcePairs
+      : normalPairs+shortagePairs
+
+    const displayBoxes=sourceBoxes>0
+      ? sourceBoxes
+      : (pairsPerBox>0 ? Math.ceil(displayPairs/pairsPerBox) : 0)
+
+    return {
+      item:txt(req.model || req.item || req.itemCode),
+      color:req.color,
+      size:req.size,
+      pairs:displayPairs,
+      boxes:displayBoxes,
+      location:[...new Set(locationParts)].join(' + '),
+      warehouse:[...new Set(warehouseParts)].join(' / '),
+      shortage:shortagePairs>0 && !wCenterSufficient,
+      wCenterSufficient:shortagePairs>0 && wCenterSufficient,
+      statusClass:
+        shortagePairs>0 && !wCenterSufficient
+          ? 'shortage'
+          : (shortagePairs>0 && wCenterSufficient ? 'wcenter-ok' : '')
+    }
   })
 
   const totalPairs=lines.reduce(
@@ -17757,7 +17776,7 @@ function buildPblLocationPickingHtml(rows,header){
   return `
     <section class="pbl-print-page">
       <div class="pbl-page-title">PBL LOCATION PICKING SHEET</div>
-      <div class="pbl-page-sub">ใบจัดสินค้า PBL แสดง Item / Color / Size / จำนวนคู่ / จำนวนกล่อง / Location สำหรับหยิบจริง</div>
+      <div class="pbl-page-sub">1 รายการต้นฉบับ = 1 บรรทัด · หากแบ่งหลาย Location หรือมี W-CENTER จะรวมรายละเอียดไว้ในบรรทัดเดียว</div>
 
       <table class="pbl-info-grid">
         <tr>
@@ -17795,20 +17814,8 @@ function buildPblLocationPickingHtml(rows,header){
               <td>${esc(r.size)}</td>
               <td>${fmt(r.pairs)}</td>
               <td>${fmt(r.boxes)}</td>
-              <td class="location ${r.statusClass||''}">
-                ${
-                  r.wCenterSufficient
-                    ? '<b>W-CENTER เพียงพอ</b>'
-                    : esc(r.location)
-                }
-              </td>
-              <td>
-                ${
-                  r.wCenterSufficient
-                    ? '<b>W-CENTER</b>'
-                    : esc(r.warehouse)
-                }
-              </td>
+              <td class="location ${r.statusClass||''}"><b>${esc(r.location)}</b></td>
+              <td>${esc(r.warehouse)}</td>
             </tr>
           `).join('')}
 
@@ -17822,7 +17829,7 @@ function buildPblLocationPickingHtml(rows,header){
       </table>
 
       <div class="pbl-pattern-note">
-        งานขาดที่ W-CENTER มีเพียงพอจะแสดง “W-CENTER เพียงพอ” และมีใบ W-CENTER PICKING SHEET แยกรายละเอียดให้หยิบ · รายการที่ W-CENTER ไม่พอจะแสดง “งานขาด”
+        รายการที่มี Stock บางส่วนและ W-CENTER ช่วยส่วนที่ขาด จะไม่แตกเป็นบรรทัดซ้ำ · รายละเอียด W-CENTER ยังอยู่ใน W-CENTER PICKING SHEET
       </div>
     </section>
   `
