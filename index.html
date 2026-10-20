@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>GAMBOL ERP PICKING</title>
+<!-- AUTO LOCATION 2026-10-20: WMT -> WBT -> W-CENTER, highest stock first, green/blue/red status -->
+<!-- VILLA FIX 2026-10-20: whole PO pairs / pack size; other customers unchanged -->
+<!-- ERP UPLOAD FIX 2026-10-20: schema-safe payload; private UI fields never sent to Supabase -->
 <!-- PRINT UI 2026-10-17: FIXED EQUAL ASN COLUMNS + UNIFORM ROWS -->
 <!-- PRINT FIX 2026-10-17: isolated print root, no mobile nav, no blank trailing pages -->
 <!-- MOBILE UI 2026-10-17: dedicated smartphone navigation and layout -->
@@ -370,6 +373,22 @@ h1{margin:0;font-size:23px;font-weight:900}
 .erp-db-not-empty{
   color:#b91c1c;
 }
+
+/* AUTO LOCATION */
+.orders-head-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.auto-location-control{display:inline-flex;align-items:center;gap:9px;min-height:42px;padding:6px 11px;border:1px solid #dfe3e8;border-radius:12px;background:#fff;color:#4b5563;font-size:10px;font-weight:900;user-select:none;white-space:nowrap}
+.auto-location-control.is-on{border-color:#86efac;background:#f0fdf4;color:#166534}
+.auto-location-switch{position:relative;display:inline-block;width:42px;height:24px;flex:0 0 42px}
+.auto-location-switch input{position:absolute;opacity:0;pointer-events:none}
+.auto-location-slider{position:absolute;inset:0;border-radius:999px;background:#cbd5e1;cursor:pointer;transition:.18s ease}
+.auto-location-slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(15,23,42,.22);transition:.18s ease}
+.auto-location-switch input:checked + .auto-location-slider{background:#16a34a}
+.auto-location-switch input:checked + .auto-location-slider::before{transform:translateX(18px)}
+.auto-location-legend{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 12px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:10px;background:#f8fafc;color:#64748b;font-size:9px;font-weight:800}
+.auto-location-legend.hidden{display:none}
+.auto-location-dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:3px;vertical-align:middle}
+.auto-location-dot.green{background:#22c55e}.auto-location-dot.blue{background:#3b82f6}.auto-location-dot.red{background:#ef4444}
+@media(max-width:820px){.orders-head-actions{gap:6px}.auto-location-control{min-height:38px;padding:5px 8px;font-size:9px}}
 
 /* JOB FORM */
 .job-form{border:2px solid #1f2937;border-radius:4px;overflow:hidden;background:white}
@@ -6533,7 +6552,16 @@ input[type="checkbox"]:focus-visible,input[type="radio"]:focus-visible{
 <div class="page-box">
   <div class="page-head">
     <div class="head-left"><button class="back-btn" data-page="home">←</button><div><h2 class="page-title">PICKING ORDER</h2><p class="page-sub">ข้อมูลจาก po_headers</p></div></div>
-    <button class="btn btn-secondary" id="reloadOrdersBtn">↻ รีเฟรช</button>
+    <div class="orders-head-actions">
+      <label class="auto-location-control" id="autoLocationControl">
+        <span>AUTO LOCATION</span>
+        <span class="auto-location-switch" aria-label="เปิดปิดการเลือก Location อัตโนมัติ">
+          <input id="autoLocationToggle" type="checkbox">
+          <span class="auto-location-slider"></span>
+        </span>
+      </label>
+      <button class="btn btn-secondary" id="reloadOrdersBtn">↻ รีเฟรช</button>
+    </div>
   </div>
 
   <div class="po-search-bar">
@@ -6960,6 +6988,14 @@ input[type="checkbox"]:focus-visible,input[type="radio"]:focus-visible{
   </div>
 
   <div id="detailMessage" class="detail-message"></div>
+
+  <div id="autoLocationLegend" class="auto-location-legend hidden">
+    <strong>AUTO LOCATION:</strong>
+    <span><i class="auto-location-dot green"></i>ของครบ</span>
+    <span><i class="auto-location-dot blue"></i>มีของบางส่วน / ยังขาด</span>
+    <span><i class="auto-location-dot red"></i>ไม่มีของ</span>
+    <span>ลำดับ WMT → WBT → W-CENTER · ภายในคลังเลือกยอดมาก → น้อย</span>
+  </div>
 
   <div id="missingPickNav" class="missing-pick-nav"></div>
 
@@ -12098,7 +12134,7 @@ async function checkErpCsv(){
       const actualHeaders=result.headers||[]
       const missing=ERP_EXPECTED_HEADERS.filter(h=>!actualHeaders.includes(h))
       if(missing.length) throw new Error(`${file.name}\nขาดคอลัมน์: ${missing.join(', ')}`)
-      const normalized=(result.data||[]).map(normalizeErpRow).filter(r=>r.item_number).map(normalizeErpUsableRow_)
+      const normalized=(result.data||[]).map(normalizeErpRow).filter(r=>r.item_number)
       if(!normalized.length) throw new Error(`${file.name}\nไม่พบข้อมูล Item`)
       allRows.push(...normalized)
       fileSummary.push({name:file.name,rows:normalized.length,warehouses:[...new Set(normalized.map(r=>txt(r.warehouse)).filter(Boolean))]})
@@ -12113,6 +12149,14 @@ async function checkErpCsv(){
     uploadBtn.disabled=false
   }catch(error){console.error(error);erpUploadState={file:null,files:[],rows:[],dbCount:null,valid:false};setErpUploadStatus('ตรวจสอบไฟล์ไม่สำเร็จ\n'+(error?.message||error),'error')}
   finally{checkBtn.disabled=false;checkBtn.textContent='ตรวจสอบไฟล์'}
+}
+
+function sanitizeErpRowForDb_(row){
+  const clean={}
+  ERP_EXPECTED_HEADERS.forEach(key=>{
+    clean[key]=row?.[key] ?? null
+  })
+  return clean
 }
 
 async function uploadErpCsvToSupabase(){
@@ -12166,7 +12210,9 @@ async function uploadErpCsvToSupabase(){
     const chunkSize=300
     let inserted=0
     for(let i=0;i<total;i+=chunkSize){
-      const chunk=erpUploadState.rows.slice(i,i+chunkSize)
+      const chunk=erpUploadState.rows
+        .slice(i,i+chunkSize)
+        .map(sanitizeErpRowForDb_)
       const {error}=await db.from(ERP_TABLE).insert(chunk)
       if(error) throw error
 
@@ -12690,6 +12736,14 @@ async function loadOrders(searchValue=null){
 }
 
 el('reloadOrdersBtn').onclick=()=>loadOrders()
+
+el('autoLocationToggle')?.addEventListener('change',event=>{
+  const enabled=Boolean(event.target.checked)
+  setAutoLocationEnabled_(enabled)
+  showToast(enabled ? 'AUTO LOCATION เปิด · WMT → WBT → W-CENTER' : 'AUTO LOCATION ปิด · เลือก Location เอง')
+})
+
+// AUTO LOCATION UI จะถูก sync หลังประกาศ config/function แล้ว
 
 el('orderPoSearchBtn')?.addEventListener('click',()=>{
   loadOrders()
@@ -15199,10 +15253,11 @@ function updatePblSavedTemplateUi_(){
 /* ---------- PBL CARTON GROUPING STRATEGY ---------- */
 /*
  * กฎการรวมกล่อง:
- * 7-11    -> รวมตาม Size / 12
- * CJ      -> รวมตาม Size / 6
- * MAXMART -> รวมตาม Model / 6
- * อื่น ๆ  -> ต่อ SKU
+ * 7-11         -> รวมตาม Size / 12
+ * CJ           -> รวมตาม Size / 6
+ * MAXMART      -> รวมตาม Model / 6
+ * VILLA MARKET -> รวมทั้ง PO / 6
+ * อื่น ๆ       -> ต่อ SKU
  */
 function pblCartonGroupMode_(customer,packSize){
   const c=norm(customer)
@@ -15211,6 +15266,11 @@ function pblCartonGroupMode_(customer,packSize){
   if(c==='711' && p===12) return 'SIZE'
   if(c==='CJ' && p===6) return 'SIZE'
   if(c==='MAXMART' && p===6) return 'MODEL'
+
+  // VILLA เท่านั้น: รวมจำนวนคู่ทั้ง PO แล้วหารจำนวนคู่ต่อกล่อง
+  // ตัวอย่าง 90 คู่ / 6 = 15 กล่อง
+  if(c==='VILLAMARKET' && p===6) return 'PO'
+
   return 'LINE'
 }
 
@@ -15221,6 +15281,10 @@ function pblCartonGroupKey_(meta,mode){
 
   if(mode==='MODEL'){
     return 'MODEL|'+norm(meta?.pattern?.item)
+  }
+
+  if(mode==='PO'){
+    return 'PO'
   }
 
   return 'LINE|'+String(meta?.lineNo||'')
@@ -17360,7 +17424,11 @@ async function createManualPblJob(){
           : (
               cartonPlan.mode==='SIZE'
                 ? `PBL SIZE MIX · SIZE ${meta.sizeRow.size}`
-                : `PBL PATTERN ${meta.patternIndex+1}`
+                : (
+                    cartonPlan.mode==='PO'
+                      ? 'PBL VILLA PO MIX'
+                      : `PBL PATTERN ${meta.patternIndex+1}`
+                  )
             ),
       validation_status:'READY',
       validation_message:null
@@ -21056,6 +21124,12 @@ function buildPblLocationPickingHtml(rows,header){
     customerKey==='MAXMART' &&
     packSize===6
 
+  // VILLA MARKET: รวมกล่องจากจำนวนคู่ทั้ง PO
+  // ห้าม ceil แยกต่อ SKU เพราะจะทำให้ยอดกล่องเกินจริง
+  const isVillaPoMix=
+    customerKey==='VILLAMARKET' &&
+    packSize===6
+
   // เก็บ allocation ตาม PO item เดิม ไม่แยก 1 SKU ออกเป็นหลายบรรทัดในใบจัด
   const byItem=new Map()
   sourceRows.forEach((r,index)=>{
@@ -21139,7 +21213,7 @@ function buildPblLocationPickingHtml(rows,header){
     // งานทั่วไปยังคงคำนวณกล่องต่อ SKU
     // 7-11 แบบ MIX SIZE จะคำนวณใหม่ "ต่อ Size" หลังจากสร้าง lines ครบแล้ว
     const displayBoxes=
-      (isSizeMixPbl || isMaxmartModelMix)
+      (isSizeMixPbl || isMaxmartModelMix || isVillaPoMix)
         ? ''
         : (
             packSize>0
@@ -21252,6 +21326,30 @@ function buildPblLocationPickingHtml(rows,header){
     })
   }
 
+  // ----------------------------------------------------------
+  // VILLA MARKET: รวมจำนวนคู่ทั้ง PO ก่อนคำนวณกล่อง
+  // ตัวอย่าง PO 9683: 90 คู่ / 6 = 15 กล่อง
+  // แสดงยอดกล่องเพียงบรรทัดแรกเพื่อไม่ให้ Total ถูกบวกซ้ำ
+  // ----------------------------------------------------------
+  const villaPoSummary={pairs:0,boxes:0}
+
+  if(isVillaPoMix){
+    villaPoSummary.pairs=lines.reduce(
+      (sum,r)=>sum+Math.max(0,num(r.pairs)),
+      0
+    )
+
+    villaPoSummary.boxes=
+      packSize>0
+        ? Math.ceil(villaPoSummary.pairs/packSize)
+        : 0
+
+    lines.forEach((line,index)=>{
+      line.boxes=index===0 ? villaPoSummary.boxes : ''
+      line.villaPoGroupFirst=index===0
+    })
+  }
+
   const totalPairs=lines.reduce(
     (sum,r)=>sum+Math.max(0,num(r.pairs)),
     0
@@ -21268,9 +21366,13 @@ function buildPblLocationPickingHtml(rows,header){
               (sum,g)=>sum+Math.max(0,num(g.boxes)),
               0
             )
-          : lines.reduce(
-              (sum,r)=>sum+Math.max(0,num(r.boxes)),
-              0
+          : (
+              isVillaPoMix
+                ? villaPoSummary.boxes
+                : lines.reduce(
+                    (sum,r)=>sum+Math.max(0,num(r.boxes)),
+                    0
+                  )
             )
       )
 
@@ -21283,7 +21385,11 @@ function buildPblLocationPickingHtml(rows,header){
           : (
               isMaxmartModelMix
                 ? `MAXMART · 1 กล่อง = ${fmt(packSize)} คู่ · 1 กล่องสามารถมีหลาย Color / หลาย Size แต่ต้องเป็น Model เดียวกัน · จำนวนกล่องรวมตาม Model`
-                : '1 รายการต้นฉบับ = 1 บรรทัด · หากแบ่งหลาย Location หรือมี W-CENTER จะรวมรายละเอียดไว้ในบรรทัดเดียว'
+                : (
+                    isVillaPoMix
+                      ? `VILLA MARKET · 1 กล่อง = ${fmt(packSize)} คู่ · จำนวนกล่องรวมจากจำนวนคู่ทั้ง PO`
+                      : '1 รายการต้นฉบับ = 1 บรรทัด · หากแบ่งหลาย Location หรือมี W-CENTER จะรวมรายละเอียดไว้ในบรรทัดเดียว'
+                  )
             )
       }</div>
 
@@ -21319,7 +21425,11 @@ function buildPblLocationPickingHtml(rows,header){
             <tr class="${
               r.sizeGroupFirst
                 ? 'pbl-size-group-start'
-                : (r.modelGroupFirst ? 'pbl-size-group-start' : '')
+                : (
+                    r.modelGroupFirst || r.villaPoGroupFirst
+                      ? 'pbl-size-group-start'
+                      : ''
+                  )
             }">
               <td>${i+1}</td>
               <td class="item">${esc(r.item)}</td>
@@ -21363,11 +21473,19 @@ function buildPblLocationPickingHtml(rows,header){
                     ).join(' &nbsp; | &nbsp; ')}
                   </div>
                 `
-                : `
-                  <div class="pbl-pattern-note">
-                    รายการที่มี Stock บางส่วนและ W-CENTER ช่วยส่วนที่ขาด จะไม่แตกเป็นบรรทัดซ้ำ · รายละเอียด W-CENTER ยังอยู่ใน W-CENTER PICKING SHEET
-                  </div>
-                `
+                : (
+                    isVillaPoMix
+                      ? `
+                        <div class="pbl-pattern-note">
+                          VILLA MARKET = ${fmt(villaPoSummary.pairs)} คู่ ÷ ${fmt(packSize)} = <b>${fmt(villaPoSummary.boxes)} กล่อง</b>
+                        </div>
+                      `
+                      : `
+                        <div class="pbl-pattern-note">
+                          รายการที่มี Stock บางส่วนและ W-CENTER ช่วยส่วนที่ขาด จะไม่แตกเป็นบรรทัดซ้ำ · รายละเอียด W-CENTER ยังอยู่ใน W-CENTER PICKING SHEET
+                        </div>
+                      `
+                  )
             )
       }
     </section>
@@ -22016,6 +22134,37 @@ function matchErp(item,erpRows,header=currentPickingHeader){
 }
 
 
+const AUTO_LOCATION_STORAGE_KEY='gambol_auto_location_v1'
+function autoLocationEnabled_(){return localStorage.getItem(AUTO_LOCATION_STORAGE_KEY)==='1'}
+function setAutoLocationEnabled_(enabled){localStorage.setItem(AUTO_LOCATION_STORAGE_KEY,enabled?'1':'0');syncAutoLocationUi_()}
+function syncAutoLocationUi_(){
+  const enabled=autoLocationEnabled_(),toggle=el('autoLocationToggle'),control=el('autoLocationControl'),legend=el('autoLocationLegend')
+  if(toggle) toggle.checked=enabled
+  if(control) control.classList.toggle('is-on',enabled)
+  if(legend) legend.classList.toggle('hidden',!enabled)
+}
+function autoSelectLocationsForLine_(itemId){
+  if(!autoLocationEnabled_()) return
+  const data=pickingLineData.get(String(itemId)); if(!data||isForcedNoStock(itemId)) return
+  const required=Math.max(0,num(data.required)),selected=getSelectedLocationSet(itemId); selected.clear(); if(required<=0) return
+  const isAsn=norm(data.jobType)==='ASN'; let looseRemain=required
+  if(isAsn){data.locations.forEach(loc=>{if(isHiddenPickingLocation(loc)||!loc?._isLoose||looseRemain<=0)return; const a=Math.max(0,num(loc.available_physical)); looseRemain-=Math.min(a,looseRemain)})}
+  let remain=Math.max(0,looseRemain)
+  const candidates=data.locations.map((loc,index)=>({loc,index})).filter(({loc})=>!isHiddenPickingLocation(loc)&&!loc?._isLoose&&Math.max(0,num(loc?.available_physical))>0&&[1,2].includes(stockWarehousePriority_(loc?.warehouse))).sort((a,b)=>sortPickingStockPriority_(a.loc,b.loc))
+  for(const c of candidates){if(remain<=0)break; selected.add(c.index); remain=Math.max(0,remain-Math.max(0,num(c.loc?.available_physical)))}
+}
+function autoSelectAllPickingLocations_(){if(!autoLocationEnabled_())return; pickingLineData.forEach((data,itemId)=>autoSelectLocationsForLine_(itemId)); savePersistedPickingSelections(currentPickingPoId)}
+function autoLocationStockState_(data){
+  const summary=stockFallbackSummaryForLine_(data,Math.max(0,num(data?.required)))
+  const total=Math.max(0,num(summary.wmt))+Math.max(0,num(summary.wbt))+Math.max(0,num(summary.wCenterTotal))
+  if(summary.required<=0||total>=summary.required)return{state:'complete',summary,total}
+  if(total>0)return{state:'partial',summary,total}
+  return{state:'none',summary,total:0}
+}
+
+// ประกาศ AUTO_LOCATION_STORAGE_KEY และ helper ครบแล้ว จึง sync UI ตรงนี้
+syncAutoLocationUi_()
+
 function getSelectedLocationSet(itemId){
   const key=String(itemId)
   if(!pickingLocationSelections.has(key)){
@@ -22363,32 +22512,24 @@ function updateLineLocationSelection(itemId){
     hasManualSelection ||
     hasAutoLooseSelection
 
-  // เขียว = เลือกครบ 100% และไม่มีงานขาด
-  const selectionComplete=
-    !forcedNoStock &&
-    result.remaining<=0 &&
-    result.shortage<=0 &&
-    result.picked>=result.required
+  const autoMode=autoLocationEnabled_()
+  const autoStockState=autoMode ? autoLocationStockState_(data) : null
+
+  const selectionComplete=autoMode
+    ? (!forcedNoStock && autoStockState.state==='complete')
+    : (!forcedNoStock && result.remaining<=0 && result.shortage<=0 && result.picked>=result.required)
 
   const lineResolved=pickingLineResolved(itemId)
 
-  // น้ำเงิน = ผู้ใช้เลือกของที่มีในระบบครบแล้ว แต่ยอดรวมยังไม่พอ
-  // เช่น ต้องการ 180 / ระบบมี 168 / เลือก 168 -> ขาด 12
-  const shortageReadyState=
-    !forcedNoStock &&
-    lineResolved &&
-    result.shortage>0 &&
-    hasAnySelection
+  const shortageReadyState=autoMode
+    ? (!forcedNoStock && autoStockState.state==='partial')
+    : (!forcedNoStock && lineResolved && result.shortage>0 && hasAnySelection)
 
-  // แดง = ระบบมีสินค้า แต่ผู้ใช้ตรวจของจริงแล้วพบว่าไม่มี
-  // ผู้ใช้ต้องติ๊ก "ไม่มีสินค้าจริง / ให้เป็นงานขาด"
-  const realNoStockState=Boolean(forcedNoStock)
+  const realNoStockState=autoMode
+    ? (!forcedNoStock && autoStockState.state==='none')
+    : Boolean(forcedNoStock)
 
-  // ธรรมดา = ยังไม่ได้เลือก/ยังเลือกไม่ครบ
-  const defaultState=
-    !selectionComplete &&
-    !shortageReadyState &&
-    !realNoStockState
+  const defaultState=!selectionComplete&&!shortageReadyState&&!realNoStockState
 
   if(lineCard){
     lineCard.classList.toggle('real-no-stock',realNoStockState)
@@ -22454,7 +22595,19 @@ function updateLineLocationSelection(itemId){
 
   const status=el(`linePickStatus_${itemId}`)
   if(status){
-    if(realNoStockState){
+    if(autoMode){
+      const s=autoStockState.summary
+      if(autoStockState.state==='complete'){
+        status.className='line-pick-status ready'
+        status.textContent='AUTO · ต้องการ '+fmt(s.required)+' คู่ · WMT '+fmt(s.wmt)+' · WBT '+fmt(s.wbt)+' · W-CENTER '+fmt(s.wCenterTotal)+' · ของครบ'
+      }else if(autoStockState.state==='partial'){
+        status.className='line-pick-status shortage-ready'
+        status.textContent='AUTO · ต้องการ '+fmt(s.required)+' คู่ · WMT '+fmt(s.wmt)+' · WBT '+fmt(s.wbt)+' · W-CENTER '+fmt(s.wCenterTotal)+' · ขาด '+fmt(s.finalShortage)+' คู่'
+      }else{
+        status.className='line-pick-status shortage'
+        status.textContent='AUTO · ต้องการ '+fmt(s.required)+' คู่ · WMT 0 · WBT 0 · W-CENTER 0 · ไม่มีสินค้า'
+      }
+    }else if(realNoStockState){
       status.className='line-pick-status shortage'
       status.textContent=
         'ของจริงไม่มี · จำนวนรวม '+fmt(result.required)+
@@ -22526,12 +22679,16 @@ function updatePdfActionButtons(isReady){
 
 function pickingLineResolved(itemId){
   const result=selectedAllocationForLine(itemId)
+  const data=pickingLineData.get(String(itemId))
 
-  // ผู้ใช้ยืนยัน "ของจริงไม่มี" -> แดงและพร้อมทำใบจัด
   if(result.forcedNoStock) return true
 
-  // ถ้า ERP ไม่มีของเลย แต่ผู้ใช้ยังไม่ติ๊กยืนยัน
-  // ให้คงกรอบธรรมดาและยังทำใบจัดไม่ได้
+  if(autoLocationEnabled_() && data){
+    const autoState=autoLocationStockState_(data)
+    if(autoState.total>0) return true
+    return false
+  }
+
   if(result.targetFromStock<=0) return false
 
   // ASN มีงานเศษอัตโนมัติ และส่วนที่เหลือเป็นงานขาด
@@ -23466,7 +23623,11 @@ async function openPickingDetail(poId,source='active'){
 
     bindLocationCheckboxes()
 
-    // คืนสถานะ checkbox เดิมเมื่อกด Refresh Location ใน PO เดิม
+    if(autoLocationEnabled_()){
+      autoSelectAllPickingLocations_()
+    }
+    syncAutoLocationUi_()
+
     pickingLineData.forEach((data,itemId)=>{
       updateLineLocationSelection(itemId)
     })
