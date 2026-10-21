@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>GAMBOL ERP PICKING</title>
+<!-- ASN TOTAL CARTON FIX 2026-10-21: zero is invalid; footer falls back to calculated row total; ASN create requires cartons > 0 -->
 <!-- WBT STOCK SYNC FIX 2026-10-21: Physical inventory is the single source for WMT/WBT; duplicate batch rows summed in picking -->
 <!-- ERP STOCK DISPLAY FIX 2026-10-21: grouped WBT rows display summed available_physical -->
 <!-- JOB ORDER COMPACT PRO V3 2026-10-21: reduced visual weight + tighter spacing + no summary spill -->
@@ -12892,8 +12893,16 @@ async function saveOrderProductionCartons(poId,input,button){
 
   const value=Number(valueText)
 
+  const poType=norm(input?.dataset?.poType)
+
   if(!Number.isFinite(value) || value<0 || !Number.isInteger(value)){
     showToast('Cartons ต้องเป็นจำนวนเต็ม 0 ขึ้นไป')
+    input?.focus()
+    return
+  }
+
+  if(poType==='ASN' && value<=0){
+    showToast('ASN ต้องกรอกจำนวนกล่องมากกว่า 0')
     input?.focus()
     return
   }
@@ -13108,13 +13117,23 @@ async function loadOrders(searchValue=null){
     }
 
     body.innerHTML=visibleOrders.length ? visibleOrders.map(r=>{
+      const productionNumeric=
+        Math.max(0,num(r.production_cartons))
+
       const hasSavedProduction=
         r.production_cartons!==null &&
         r.production_cartons!==undefined &&
-        txt(r.production_cartons)!==''
+        txt(r.production_cartons)!=='' &&
+        (
+          norm(r.po_type)!=='ASN' ||
+          (
+            Number.isInteger(productionNumeric) &&
+            productionNumeric>0
+          )
+        )
 
       const productionValue=hasSavedProduction
-        ? Number(r.production_cartons)
+        ? productionNumeric
         : (
             norm(r.po_type)==='PBL'
               ? Math.max(0,num(r.total_pairs))/pblPackSizeFromHeader(r)
@@ -13150,6 +13169,7 @@ async function loadOrders(searchValue=null){
                 inputmode="numeric"
                 value="${productionValue===''?'':esc(productionValue)}"
                 data-production-cartons="${esc(r.id)}"
+                data-po-type="${esc(r.po_type||'')}"
                 data-saved-value="${productionValue===''?'':esc(productionValue)}"
                 placeholder="0"
                 aria-label="จำนวนกล่องที่ส่ง PO ${esc(r.po_no||'')}"
@@ -24236,19 +24256,37 @@ function displayedProductionCartons(header,fallback=0){
   const value=header?.production_cartons
   const type=norm(header?.po_type)
 
-  // ถ้าผู้ใช้กรอกเองแล้ว ใช้ค่าที่กรอกเป็นหลัก
-  if(value!==null && value!==undefined && txt(value)!==''){
-    return Math.max(0,num(value))
+  const hasValue=
+    value!==null &&
+    value!==undefined &&
+    txt(value)!==''
+
+  const numericValue=hasValue
+    ? Math.max(0,num(value))
+    : null
+
+  // ASN: 0 ไม่ถือว่าเป็นจำนวนกล่องที่กรอกแล้ว
+  // ต้องเป็นจำนวนเต็มมากกว่า 0 จึงจะนำไปใช้เป็นยอด Header/Footer
+  if(type==='ASN'){
+    if(
+      numericValue!==null &&
+      Number.isInteger(numericValue) &&
+      numericValue>0
+    ){
+      return numericValue
+    }
+
+    return null
+  }
+
+  // ประเภทอื่น: ถ้ามีค่าบันทึกไว้ ใช้ค่าบันทึก
+  if(numericValue!==null){
+    return numericValue
   }
 
   // PBL: ค่า Default = จำนวนคู่ / จำนวนคู่ต่อกล่อง
   if(type==='PBL'){
     return Math.max(0,num(header?.total_pairs))/pblPackSizeFromHeader(header)
-  }
-
-  // ASN: ไม่ทำ Default ต้องให้ผู้ใช้กรอกเอง
-  if(type==='ASN'){
-    return null
   }
 
   return Math.max(0,num(fallback))
@@ -24258,10 +24296,20 @@ function hasRequiredProductionCartons(header){
   if(norm(header?.po_type)!=='ASN') return true
 
   const value=header?.production_cartons
-  return !(
+
+  if(
     value===null ||
     value===undefined ||
     txt(value)===''
+  ){
+    return false
+  }
+
+  const numericValue=num(value)
+
+  return (
+    Number.isInteger(numericValue) &&
+    numericValue>0
   )
 }
 
@@ -24888,7 +24936,7 @@ async function openJobOrderPreview(){
   // ASN ต้องกรอกจำนวนกล่องที่ส่งเองก่อน
   if(!hasRequiredProductionCartons(currentPickingHeader)){
     setDetailMessage(
-      'ASN ยังไม่ได้กรอกจำนวนกล่องที่ส่ง · กรุณากรอกในหน้า PICKING ORDER และกดบันทึกก่อนสร้างใบจัดงาน',
+      'ASN ต้องกรอกจำนวนกล่องที่ส่งมากกว่า 0 · กรุณากรอกในหน้า PICKING ORDER และกดบันทึกก่อนสร้างใบจัดงาน',
       'warn'
     )
     showToast('กรุณากรอกจำนวนกล่องที่ส่งของ ASN ก่อน')
