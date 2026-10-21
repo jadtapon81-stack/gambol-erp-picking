@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>GAMBOL ERP PICKING</title>
+<!-- WBT STOCK SYNC FIX 2026-10-21: Physical inventory is the single source for WMT/WBT; duplicate batch rows summed in picking -->
+<!-- ERP STOCK DISPLAY FIX 2026-10-21: grouped WBT rows display summed available_physical -->
+<!-- JOB ORDER COMPACT PRO V3 2026-10-21: reduced visual weight + tighter spacing + no summary spill -->
+<!-- JOB ORDER CLEAN PRO V2 2026-10-21: readable plan cards + required time validation + A4 landscape dual-column -->
+<!-- JOB ORDER PREVIEW FIX 2026-10-21: iframe modal preview; no browser popup required -->
+<!-- PRODUCTION JOB ORDER 2026-10-21: multi-PO -> A4 -> Supabase history -->
 <!-- AUTO LOCATION 2026-10-20: WMT -> WBT -> W-CENTER, highest stock first, green/blue/red status -->
 <!-- VILLA FIX 2026-10-20: whole PO pairs / pack size; other customers unchanged -->
 <!-- ERP UPLOAD FIX 2026-10-20: schema-safe payload; private UI fields never sent to Supabase -->
@@ -5774,6 +5780,362 @@ input[type="checkbox"]:focus-visible,input[type="radio"]:focus-visible{
   #printArea .pdf-asn-original .asn-total-row td{height:24px !important;min-height:24px !important;}
 }
 
+
+/* =========================================================
+   PRODUCTION JOB ORDER MANAGEMENT
+========================================================= */
+.jom-layout{
+  display:grid;
+  grid-template-columns:minmax(290px,.78fr) minmax(0,1.55fr);
+  gap:14px;
+}
+.jom-card{
+  border:1px solid #e5e7eb;
+  border-radius:16px;
+  background:#fff;
+  padding:15px;
+}
+.jom-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:12px;
+}
+.jom-title h3{margin:0;font-size:16px}
+.jom-search{display:grid;grid-template-columns:1fr auto;gap:8px}
+.jom-search input,
+.jom-field input,
+.jom-field select,
+.jom-line-input{
+  width:100%;
+  min-height:40px;
+  padding:9px 10px;
+  border:1px solid #d1d5db;
+  border-radius:9px;
+  background:#fff;
+}
+.jom-search input:focus,
+.jom-field input:focus,
+.jom-field select:focus,
+.jom-line-input:focus{
+  outline:none;
+  border-color:#ef6b63;
+  box-shadow:0 0 0 3px rgba(217,47,39,.07);
+}
+.jom-po-tools{display:flex;gap:7px;flex-wrap:wrap;margin:9px 0}
+.jom-po-list{
+  max-height:620px;
+  overflow:auto;
+  border-top:1px solid #e5e7eb;
+}
+.jom-po-item{
+  display:grid;
+  grid-template-columns:28px 1fr;
+  gap:9px;
+  padding:12px 2px;
+  border-bottom:1px solid #eef2f7;
+}
+.jom-po-item:hover{background:#fafafa}
+.jom-po-item input[type=checkbox]{
+  width:19px;height:19px;accent-color:#d92f27;margin-top:3px;
+}
+.jom-po-no{font-size:14px;font-weight:900}
+.jom-po-meta{margin-top:3px;color:#6b7280;font-size:10px;line-height:1.5}
+.jom-header-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+}
+.jom-field label{
+  display:block;
+  margin-bottom:5px;
+  color:#6b7280;
+  font-size:9px;
+  font-weight:900;
+}
+.jom-selected-wrap{
+  margin-top:14px;
+  overflow:auto;
+  border:1px solid #e5e7eb;
+  border-radius:11px;
+}
+.jom-selected-table{
+  width:100%;
+  min-width:1080px;
+  border-collapse:collapse;
+}
+.jom-selected-table th,
+.jom-selected-table td{
+  padding:8px 9px;
+  border-bottom:1px solid #e5e7eb;
+  font-size:10px;
+  text-align:left;
+  vertical-align:middle;
+}
+.jom-selected-table th{
+  background:#f8fafc;
+  color:#475569;
+  font-size:9px;
+  font-weight:900;
+  position:sticky;
+  top:0;
+  z-index:1;
+}
+.jom-selected-table .jom-line-input{
+  min-height:34px;
+  padding:6px 7px;
+  font-size:10px;
+}
+.jom-remove{
+  border:0;
+  border-radius:8px;
+  background:#fef2f2;
+  color:#b91c1c;
+  font-weight:900;
+  padding:6px 9px;
+  cursor:pointer;
+}
+.jom-summary{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:9px;
+  margin-top:12px;
+}
+.jom-stat{
+  border:1px solid #e5e7eb;
+  border-radius:11px;
+  padding:10px 11px;
+  background:#fafafa;
+}
+.jom-stat small{display:block;color:#6b7280;font-size:9px;font-weight:900}
+.jom-stat b{display:block;margin-top:4px;font-size:18px}
+.jom-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:13px;
+}
+.jom-status{
+  display:none;
+  margin-top:12px;
+  padding:10px 12px;
+  border-radius:10px;
+  font-size:11px;
+  line-height:1.5;
+  white-space:pre-line;
+}
+.jom-status.show{display:block}
+.jom-status.info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af}
+.jom-status.ok{background:#ecfdf5;border:1px solid #86efac;color:#166534}
+.jom-status.warn{background:#fff7ed;border:1px solid #fdba74;color:#9a3412}
+.jom-status.error{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
+.jom-history{
+  margin-top:14px;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+  overflow:auto;
+}
+.jom-history table{
+  width:100%;
+  min-width:760px;
+  border-collapse:collapse;
+}
+.jom-history th,.jom-history td{
+  padding:9px 10px;
+  border-bottom:1px solid #e5e7eb;
+  font-size:10px;
+  text-align:left;
+}
+.jom-history th{background:#f8fafc;font-size:9px;color:#475569}
+.jom-view-btn{
+  border:0;border-radius:8px;padding:6px 9px;
+  background:#eef2ff;color:#3730a3;font-weight:900;cursor:pointer
+}
+.jom-stepbar{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+  margin-bottom:14px;
+}
+.jom-step{
+  border:1px solid #e5e7eb;
+  border-radius:11px;
+  padding:9px 10px;
+  background:#fff;
+  font-size:10px;
+  font-weight:800;
+  color:#475569;
+}
+.jom-step b{
+  display:inline-grid;
+  place-items:center;
+  width:23px;height:23px;
+  margin-right:6px;
+  border-radius:50%;
+  background:#fff1ef;
+  color:#d92f27;
+}
+@media(max-width:820px){
+  .jom-layout{grid-template-columns:1fr}
+  .jom-header-grid{grid-template-columns:1fr 1fr}
+  .jom-summary{grid-template-columns:1fr 1fr}
+  .jom-stepbar{grid-template-columns:1fr 1fr}
+}
+@media(max-width:560px){
+  .jom-header-grid{grid-template-columns:1fr}
+}
+
+
+/* =========================================================
+   JOB ORDER PREVIEW MODAL - NO POPUP REQUIRED
+========================================================= */
+.jom-preview-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:30000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(15,23,42,.72);
+  backdrop-filter:blur(5px);
+}
+
+.jom-preview-shell{
+  width:min(1180px,100%);
+  height:calc(100vh - 36px);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  border-radius:18px;
+  background:#fff;
+  box-shadow:0 30px 90px rgba(0,0,0,.38);
+}
+
+.jom-preview-toolbar{
+  min-height:68px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:13px 16px;
+  border-bottom:1px solid #e5e7eb;
+  background:#fff;
+}
+
+.jom-preview-toolbar-title{
+  font-size:15px;
+  font-weight:900;
+}
+
+.jom-preview-toolbar-sub{
+  margin-top:3px;
+  color:#6b7280;
+  font-size:10px;
+}
+
+.jom-preview-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.jom-preview-frame{
+  width:100%;
+  height:100%;
+  flex:1;
+  border:0;
+  background:#dfe3e8;
+}
+
+@media(max-width:700px){
+  .jom-preview-backdrop{
+    padding:0;
+  }
+
+  .jom-preview-shell{
+    width:100%;
+    height:100vh;
+    border-radius:0;
+  }
+
+  .jom-preview-toolbar{
+    min-height:60px;
+    padding:9px 10px;
+  }
+
+  .jom-preview-toolbar-title{
+    font-size:13px;
+  }
+
+  .jom-preview-toolbar-sub{
+    display:none;
+  }
+
+  .jom-preview-actions .btn{
+    padding:9px 10px;
+    font-size:11px;
+  }
+}
+
+
+/* =========================================================
+   JOB ORDER V2 — CLEAN SELECTED PO CARDS
+========================================================= */
+.jom-selected-panel{margin-top:14px;border:0;overflow:visible;border-radius:0}
+.jom-selected-cards{display:grid;gap:10px}
+.jom-selected-empty{
+  padding:30px 16px;text-align:center;color:#94a3b8;
+  border:1px dashed #cbd5e1;border-radius:12px;background:#f8fafc
+}
+.jom-po-edit-card{
+  border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;background:#fff
+}
+.jom-po-edit-head{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:10px 12px;background:#f8fafc;border-bottom:1px solid #e5e7eb
+}
+.jom-po-edit-title{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.jom-po-edit-title strong{font-size:14px}
+.jom-mini-badge{
+  display:inline-flex;align-items:center;min-height:24px;padding:4px 8px;
+  border-radius:999px;background:#fff;border:1px solid #e5e7eb;
+  color:#475569;font-size:9px;font-weight:900
+}
+.jom-po-edit-metrics{
+  display:flex;gap:7px;flex-wrap:wrap;color:#475569;font-size:10px;font-weight:800
+}
+.jom-po-edit-body{padding:12px}
+.jom-po-plan-grid{
+  display:grid;grid-template-columns:1.15fr .9fr 1fr 1fr .55fr;
+  gap:9px;align-items:end
+}
+.jom-po-plan-field label{
+  display:block;margin-bottom:5px;color:#64748b;font-size:9px;
+  font-weight:900;text-transform:uppercase
+}
+.jom-po-plan-field input{
+  width:100%;min-height:42px;padding:8px 9px;border:1px solid #d1d5db;
+  border-radius:9px;background:#fff;color:#111827;font-size:11px
+}
+.jom-po-plan-field input:focus{
+  outline:none;border-color:#ef6b63;box-shadow:0 0 0 3px rgba(217,47,39,.07)
+}
+.jom-datetime-help{
+  margin-top:8px;padding:8px 10px;border-radius:9px;background:#eff6ff;
+  border:1px solid #bfdbfe;color:#1e40af;font-size:9px;line-height:1.45
+}
+.jom-field-error{border-color:#ef4444 !important;background:#fff7f7 !important}
+.jom-required-note{color:#b91c1c;font-weight:900}
+@media(max-width:980px){.jom-po-plan-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:580px){
+  .jom-po-edit-head{align-items:flex-start}
+  .jom-po-plan-grid{grid-template-columns:1fr}
+  .jom-po-edit-metrics{justify-content:flex-end}
+}
+
 </style>
 </head>
 
@@ -5788,6 +6150,7 @@ input[type="checkbox"]:focus-visible,input[type="radio"]:focus-visible{
     <button class="side-item" data-side-page="create"><span class="side-icon">＋</span>CREATE PICKING</button>
     <button class="side-item" data-side-page="pblmanual"><span class="side-icon">✎</span>CREATE PBL</button>
     <button class="side-item" data-side-page="active"><span class="side-icon">⌁</span>ACTIVE PICKING</button>
+    <button class="side-item" data-side-page="productionjo"><span class="side-icon">JO</span>JOB ORDER</button>
     <div class="side-section">MASTER / MANAGEMENT</div>
     <button class="side-item" data-side-page="upload"><span class="side-icon">⇧</span>UPLOAD ERP STOCK</button>
     <button class="side-item" data-side-page="upcmaster"><span class="side-icon">▥</span>UPC MASTER</button>
@@ -5841,6 +6204,10 @@ input[type="checkbox"]:focus-visible,input[type="radio"]:focus-visible{
     <div class="small-card" data-page="reservations">
       <div class="small-icon">◉</div>
       <div><strong>RESERVED STOCK</strong><span>ดูยอดที่ PO จอง / ยอดก่อน-หลัง / คงเหลือ</span></div>
+    </div>
+    <div class="small-card" data-page="productionjo">
+      <div class="small-icon">JO</div>
+      <div><strong>JOB ORDER</strong><span>รวมหลาย PO → Preview A4 → Save / Print</span></div>
     </div>
 
     <div class="small-card danger" id="clearErpStockCard" title="ล้างข้อมูล ERP Stock ทั้งหมด">
@@ -7006,6 +7373,143 @@ input[type="checkbox"]:focus-visible,input[type="radio"]:focus-visible{
 </section>
 
 
+
+<section class="page" id="page-productionjo">
+<div class="page-box">
+  <div class="page-head">
+    <div class="head-left">
+      <button class="back-btn" data-page="home">←</button>
+      <div>
+        <h2 class="page-title">JOB ORDER MANAGEMENT</h2>
+        <p class="page-sub">เลือกหลาย PO → กำหนดข้อมูลการผลิต → Preview A4 → บันทึก JOB ORDER</p>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-secondary" id="jomRefreshBtn">↻ รีเฟรช</button>
+      <button class="btn btn-primary" id="jomPreviewBtn">PREVIEW</button>
+    </div>
+  </div>
+
+  <div class="jom-stepbar">
+    <div class="jom-step"><b>1</b>เลือก PO</div>
+    <div class="jom-step"><b>2</b>กำหนด Line / เวลา</div>
+    <div class="jom-step"><b>3</b>Preview เอกสาร</div>
+    <div class="jom-step"><b>4</b>Save / Print</div>
+  </div>
+
+  <div class="jom-layout">
+    <section class="jom-card">
+      <div class="jom-title">
+        <h3>เลือก PO</h3>
+        <span class="badge" id="jomPoCountBadge">0 PO</span>
+      </div>
+
+      <div class="jom-search">
+        <input id="jomPoSearch" placeholder="ค้นหา PO / Customer / Type">
+        <button class="btn btn-primary" id="jomPoSearchBtn">ค้นหา</button>
+      </div>
+
+      <div class="jom-po-tools">
+        <button class="btn btn-secondary" id="jomSelectVisibleBtn">✓ เลือกที่เห็น</button>
+        <button class="btn btn-secondary" id="jomClearSelectedBtn">ล้างที่เลือก</button>
+      </div>
+
+      <div class="jom-po-list" id="jomPoList">
+        <div class="empty"><div><strong>กำลังโหลด PO</strong></div></div>
+      </div>
+    </section>
+
+    <section class="jom-card">
+      <div class="jom-title">
+        <h3>JOB INFORMATION</h3>
+        <span class="badge" id="jomJoNoBadge">JO: -</span>
+      </div>
+
+      <div class="jom-header-grid">
+        <div class="jom-field">
+          <label>JO NUMBER</label>
+          <input id="jomJoNo" readonly placeholder="สร้างอัตโนมัติ">
+        </div>
+        <div class="jom-field">
+          <label>JOB DATE</label>
+          <input id="jomJobDate" type="date">
+        </div>
+        <div class="jom-field">
+          <label>PRIORITY</label>
+          <select id="jomPriority">
+            <option value="NORMAL">NORMAL</option>
+            <option value="HIGH">HIGH</option>
+            <option value="URGENT">URGENT</option>
+          </select>
+        </div>
+        <div class="jom-field">
+          <label>PLANNER</label>
+          <input id="jomPlanner" placeholder="ชื่อ Planner">
+        </div>
+        <div class="jom-field">
+          <label>SHIFT</label>
+          <select id="jomShift">
+            <option value="DAY">DAY</option>
+            <option value="OT">OT</option>
+            <option value="NIGHT">NIGHT</option>
+          </select>
+        </div>
+        <div class="jom-field">
+          <label>LEADER</label>
+          <input id="jomLeader" placeholder="ชื่อ Leader">
+        </div>
+      </div>
+
+      <div class="jom-selected-panel">
+        <div id="jomSelectedBody" class="jom-selected-cards">
+          <div class="jom-selected-empty">ยังไม่ได้เลือก PO</div>
+        </div>
+      </div>
+
+      <div class="jom-summary">
+        <div class="jom-stat"><small>TOTAL PO</small><b id="jomSumPo">0</b></div>
+        <div class="jom-stat"><small>TOTAL PAIRS</small><b id="jomSumPairs">0</b></div>
+        <div class="jom-stat"><small>TOTAL CARTON</small><b id="jomSumCartons">0</b></div>
+        <div class="jom-stat"><small>CUSTOMER</small><b id="jomSumCustomer" style="font-size:13px">-</b></div>
+      </div>
+
+      <div class="jom-actions">
+        <button class="btn btn-secondary" id="jomPreviewBtn2">PREVIEW A4</button>
+        <button class="btn btn-green" id="jomSaveBtn">CREATE JOB ORDER</button>
+      </div>
+
+      <div id="jomStatus" class="jom-status"></div>
+    </section>
+  </div>
+
+  <section class="jom-card" style="margin-top:14px">
+    <div class="jom-title">
+      <h3>JOB ORDER HISTORY</h3>
+      <button class="btn btn-secondary" id="jomHistoryRefreshBtn">↻ รีเฟรช</button>
+    </div>
+    <div class="jom-history">
+      <table>
+        <thead>
+          <tr>
+            <th>JO NO.</th>
+            <th>Date</th>
+            <th>Customer</th>
+            <th>Planner</th>
+            <th>Priority</th>
+            <th>Status</th>
+            <th>Updated</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="jomHistoryBody">
+          <tr><td colspan="8">กำลังโหลด...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+</section>
+
 <section class="page" id="page-joborder">
 <div class="page-box">
   <div class="page-head">
@@ -7649,8 +8153,10 @@ const BARCODE_MASTER_TABLE = 'barcode_master'
 const W_CENTER_VIEW = 'w_center_stock'
 const W_CENTER_SOURCE_TABLE = 'summary_stock_zone'
 const PACK_SIZE = 6
+const PRODUCTION_JOB_ORDER_TABLE = 'job_orders'
+const PRODUCTION_JOB_DETAIL_TABLE = 'job_order_details'
 
-const pages = ['home','create','pblmanual','orders','stock','wcenter','wbt','shortages','btcenterexport','reservations','active','activejob','detail','joborder','upload','upcmaster','looselocations','forbiddenlocations','locationqr','completed']
+const pages = ['home','create','pblmanual','orders','stock','wcenter','wbt','shortages','btcenterexport','reservations','active','activejob','detail','joborder','productionjo','upload','upcmaster','looselocations','forbiddenlocations','locationqr','completed']
 const jobRows = []
 let shortageReportRows=[]
 let shortageReportFiltered=[]
@@ -8676,6 +9182,7 @@ function showPage(name, updateHash=true){
   if(name==='shortages') loadShortageReport()
   if(name==='btcenterexport') loadBtWCenterExportPage()
   if(name==='reservations') loadReservationsPage()
+  if(name==='productionjo') loadProductionJobOrderPage_()
   if(name==='upcmaster') resetUpcUploadStatusOnly()
   if(name==='locationqr') loadLocationQrMaster()
   if(name==='looselocations') loadLooseLocationMaster()
@@ -16761,7 +17268,28 @@ async function fetchManualPblExactStock(item,color,size,warehouseOverride=''){
     norm(r.warehouse)===norm(warehouse)
   )
 
-  return applyReservationToErpRows(rows)
+  const grouped=new Map()
+
+  rows.forEach(r=>{
+    const key=[
+      norm(r.item_number),
+      norm(r.color),
+      norm(r.size),
+      norm(r.warehouse),
+      norm(r.location)
+    ].join('|')
+
+    if(!grouped.has(key)){
+      grouped.set(key,{
+        ...r,
+        available_physical:0
+      })
+    }
+
+    grouped.get(key).available_physical+=erpUsableAvailable_(r)
+  })
+
+  return applyReservationToErpRows([...grouped.values()])
 }
 
 function autoAllocateManualPblLocations(rows,requiredPairs){
@@ -17749,9 +18277,9 @@ function erpWarehouseGroup_(warehouse){
 }
 
 function erpUsableAvailable_(row){
-  return erpWarehouseGroup_(row?.warehouse)==='WBT'
-    ? Math.max(0,num(row?.total_available))
-    : Math.max(0,num(row?.available_physical))
+  // ใช้ยอด Physical inventory / available_physical เหมือนกันทั้ง WMT และ WBT
+  // เพื่อให้ ERP STOCK, Picking Detail และ Auto Location ใช้ยอดเดียวกับไฟล์ที่อัปโหลด
+  return Math.max(0,num(row?.available_physical))
 }
 
 function normalizeErpUsableRow_(row){
@@ -24823,7 +25351,7 @@ function renderStockFilteredRows(query=''){
       <td>${esc(r.color||'-')}</td>
       <td>${esc(r.warehouse||'-')}</td>
       <td>${esc(r.location||'-')}</td>
-      <td><b>${fmt(erpUsableAvailable_(r))}</b></td>
+      <td><b>${fmt(r.available_physical)}</b></td>
     </tr>
   `).join('')
 }
@@ -24912,6 +25440,1255 @@ el('stockClearSearchBtn').onclick=()=>{
   el('stockSummary').className='stock-summary'
   el('stockBody').innerHTML='<tr><td colspan="7">ค้นหา Item เพื่อดู Stock</td></tr>'
 }
+
+
+/* =========================================================
+   PRODUCTION JOB ORDER
+   po_headers + po_items -> job_orders + job_order_details
+========================================================= */
+let jomAvailablePOs_=[]
+const jomSelectedPOs_=new Map()
+let jomLastPreviewHtml_=''
+
+function jomSetStatus_(message,type='info'){
+  const box=el('jomStatus')
+  if(!box) return
+  box.className=`jom-status show ${type}`
+  box.textContent=message
+}
+
+function jomToday_(){
+  const d=new Date()
+  return [
+    d.getFullYear(),
+    String(d.getMonth()+1).padStart(2,'0'),
+    String(d.getDate()).padStart(2,'0')
+  ].join('-')
+}
+
+function jomLocalDateTimeInputValue_(value){
+  if(!value) return ''
+  const d=new Date(value)
+  if(Number.isNaN(d.getTime())) return ''
+  const pad=n=>String(n).padStart(2,'0')
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
+function jomFmtDateTime_(value){
+  if(!value) return '-'
+  const d=new Date(value)
+  if(Number.isNaN(d.getTime())) return esc(value)
+  return d.toLocaleString('en-GB',{
+    day:'2-digit',month:'2-digit',year:'numeric',
+    hour:'2-digit',minute:'2-digit',hour12:false
+  })
+}
+
+function jomFmtDate_(value){
+  if(!value) return '-'
+  const d=new Date(String(value).slice(0,10)+'T00:00:00')
+  if(Number.isNaN(d.getTime())) return esc(value)
+  return d.toLocaleDateString('en-GB')
+}
+
+function jomReadRowDraft_(id){
+  const row=jomSelectedPOs_.get(String(id))
+  if(!row) return null
+  return {
+    ...row,
+    production_plan_no:txt(el(`jomPlan_${id}`)?.value),
+    line:txt(el(`jomLine_${id}`)?.value),
+    planned_start:txt(el(`jomStart_${id}`)?.value),
+    planned_finish:txt(el(`jomFinish_${id}`)?.value),
+    operator_qty:Math.max(0,num(el(`jomOperator_${id}`)?.value))
+  }
+}
+
+function jomSyncDraftsFromDom_(){
+  ;[...jomSelectedPOs_.keys()].forEach(id=>{
+    const next=jomReadRowDraft_(id)
+    if(next) jomSelectedPOs_.set(String(id),next)
+  })
+}
+
+async function jomGenerateNextNo_(){
+  const now=new Date()
+  const prefix=`JO-${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-`
+  let next=1
+
+  try{
+    const {data,error}=await db
+      .from(PRODUCTION_JOB_ORDER_TABLE)
+      .select('jo_no')
+      .like('jo_no',`${prefix}%`)
+      .order('jo_no',{ascending:false})
+      .limit(1)
+
+    if(error) throw error
+
+    if(data?.length){
+      const last=Number(String(data[0].jo_no||'').split('-').pop())
+      if(Number.isFinite(last)) next=last+1
+    }
+  }catch(error){
+    console.warn('jomGenerateNextNo_',error)
+  }
+
+  const value=prefix+String(next).padStart(3,'0')
+  if(el('jomJoNo')) el('jomJoNo').value=value
+  if(el('jomJoNoBadge')) el('jomJoNoBadge').textContent='JO: '+value
+  return value
+}
+
+async function loadProductionJobOrderPage_(){
+  if(el('jomJobDate') && !el('jomJobDate').value) el('jomJobDate').value=jomToday_()
+
+  if(el('jomPlanner') && !txt(el('jomPlanner').value)){
+    el('jomPlanner').value=localStorage.getItem('erp_picking_user')||'ADMIN'
+  }
+
+  await Promise.allSettled([
+    jomGenerateNextNo_(),
+    jomLoadPOs_(),
+    jomLoadHistory_()
+  ])
+
+  jomRenderSelected_()
+}
+
+async function jomLoadPOs_(){
+  const root=el('jomPoList')
+  if(!root) return
+
+  root.innerHTML='<div class="empty"><div><strong>กำลังโหลด PO</strong></div></div>'
+
+  try{
+    const fields='id,po_no,customer,po_type,delivery_date,total_pairs,total_cartons,production_cartons,pbl_pairs_per_carton,status,source_file_name,created_by,created_at'
+    const {data,error}=await headerQueryCompat(fields,q=>
+      q.order('id',{ascending:false}).limit(300)
+    )
+    if(error) throw error
+
+    jomAvailablePOs_=(data||[]).map(r=>({
+      ...r,
+      total_cartons:
+        r.production_cartons!==null &&
+        r.production_cartons!==undefined &&
+        txt(r.production_cartons)!==''
+          ? Math.max(0,num(r.production_cartons))
+          : Math.max(0,num(r.total_cartons))
+    }))
+
+    jomRenderPOList_()
+  }catch(error){
+    root.innerHTML=`<div class="jom-status show error">โหลด PO ไม่สำเร็จ: ${esc(error?.message||error)}</div>`
+  }
+}
+
+function jomFilteredPOs_(){
+  const q=norm(el('jomPoSearch')?.value)
+  return jomAvailablePOs_.filter(r=>{
+    if(!q) return true
+    return [
+      r.po_no,r.customer,r.po_type,r.source_file_name,r.status
+    ].some(v=>norm(v).includes(q))
+  })
+}
+
+function jomRenderPOList_(){
+  const root=el('jomPoList')
+  if(!root) return
+
+  const rows=jomFilteredPOs_()
+
+  if(el('jomPoCountBadge')){
+    el('jomPoCountBadge').textContent=
+      `${jomSelectedPOs_.size} / ${rows.length} PO`
+  }
+
+  if(!rows.length){
+    root.innerHTML='<div class="empty"><div><strong>ไม่พบ PO</strong></div></div>'
+    return
+  }
+
+  root.innerHTML=rows.map(r=>{
+    const checked=jomSelectedPOs_.has(String(r.id))?'checked':''
+    return `
+      <label class="jom-po-item">
+        <input type="checkbox" class="jom-po-check" data-id="${esc(r.id)}" ${checked}>
+        <div>
+          <div class="jom-po-no">${esc(r.po_no||'-')}</div>
+          <div class="jom-po-meta">
+            ${esc(r.customer||'-')} · ${esc(r.po_type||'-')} · ${fmt(r.total_pairs)} คู่ · ${fmt(r.total_cartons)} กล่อง<br>
+            Delivery ${r.delivery_date?esc(formatDeliveryDate(r.delivery_date)):'-'} · ${esc(r.status||'-')}
+          </div>
+        </div>
+      </label>
+    `
+  }).join('')
+
+  root.querySelectorAll('.jom-po-check').forEach(input=>{
+    input.addEventListener('change',()=>{
+      const id=String(input.dataset.id)
+      const row=jomAvailablePOs_.find(r=>String(r.id)===id)
+      if(!row) return
+
+      if(input.checked){
+        const selectedCustomers=new Set(
+          [...jomSelectedPOs_.values()].map(x=>norm(x.customer)).filter(Boolean)
+        )
+        if(selectedCustomers.size && !selectedCustomers.has(norm(row.customer))){
+          input.checked=false
+          jomSetStatus_(
+            `1 JOB ORDER ควรเป็น Customer เดียวกัน\nPO ${row.po_no} เป็น ${row.customer} จึงยังไม่ถูกเลือก`,
+            'warn'
+          )
+          return
+        }
+
+        jomSelectedPOs_.set(id,{
+          ...row,
+          production_plan_no:'',
+          line:'',
+          planned_start:'',
+          planned_finish:'',
+          operator_qty:0
+        })
+      }else{
+        jomSelectedPOs_.delete(id)
+      }
+
+      jomRenderSelected_()
+      jomRenderPOList_()
+    })
+  })
+}
+
+function jomRenderSelected_(){
+  const body=el('jomSelectedBody')
+  if(!body) return
+
+  jomSyncDraftsFromDom_()
+  const rows=[...jomSelectedPOs_.values()]
+
+  if(!rows.length){
+    body.innerHTML='<div class="jom-selected-empty">ยังไม่ได้เลือก PO</div>'
+  }else{
+    body.innerHTML=rows.map((r,index)=>`
+      <article class="jom-po-edit-card" data-jom-card="${esc(r.id)}">
+        <div class="jom-po-edit-head">
+          <div class="jom-po-edit-title">
+            <strong>${index+1}. PO ${esc(r.po_no||'-')}</strong>
+            <span class="jom-mini-badge">${esc(r.customer||'-')}</span>
+            <span class="jom-mini-badge">${esc(r.po_type||'-')}</span>
+          </div>
+
+          <div class="jom-po-edit-metrics">
+            <span>${fmt(r.total_pairs)} คู่</span>
+            <span>•</span>
+            <span>${fmt(r.total_cartons)} กล่อง</span>
+            <button class="jom-remove" data-remove-id="${esc(r.id)}">ลบ</button>
+          </div>
+        </div>
+
+        <div class="jom-po-edit-body">
+          <div class="jom-po-plan-grid">
+            <div class="jom-po-plan-field">
+              <label>Production Plan No. <span class="jom-required-note">*</span></label>
+              <input id="jomPlan_${r.id}" value="${esc(r.production_plan_no||'')}"
+                     placeholder="เช่น PP-2026-10-001">
+            </div>
+
+            <div class="jom-po-plan-field">
+              <label>Production Line <span class="jom-required-note">*</span></label>
+              <input id="jomLine_${r.id}" value="${esc(r.line||'')}"
+                     placeholder="เช่น MT LINE 2">
+            </div>
+
+            <div class="jom-po-plan-field">
+              <label>Plan Start <span class="jom-required-note">*</span></label>
+              <input id="jomStart_${r.id}" type="datetime-local"
+                     value="${esc(r.planned_start||'')}">
+            </div>
+
+            <div class="jom-po-plan-field">
+              <label>Plan Finish <span class="jom-required-note">*</span></label>
+              <input id="jomFinish_${r.id}" type="datetime-local"
+                     value="${esc(r.planned_finish||'')}">
+            </div>
+
+            <div class="jom-po-plan-field">
+              <label>Operator</label>
+              <input id="jomOperator_${r.id}" type="number" min="0" step="1"
+                     value="${esc(r.operator_qty||0)}">
+            </div>
+          </div>
+
+          <div class="jom-datetime-help">
+            วิธีใส่เวลา: กดช่อง <b>Plan Start</b> / <b>Plan Finish</b>
+            แล้วเลือกวันที่และเวลา เช่น <b>21/10/2026 08:00 → 21/10/2026 12:00</b>
+          </div>
+        </div>
+      </article>
+    `).join('')
+
+    body.querySelectorAll('[data-remove-id]').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        jomSelectedPOs_.delete(String(btn.dataset.removeId))
+        jomRenderSelected_()
+        jomRenderPOList_()
+      })
+    })
+  }
+
+  const totalPairs=rows.reduce((s,r)=>s+Math.max(0,num(r.total_pairs)),0)
+  const totalCartons=rows.reduce((s,r)=>s+Math.max(0,num(r.total_cartons)),0)
+  const customers=[...new Set(rows.map(r=>txt(r.customer)).filter(Boolean))]
+
+  if(el('jomSumPo')) el('jomSumPo').textContent=fmt(rows.length)
+  if(el('jomSumPairs')) el('jomSumPairs').textContent=fmt(totalPairs)
+  if(el('jomSumCartons')) el('jomSumCartons').textContent=fmt(totalCartons)
+  if(el('jomSumCustomer')) el('jomSumCustomer').textContent=customers.join(', ')||'-'
+  if(el('jomPoCountBadge')) el('jomPoCountBadge').textContent=`${rows.length} PO`
+}
+
+function jomValidateSelected_(){
+  jomSyncDraftsFromDom_()
+
+  document
+    .querySelectorAll('.jom-field-error')
+    .forEach(node=>node.classList.remove('jom-field-error'))
+
+  const rows=[...jomSelectedPOs_.values()]
+  const errors=[]
+
+  rows.forEach(r=>{
+    const plan=txt(r.production_plan_no)
+    const line=txt(r.line)
+    const start=txt(r.planned_start)
+    const finish=txt(r.planned_finish)
+
+    if(!plan){
+      errors.push(`PO ${r.po_no}: กรุณากรอก Production Plan No.`)
+      el(`jomPlan_${r.id}`)?.classList.add('jom-field-error')
+    }
+
+    if(!line){
+      errors.push(`PO ${r.po_no}: กรุณากรอก Production Line`)
+      el(`jomLine_${r.id}`)?.classList.add('jom-field-error')
+    }
+
+    if(!start){
+      errors.push(`PO ${r.po_no}: กรุณาเลือก Plan Start`)
+      el(`jomStart_${r.id}`)?.classList.add('jom-field-error')
+    }
+
+    if(!finish){
+      errors.push(`PO ${r.po_no}: กรุณาเลือก Plan Finish`)
+      el(`jomFinish_${r.id}`)?.classList.add('jom-field-error')
+    }
+
+    if(start && finish){
+      const startDate=new Date(start)
+      const finishDate=new Date(finish)
+
+      if(
+        Number.isNaN(startDate.getTime()) ||
+        Number.isNaN(finishDate.getTime())
+      ){
+        errors.push(`PO ${r.po_no}: รูปแบบวัน/เวลาไม่ถูกต้อง`)
+      }else if(finishDate<=startDate){
+        errors.push(`PO ${r.po_no}: Plan Finish ต้องมากกว่า Plan Start`)
+        el(`jomStart_${r.id}`)?.classList.add('jom-field-error')
+        el(`jomFinish_${r.id}`)?.classList.add('jom-field-error')
+      }
+    }
+  })
+
+  return {ok:errors.length===0,errors}
+}
+
+async function jomLoadItemsForPOs_(poIds){
+  const result=new Map(poIds.map(id=>[String(id),[]]))
+  if(!poIds.length) return result
+
+  const BATCH=80
+  for(let i=0;i<poIds.length;i+=BATCH){
+    const ids=poIds.slice(i,i+BATCH)
+    const {data,error}=await db
+      .from(ITEM_TABLE)
+      .select('id,po_id,line_no,item,code,assort,order_pairs,carton_qty,remark')
+      .in('po_id',ids)
+      .order('line_no',{ascending:true})
+
+    if(error) throw error
+
+    ;(data||[]).forEach(r=>{
+      const key=String(r.po_id)
+      if(!result.has(key)) result.set(key,[])
+      result.get(key).push(r)
+    })
+  }
+
+  return result
+}
+
+function jomBuildPrintHtml_(job,details,itemsByPo){
+  const totalPairs=details.reduce((s,r)=>s+Math.max(0,num(r.pairs)),0)
+  const totalCartons=details.reduce((s,r)=>s+Math.max(0,num(r.cartons)),0)
+  const totalTarget=details.reduce((s,r)=>s+Math.max(0,num(r.target_pairs)),0)
+  const totalActual=details.reduce((s,r)=>s+Math.max(0,num(r.actual_pairs)),0)
+  const totalReject=details.reduce((s,r)=>s+Math.max(0,num(r.reject_pairs)),0)
+  const totalDowntime=details.reduce((s,r)=>s+Math.max(0,num(r.downtime_min)),0)
+
+  const buildMiniTable=rows=>`
+    <table class="sku-table">
+      <thead>
+        <tr>
+          <th>SKU</th>
+          <th>Color</th>
+          <th>Size</th>
+          <th>Box</th>
+          <th>Pairs</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${
+          rows.length
+            ? rows.map(x=>`
+                <tr>
+                  <td>${esc(x.item||'-')}</td>
+                  <td>${esc(x.code||'-')}</td>
+                  <td>${esc(x.assort||'-')}</td>
+                  <td>${fmt(x.carton_qty)}</td>
+                  <td>${fmt(x.order_pairs)}</td>
+                </tr>
+              `).join('')
+            : '<tr><td colspan="5" class="empty-row">-</td></tr>'
+        }
+      </tbody>
+    </table>
+  `
+
+  const detailPages=details.map((d,index)=>{
+    const items=itemsByPo.get(String(d.po_id))||[]
+    const midpoint=Math.ceil(items.length/2)
+    const leftRows=items.slice(0,midpoint)
+    const rightRows=items.slice(midpoint)
+    const isLast=index===details.length-1
+
+    return `
+      <section class="po-page ${index>0?'page-break':''}">
+        <header class="doc-head">
+          <div class="brand-block">
+            <div class="doc-brand">GAMBOL</div>
+            <div class="doc-sub">PRODUCTION JOB ORDER</div>
+          </div>
+
+          <div class="doc-title">JOB ORDER</div>
+
+          <div class="doc-code">
+            <b>${esc(job.jo_no||'-')}</b>
+            <span>PO ${index+1}/${details.length}</span>
+          </div>
+        </header>
+
+        <table class="meta-table">
+          <tr>
+            <th>Customer</th>
+            <td>${esc(job.customer||'-')}</td>
+
+            <th>PO</th>
+            <td>${esc(d.po_no||'-')}</td>
+
+            <th>Plan No.</th>
+            <td>${esc(d.production_plan_no||'-')}</td>
+
+            <th>Line</th>
+            <td>${esc(d.line||'-')}</td>
+
+            <th>Shift</th>
+            <td>${esc(job.shift||'-')}</td>
+
+            <th>Priority</th>
+            <td>${esc(job.priority||'-')}</td>
+          </tr>
+        </table>
+
+        <table class="plan-table">
+          <tr>
+            <th>Plan Start</th>
+            <td>${jomFmtDateTime_(d.planned_start)}</td>
+
+            <th>Plan Finish</th>
+            <td>${jomFmtDateTime_(d.planned_finish)}</td>
+
+            <th>Actual Start</th>
+            <td>${jomFmtDateTime_(d.actual_start)}</td>
+
+            <th>Actual Finish</th>
+            <td>${jomFmtDateTime_(d.actual_finish)}</td>
+          </tr>
+
+          <tr>
+            <th>Operator</th>
+            <td>${fmt(d.operator_qty)}</td>
+
+            <th>Leader</th>
+            <td>${esc(job.leader||'-')}</td>
+
+            <th>Target</th>
+            <td>${fmt(d.target_pairs)} คู่</td>
+
+            <th>Quantity</th>
+            <td>${fmt(d.cartons)} กล่อง / ${fmt(d.pairs)} คู่</td>
+          </tr>
+        </table>
+
+        <div class="section-label">SIZE BREAKDOWN</div>
+
+        <div class="sku-columns">
+          ${buildMiniTable(leftRows)}
+          ${buildMiniTable(rightRows)}
+        </div>
+
+        <table class="bottom-table">
+          <tr>
+            <th>PO TOTAL</th>
+            <td>${fmt(d.cartons)} BOX</td>
+            <td>${fmt(d.pairs)} PAIRS</td>
+
+            <th>Actual</th>
+            <td>${fmt(d.actual_pairs)} คู่</td>
+
+            <th>Reject</th>
+            <td>${fmt(d.reject_pairs)} คู่</td>
+
+            <th>Downtime</th>
+            <td>${fmt(d.downtime_min)} นาที</td>
+          </tr>
+        </table>
+
+        ${isLast ? `
+          <div class="summary-wrap">
+            <div class="summary-label">JOB SUMMARY</div>
+
+            <table class="job-summary-table">
+              <tr>
+                <th>Total PO</th>
+                <th>Total Box</th>
+                <th>Total Pairs</th>
+                <th>Total Target</th>
+                <th>Total Actual</th>
+                <th>Total Reject</th>
+                <th>Total Downtime</th>
+              </tr>
+              <tr>
+                <td>${fmt(details.length)}</td>
+                <td>${fmt(totalCartons)}</td>
+                <td>${fmt(totalPairs)}</td>
+                <td>${fmt(totalTarget)}</td>
+                <td>${fmt(totalActual)}</td>
+                <td>${fmt(totalReject)}</td>
+                <td>${fmt(totalDowntime)} Min</td>
+              </tr>
+            </table>
+
+            <div class="sign-row">
+              <div>
+                <b>Prepared by (Planner)</b>
+                <span>${esc(job.planner||'-')}</span>
+              </div>
+
+              <div>
+                <b>Checked by (Leader)</b>
+                <span>${esc(job.leader||'-')}</span>
+              </div>
+
+              <div>
+                <b>Approved by (Production Manager)</b>
+                <span>Date: __________________</span>
+              </div>
+            </div>
+          </div>
+        ` : ''}
+
+        <footer class="doc-footer">
+          ${esc(job.jo_no||'-')} · ${jomFmtDate_(job.job_date)}
+        </footer>
+      </section>
+    `
+  }).join('')
+
+  return `<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<title>${esc(job.jo_no||'JOB ORDER')}</title>
+
+<style>
+@page{
+  size:A4 landscape;
+  margin:5mm;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html,
+body{
+  margin:0;
+  padding:0;
+  background:#fff;
+  color:#111827;
+  font-family:Arial,Tahoma,sans-serif;
+}
+
+body{
+  font-size:7.4px;
+}
+
+.po-page{
+  width:100%;
+  break-inside:avoid;
+}
+
+.page-break{
+  break-before:page;
+  page-break-before:always;
+}
+
+.doc-head{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:end;
+  gap:8px;
+  padding-bottom:3px;
+  margin-bottom:3px;
+  border-bottom:1.4px solid #111827;
+}
+
+.doc-brand{
+  font-size:15px;
+  line-height:1;
+  font-weight:900;
+  letter-spacing:.4px;
+}
+
+.doc-sub{
+  margin-top:2px;
+  font-size:5.8px;
+  color:#6b7280;
+  letter-spacing:1.4px;
+}
+
+.doc-title{
+  font-size:16px;
+  line-height:1;
+  font-weight:900;
+  text-align:center;
+  letter-spacing:.3px;
+}
+
+.doc-code{
+  text-align:right;
+}
+
+.doc-code b{
+  display:block;
+  font-size:8.5px;
+  line-height:1.1;
+}
+
+.doc-code span{
+  display:block;
+  margin-top:1px;
+  color:#6b7280;
+  font-size:5.8px;
+}
+
+.meta-table,
+.plan-table,
+.bottom-table,
+.job-summary-table,
+.sku-table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+.meta-table{
+  margin-bottom:3px;
+}
+
+.meta-table th,
+.meta-table td{
+  border:1px solid #9ca3af;
+  padding:2.7px 4px;
+  height:6.2mm;
+  line-height:1.05;
+}
+
+.meta-table th{
+  width:5.5%;
+  background:#f8fafc;
+  color:#6b7280;
+  font-size:5.8px;
+  text-transform:uppercase;
+  text-align:left;
+}
+
+.meta-table td{
+  width:11%;
+  font-size:7px;
+  font-weight:700;
+}
+
+.plan-table{
+  margin-bottom:3px;
+}
+
+.plan-table th,
+.plan-table td{
+  border:1px solid #d1d5db;
+  padding:2.6px 4px;
+  height:5.7mm;
+  line-height:1.05;
+}
+
+.plan-table th{
+  width:7%;
+  background:#fafafa;
+  color:#6b7280;
+  font-size:5.7px;
+  text-align:left;
+  text-transform:uppercase;
+}
+
+.plan-table td{
+  width:18%;
+  font-size:6.8px;
+  font-weight:700;
+}
+
+.section-label{
+  margin-top:1px;
+  padding:3px 5px;
+  border-top:1px solid #111827;
+  border-bottom:1px solid #d1d5db;
+  background:#f8fafc;
+  color:#111827;
+  font-size:7px;
+  font-weight:900;
+  letter-spacing:.25px;
+}
+
+.sku-columns{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:4px;
+  margin-top:2px;
+}
+
+.sku-table{
+  table-layout:fixed;
+}
+
+.sku-table th,
+.sku-table td{
+  border:1px solid #c7ccd3;
+  padding:1.25px 3px;
+  height:3.55mm;
+  font-size:6.05px;
+  line-height:1;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.sku-table th{
+  background:#f4f5f7;
+  color:#374151;
+  font-size:5.8px;
+  font-weight:900;
+  text-align:center;
+}
+
+.sku-table th:nth-child(1){width:31%}
+.sku-table th:nth-child(2){width:21%}
+.sku-table th:nth-child(3){width:16%}
+.sku-table th:nth-child(4){width:16%}
+.sku-table th:nth-child(5){width:16%}
+
+.sku-table td:nth-child(3),
+.sku-table td:nth-child(4),
+.sku-table td:nth-child(5){
+  text-align:center;
+}
+
+.empty-row{
+  text-align:center;
+  color:#9ca3af;
+}
+
+.bottom-table{
+  margin-top:3px;
+}
+
+.bottom-table th,
+.bottom-table td{
+  border:1px solid #9ca3af;
+  padding:2.6px 4px;
+  height:5.8mm;
+  font-size:6.4px;
+}
+
+.bottom-table th{
+  background:#f8fafc;
+  color:#4b5563;
+  font-size:5.8px;
+  text-transform:uppercase;
+}
+
+.bottom-table td{
+  text-align:center;
+  font-weight:800;
+}
+
+.summary-wrap{
+  margin-top:3px;
+  break-inside:avoid;
+  page-break-inside:avoid;
+}
+
+.summary-label{
+  padding:3px 5px;
+  border:1px solid #9ca3af;
+  border-bottom:0;
+  background:#f3f4f6;
+  font-size:6.6px;
+  font-weight:900;
+}
+
+.job-summary-table th,
+.job-summary-table td{
+  border:1px solid #9ca3af;
+  padding:2px 4px;
+  height:5mm;
+  text-align:center;
+}
+
+.job-summary-table th{
+  background:#fafafa;
+  color:#6b7280;
+  font-size:5.4px;
+  text-transform:uppercase;
+}
+
+.job-summary-table td{
+  font-size:6.5px;
+  font-weight:800;
+}
+
+.sign-row{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  border:1px solid #9ca3af;
+  border-top:0;
+}
+
+.sign-row>div{
+  min-height:10mm;
+  padding:3px 5px;
+  text-align:center;
+  border-right:1px solid #9ca3af;
+}
+
+.sign-row>div:last-child{
+  border-right:0;
+}
+
+.sign-row b{
+  display:block;
+  margin-bottom:3px;
+  font-size:5.8px;
+}
+
+.sign-row span{
+  display:block;
+  padding-top:4px;
+  border-top:1px solid #d1d5db;
+  color:#4b5563;
+  font-size:5.8px;
+}
+
+.doc-footer{
+  margin-top:3px;
+  padding-top:2px;
+  border-top:1px solid #e5e7eb;
+  text-align:right;
+  color:#9ca3af;
+  font-size:5.4px;
+}
+
+@media print{
+  body{
+    print-color-adjust:exact;
+    -webkit-print-color-adjust:exact;
+  }
+
+  .summary-wrap{
+    break-inside:avoid;
+    page-break-inside:avoid;
+  }
+}
+</style>
+</head>
+
+<body>
+${detailPages}
+</body>
+</html>`
+}
+
+function jomOpenPrintHtml_(html){
+  let modal=document.getElementById('jomPreviewModal')
+
+  if(!modal){
+    modal=document.createElement('div')
+    modal.id='jomPreviewModal'
+
+    modal.innerHTML=`
+      <div class="jom-preview-backdrop">
+        <div class="jom-preview-shell">
+          <div class="jom-preview-toolbar">
+            <div>
+              <div class="jom-preview-toolbar-title">JOB ORDER PREVIEW</div>
+              <div class="jom-preview-toolbar-sub">ตรวจสอบเอกสารก่อนพิมพ์หรือบันทึก PDF</div>
+            </div>
+
+            <div class="jom-preview-actions">
+              <button type="button" class="btn btn-secondary" id="jomPreviewCloseBtn">
+                ปิด
+              </button>
+
+              <button type="button" class="btn btn-primary" id="jomPreviewPrintBtn">
+                🖨 พิมพ์ / PDF
+              </button>
+            </div>
+          </div>
+
+          <iframe
+            id="jomPreviewFrame"
+            class="jom-preview-frame"
+            title="JOB ORDER PREVIEW">
+          </iframe>
+        </div>
+      </div>
+    `
+
+    document.body.appendChild(modal)
+
+    document
+      .getElementById('jomPreviewCloseBtn')
+      ?.addEventListener('click',()=>{
+        modal.remove()
+      })
+
+    document
+      .getElementById('jomPreviewPrintBtn')
+      ?.addEventListener('click',()=>{
+        const frame=document.getElementById('jomPreviewFrame')
+
+        if(!frame || !frame.contentWindow){
+          alert('ไม่พบหน้า Preview สำหรับพิมพ์')
+          return
+        }
+
+        frame.contentWindow.focus()
+        frame.contentWindow.print()
+      })
+
+    modal.addEventListener('click',event=>{
+      if(event.target===modal.querySelector('.jom-preview-backdrop')){
+        modal.remove()
+      }
+    })
+
+    document.addEventListener(
+      'keydown',
+      function jomPreviewEsc_(event){
+        if(event.key!=='Escape') return
+
+        const current=document.getElementById('jomPreviewModal')
+        if(!current) return
+
+        current.remove()
+        document.removeEventListener('keydown',jomPreviewEsc_)
+      }
+    )
+  }
+
+  const frame=document.getElementById('jomPreviewFrame')
+  if(!frame){
+    alert('สร้างหน้า Preview ไม่สำเร็จ')
+    return
+  }
+
+  frame.srcdoc=html
+}
+
+async function jomPreviewCurrent_(){
+  jomSyncDraftsFromDom_()
+  const rows=[...jomSelectedPOs_.values()]
+  if(!rows.length){
+    jomSetStatus_('กรุณาเลือก PO อย่างน้อย 1 รายการ','warn')
+    return
+  }
+
+  const validation=jomValidateSelected_()
+  if(!validation.ok){
+    jomSetStatus_(
+      'กรุณาตรวจ Production Plan ก่อน Preview:\n' +
+      validation.errors.join('\n'),
+      'warn'
+    )
+    return
+  }
+
+  try{
+    const itemsByPo=await jomLoadItemsForPOs_(rows.map(r=>Number(r.id)))
+    const job={
+      jo_no:txt(el('jomJoNo')?.value)||'DRAFT',
+      job_date:txt(el('jomJobDate')?.value)||jomToday_(),
+      customer:[...new Set(rows.map(r=>txt(r.customer)).filter(Boolean))].join(', '),
+      planner:txt(el('jomPlanner')?.value)||'ADMIN',
+      priority:txt(el('jomPriority')?.value)||'NORMAL',
+      shift:txt(el('jomShift')?.value)||'DAY',
+      leader:txt(el('jomLeader')?.value)
+    }
+    const details=rows.map(r=>({
+      po_id:Number(r.id),
+      po_no:r.po_no,
+      production_plan_no:r.production_plan_no,
+      line:r.line,
+      planned_start:r.planned_start||null,
+      planned_finish:r.planned_finish||null,
+      actual_start:null,
+      actual_finish:null,
+      pairs:Math.max(0,num(r.total_pairs)),
+      cartons:Math.max(0,num(r.total_cartons)),
+      target_pairs:Math.max(0,num(r.total_pairs)),
+      actual_pairs:0,
+      reject_pairs:0,
+      downtime_min:0,
+      operator_qty:Math.max(0,num(r.operator_qty))
+    }))
+
+    jomLastPreviewHtml_=jomBuildPrintHtml_(job,details,itemsByPo)
+    jomOpenPrintHtml_(jomLastPreviewHtml_)
+    jomSetStatus_('สร้าง Preview แล้ว · ตรวจสอบข้อมูลก่อนกด CREATE JOB ORDER','info')
+  }catch(error){
+    jomSetStatus_('Preview ไม่สำเร็จ: '+(error?.message||error),'error')
+  }
+}
+
+async function jomCreate_(){
+  jomSyncDraftsFromDom_()
+  const rows=[...jomSelectedPOs_.values()]
+  if(!rows.length){
+    jomSetStatus_('กรุณาเลือก PO อย่างน้อย 1 รายการ','warn')
+    return
+  }
+
+  const validation=jomValidateSelected_()
+  if(!validation.ok){
+    jomSetStatus_(
+      'ยังสร้าง JOB ORDER ไม่ได้ กรุณาตรวจ Production Plan:\n' +
+      validation.errors.join('\n'),
+      'warn'
+    )
+    return
+  }
+
+  const joNo=txt(el('jomJoNo')?.value)
+  const planner=txt(el('jomPlanner')?.value)||'ADMIN'
+  const jobDate=txt(el('jomJobDate')?.value)||jomToday_()
+  const customers=[...new Set(rows.map(r=>txt(r.customer)).filter(Boolean))]
+
+  if(customers.length!==1){
+    jomSetStatus_('JOB ORDER ต้องเป็น Customer เดียวกัน','warn')
+    return
+  }
+
+  try{
+    jomSetStatus_('กำลังสร้าง JOB ORDER...','info')
+
+    const {data:job,error:jobError}=await db
+      .from(PRODUCTION_JOB_ORDER_TABLE)
+      .insert({
+        jo_no:joNo,
+        job_date:jobDate,
+        customer:customers[0],
+        planner,
+        priority:txt(el('jomPriority')?.value)||'NORMAL',
+        shift:txt(el('jomShift')?.value)||'DAY',
+        leader:txt(el('jomLeader')?.value)||null,
+        status:'DRAFT',
+        created_by:planner
+      })
+      .select('*')
+      .single()
+
+    if(jobError) throw jobError
+
+    const details=rows.map(r=>({
+      job_order_id:job.id,
+      po_id:Number(r.id),
+      po_no:String(r.po_no||''),
+      production_plan_no:r.production_plan_no||null,
+      customer:r.customer||null,
+      product_family:r.po_type||null,
+      line:r.line||null,
+      planned_start:r.planned_start ? new Date(r.planned_start).toISOString() : null,
+      planned_finish:r.planned_finish ? new Date(r.planned_finish).toISOString() : null,
+      actual_start:null,
+      actual_finish:null,
+      pairs:Math.max(0,num(r.total_pairs)),
+      cartons:Math.max(0,num(r.total_cartons)),
+      target_pairs:Math.max(0,num(r.total_pairs)),
+      actual_pairs:0,
+      reject_pairs:0,
+      downtime_min:0,
+      operator_qty:Math.max(0,num(r.operator_qty))
+    }))
+
+    const {error:detailError}=await db
+      .from(PRODUCTION_JOB_DETAIL_TABLE)
+      .insert(details)
+
+    if(detailError){
+      // rollback header หาก details บันทึกไม่สำเร็จ
+      await db.from(PRODUCTION_JOB_ORDER_TABLE).delete().eq('id',job.id)
+      throw detailError
+    }
+
+    localStorage.setItem('erp_picking_user',planner)
+
+    jomSetStatus_(
+      `สร้าง JOB ORDER สำเร็จ\n${job.jo_no} · ${rows.length} PO`,
+      'ok'
+    )
+
+    jomSelectedPOs_.clear()
+    jomRenderSelected_()
+    jomRenderPOList_()
+    await Promise.allSettled([jomGenerateNextNo_(),jomLoadHistory_()])
+  }catch(error){
+    const message=String(error?.message||error)
+    if(/duplicate|unique|jo_no/i.test(message)){
+      await jomGenerateNextNo_()
+      jomSetStatus_('เลข JO ชนกับรายการอื่น ระบบสร้างเลขใหม่แล้ว กรุณากด CREATE JOB ORDER อีกครั้ง','warn')
+    }else{
+      jomSetStatus_('สร้าง JOB ORDER ไม่สำเร็จ: '+message,'error')
+    }
+  }
+}
+
+async function jomLoadHistory_(){
+  const body=el('jomHistoryBody')
+  if(!body) return
+
+  body.innerHTML='<tr><td colspan="8">กำลังโหลด...</td></tr>'
+
+  try{
+    const {data,error}=await db
+      .from(PRODUCTION_JOB_ORDER_TABLE)
+      .select('id,jo_no,job_date,customer,planner,priority,status,updated_at,created_at')
+      .order('id',{ascending:false})
+      .limit(100)
+
+    if(error) throw error
+
+    const rows=data||[]
+    body.innerHTML=rows.length
+      ? rows.map(r=>`
+          <tr>
+            <td><b>${esc(r.jo_no||'-')}</b></td>
+            <td>${jomFmtDate_(r.job_date)}</td>
+            <td>${esc(r.customer||'-')}</td>
+            <td>${esc(r.planner||'-')}</td>
+            <td>${esc(r.priority||'-')}</td>
+            <td><span class="status draft">${esc(r.status||'DRAFT')}</span></td>
+            <td>${jomFmtDateTime_(r.updated_at||r.created_at)}</td>
+            <td><button class="jom-view-btn" data-jom-view="${esc(r.id)}">เปิด / พิมพ์</button></td>
+          </tr>
+        `).join('')
+      : '<tr><td colspan="8" style="text-align:center;color:#94a3b8">ยังไม่มี JOB ORDER</td></tr>'
+
+    body.querySelectorAll('[data-jom-view]').forEach(btn=>{
+      btn.addEventListener('click',()=>jomOpenSaved_(Number(btn.dataset.jomView)))
+    })
+  }catch(error){
+    body.innerHTML=`<tr><td colspan="8" style="color:#b91c1c">โหลด History ไม่สำเร็จ: ${esc(error?.message||error)}</td></tr>`
+  }
+}
+
+async function jomOpenSaved_(jobId){
+  try{
+    const [jobRes,detailRes]=await Promise.all([
+      db.from(PRODUCTION_JOB_ORDER_TABLE).select('*').eq('id',jobId).single(),
+      db.from(PRODUCTION_JOB_DETAIL_TABLE).select('*').eq('job_order_id',jobId).order('id',{ascending:true})
+    ])
+
+    if(jobRes.error) throw jobRes.error
+    if(detailRes.error) throw detailRes.error
+
+    const details=detailRes.data||[]
+    const itemsByPo=await jomLoadItemsForPOs_(details.map(d=>Number(d.po_id)).filter(Number.isFinite))
+    const html=jomBuildPrintHtml_(jobRes.data,details,itemsByPo)
+    jomOpenPrintHtml_(html)
+  }catch(error){
+    jomSetStatus_('เปิด JOB ORDER ไม่สำเร็จ: '+(error?.message||error),'error')
+  }
+}
+
+el('jomRefreshBtn')?.addEventListener('click',loadProductionJobOrderPage_)
+el('jomHistoryRefreshBtn')?.addEventListener('click',jomLoadHistory_)
+el('jomPreviewBtn')?.addEventListener('click',jomPreviewCurrent_)
+el('jomPreviewBtn2')?.addEventListener('click',jomPreviewCurrent_)
+el('jomSaveBtn')?.addEventListener('click',jomCreate_)
+el('jomPoSearchBtn')?.addEventListener('click',jomRenderPOList_)
+el('jomPoSearch')?.addEventListener('keydown',e=>{if(e.key==='Enter') jomRenderPOList_()})
+el('jomSelectVisibleBtn')?.addEventListener('click',()=>{
+  jomSyncDraftsFromDom_()
+  const visible=jomFilteredPOs_()
+  const currentCustomers=new Set([...jomSelectedPOs_.values()].map(x=>norm(x.customer)).filter(Boolean))
+  const targetCustomer=currentCustomers.size ? [...currentCustomers][0] : norm(visible[0]?.customer)
+
+  visible.forEach(r=>{
+    if(targetCustomer && norm(r.customer)!==targetCustomer) return
+    const id=String(r.id)
+    if(!jomSelectedPOs_.has(id)){
+      jomSelectedPOs_.set(id,{
+        ...r,
+        production_plan_no:'',
+        line:'',
+        planned_start:'',
+        planned_finish:'',
+        operator_qty:0
+      })
+    }
+  })
+  jomRenderSelected_()
+  jomRenderPOList_()
+})
+el('jomClearSelectedBtn')?.addEventListener('click',()=>{
+  jomSelectedPOs_.clear()
+  jomRenderSelected_()
+  jomRenderPOList_()
+})
+
 
 window.addEventListener('hashchange',()=>{
   updateMobileNavActive_(location.hash.replace('#','')||'home')
