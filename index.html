@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>GAMBOL ERP PICKING</title>
 <!-- ASN TOTAL CARTON FIX 2026-10-21: zero is invalid; footer falls back to calculated row total; ASN create requires cartons > 0 -->
+<!-- ASN SEPARATE TOTAL FIX 2026-10-21: footer จำนวนรวม = sum of row boxQty only; จำนวนกล่องที่ส่ง remains independent -->
 <!-- WBT STOCK SYNC FIX 2026-10-21: Physical inventory is the single source for WMT/WBT; duplicate batch rows summed in picking -->
 <!-- ERP STOCK DISPLAY FIX 2026-10-21: grouped WBT rows display summed available_physical -->
 <!-- JOB ORDER COMPACT PRO V3 2026-10-21: reduced visual weight + tighter spacing + no summary spill -->
@@ -21203,10 +21204,9 @@ function buildAsnPreparationTableHtml(rows,header){
     0
   )
 
-  // ถ้ามีจำนวนกล่องที่ส่งใน Header ให้ใช้ค่านั้นเป็นยอดรวมของใบ
-  const totalBoxes=shippedCartons===null
-    ? calculatedBoxes
-    : Math.max(0,num(shippedCartons))
+  // จำนวนรวมของคอลัมน์ "จำนวน กล่อง" ต้องรวมจากรายการในใบเท่านั้น
+  // และเป็นคนละค่ากับ "จำนวนกล่องที่ส่ง" ใน Header
+  const totalBoxes=calculatedBoxes
 
   // Footer ASN ต้องตรงกับยอด PO ใน Header เสมอ
   const prepCalculatedPairs=prepRows.reduce(
